@@ -803,7 +803,10 @@ function sendW9SubmissionNotification_(workerId, displayName, w9RecordId, pdfUrl
               <a href="${pdfUrl}" style="display: inline-block; padding: 12px 30px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 5px; margin: 5px; font-weight: bold; font-size: 14px;">📄 View W-9 PDF</a>
             </p>
             <p style="text-align: center; margin: 15px 0;">
-              <a href="https://carolinalumpers.com/employeeDashboard.html" style="display: inline-block; padding: 12px 30px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin: 5px; font-weight: bold; font-size: 14px;">✅ Approve/Reject</a>
+              <a href="https://carolinalumpers.com/adminDashboard.html#w9-management?autoload=true&approve=${w9RecordId}" style="display: inline-block; padding: 12px 30px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin: 5px; font-weight: bold; font-size: 14px;">✅ Quick Approve</a>
+            </p>
+            <p style="text-align: center; margin: 15px 0;">
+              <a href="https://carolinalumpers.com/adminDashboard.html#w9-management?autoload=true" style="display: inline-block; padding: 10px 20px; background-color: #FF5722; color: white; text-decoration: none; border-radius: 5px; margin: 5px; font-size: 13px;">❌ Review to Reject</a>
             </p>
           </div>
           

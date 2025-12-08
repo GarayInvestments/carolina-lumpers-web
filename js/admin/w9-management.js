@@ -19,6 +19,51 @@ export class W9Management {
     if (btnLoadPendingW9s) {
       btnLoadPendingW9s.addEventListener('click', () => this.loadPendingW9s());
     }
+
+    // Check URL parameters for auto-load and auto-approve
+    this.handleUrlParameters();
+  }
+
+  /**
+   * Handle URL parameters for email link actions
+   */
+  async handleUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoload = urlParams.get('autoload');
+    const approveId = urlParams.get('approve');
+
+    if (autoload === 'true') {
+      // Auto-load pending W-9s
+      await this.loadPendingW9s();
+
+      // If there's an approval request, trigger it
+      if (approveId) {
+        // Wait a moment for the list to render
+        setTimeout(() => this.autoApproveW9(approveId), 500);
+      }
+    }
+  }
+
+  /**
+   * Auto-approve a W-9 from email link
+   */
+  async autoApproveW9(w9RecordId) {
+    try {
+      // Find the W-9 in the loaded list
+      const container = document.getElementById('w9List');
+      if (!container) return;
+
+      // Look for the approve button for this W-9
+      const approveButton = container.querySelector(`button[onclick*="approveW9('${w9RecordId}'"]`);
+      
+      if (approveButton) {
+        approveButton.click();
+      } else {
+        await Dialog.alert('W-9 Not Found', `Could not find W-9 record ${w9RecordId}. It may have already been processed.`);
+      }
+    } catch (err) {
+      console.error('Auto-approve error:', err);
+    }
   }
 
   /**
@@ -38,7 +83,12 @@ export class W9Management {
     }
 
     try {
-      const response = await fetch(`${this.apiUrl}?action=listPendingW9s`);
+      const requesterId = localStorage.getItem('CLS_WorkerID');
+      if (!requesterId) {
+        throw new Error('Admin session not found');
+      }
+
+      const response = await fetch(`${this.apiUrl}?action=listPendingW9s&requesterId=${encodeURIComponent(requesterId)}`);
       const data = await response.json();
 
       if (!data.ok) {
