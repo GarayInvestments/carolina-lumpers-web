@@ -3,7 +3,7 @@
  * Handles W-9 form review, approval, and rejection
  */
 
-import { Dialog } from '../utils/dialog.js?v=2024-dialog-fix';
+import { Dialog } from "../utils/dialog.js?v=2024-dialog-fix";
 
 export class W9Management {
   constructor(apiUrl) {
@@ -14,10 +14,10 @@ export class W9Management {
    * Initialize the W9 Management module
    */
   init() {
-    const btnLoadPendingW9s = document.getElementById('btnLoadPendingW9s');
-    
+    const btnLoadPendingW9s = document.getElementById("btnLoadPendingW9s");
+
     if (btnLoadPendingW9s) {
-      btnLoadPendingW9s.addEventListener('click', () => this.loadPendingW9s());
+      btnLoadPendingW9s.addEventListener("click", () => this.loadPendingW9s());
     }
 
     // Check URL parameters for auto-load and auto-approve
@@ -29,10 +29,10 @@ export class W9Management {
    */
   async handleUrlParameters() {
     const urlParams = new URLSearchParams(window.location.search);
-    const autoload = urlParams.get('autoload');
-    const approveId = urlParams.get('approve');
+    const autoload = urlParams.get("autoload");
+    const approveId = urlParams.get("approve");
 
-    if (autoload === 'true') {
+    if (autoload === "true") {
       // Auto-load pending W-9s
       await this.loadPendingW9s();
 
@@ -50,19 +50,24 @@ export class W9Management {
   async autoApproveW9(w9RecordId) {
     try {
       // Find the W-9 in the loaded list
-      const container = document.getElementById('w9List');
+      const container = document.getElementById("w9List");
       if (!container) return;
 
       // Look for the approve button for this W-9
-      const approveButton = container.querySelector(`button[onclick*="approveW9('${w9RecordId}'"]`);
-      
+      const approveButton = container.querySelector(
+        `button[onclick*="approveW9('${w9RecordId}'"]`
+      );
+
       if (approveButton) {
         approveButton.click();
       } else {
-        await Dialog.alert('W-9 Not Found', `Could not find W-9 record ${w9RecordId}. It may have already been processed.`);
+        await Dialog.alert(
+          "W-9 Not Found",
+          `Could not find W-9 record ${w9RecordId}. It may have already been processed.`
+        );
       }
     } catch (err) {
-      console.error('Auto-approve error:', err);
+      console.error("Auto-approve error:", err);
     }
   }
 
@@ -70,42 +75,47 @@ export class W9Management {
    * Load pending W-9 submissions
    */
   async loadPendingW9s() {
-    const container = document.getElementById('w9List');
-    const button = document.getElementById('btnLoadPendingW9s');
-    
+    const container = document.getElementById("w9List");
+    const button = document.getElementById("btnLoadPendingW9s");
+
     if (!container) return;
 
     // Show loading state
-    container.innerHTML = '<p class="muted">Loading pending W-9 submissions...</p>';
+    container.innerHTML =
+      '<p class="muted">Loading pending W-9 submissions...</p>';
     if (button) {
       button.disabled = true;
-      button.innerHTML = '<span>Loading...</span>';
+      button.innerHTML = "<span>Loading...</span>";
     }
 
     try {
-      const requesterId = localStorage.getItem('CLS_WorkerID');
+      const requesterId = localStorage.getItem("CLS_WorkerID");
       if (!requesterId) {
-        throw new Error('Admin session not found');
+        throw new Error("Admin session not found");
       }
 
-      const response = await fetch(`${this.apiUrl}?action=listPendingW9s&requesterId=${encodeURIComponent(requesterId)}`);
+      const response = await fetch(
+        `${this.apiUrl}?action=listPendingW9s&requesterId=${encodeURIComponent(
+          requesterId
+        )}`
+      );
       const data = await response.json();
 
       if (!data.ok) {
-        throw new Error(data.message || 'Failed to load W-9 submissions');
+        throw new Error(data.message || "Failed to load W-9 submissions");
       }
 
       this.renderW9List(data.pending || []);
-
     } catch (err) {
-      console.error('Failed to load W-9s:', err);
+      console.error("Failed to load W-9s:", err);
       container.innerHTML = `<p class="muted" style="color:#f44336;">Error: ${err.message}</p>`;
     } finally {
       if (button) {
         button.disabled = false;
-        button.innerHTML = '<i data-feather="refresh-cw" class="w-4 h-4"></i><span>Load Pending W-9s</span>';
+        button.innerHTML =
+          '<i data-feather="refresh-cw" class="w-4 h-4"></i><span>Load Pending W-9s</span>';
         // Re-render Feather icons
-        if (typeof feather !== 'undefined') {
+        if (typeof feather !== "undefined") {
           feather.replace();
         }
       }
@@ -116,7 +126,7 @@ export class W9Management {
    * Render W-9 list
    */
   renderW9List(w9s) {
-    const container = document.getElementById('w9List');
+    const container = document.getElementById("w9List");
     if (!container) return;
 
     if (!w9s || w9s.length === 0) {
@@ -143,7 +153,7 @@ export class W9Management {
           </tr>
         </thead>
         <tbody>
-          ${w9s.map(w9 => this.renderW9Row(w9)).join('')}
+          ${w9s.map((w9) => this.renderW9Row(w9)).join("")}
         </tbody>
       </table>
     `;
@@ -155,30 +165,40 @@ export class W9Management {
    * Render a single W-9 row
    */
   renderW9Row(w9) {
-    const submittedDate = w9.submittedDate ? new Date(w9.submittedDate).toLocaleDateString() : '-';
-    
+    const submittedDate = w9.submittedDate
+      ? new Date(w9.submittedDate).toLocaleDateString()
+      : "-";
+
     return `
       <tr style="border-bottom:1px solid #333;">
         <td style="padding:10px;">
-          <div style="font-weight:600;">${w9.displayName || '-'}</div>
-          <div style="font-size:12px;color:#999;">${w9.workerId || '-'}</div>
+          <div style="font-weight:600;">${w9.displayName || "-"}</div>
+          <div style="font-size:12px;color:#999;">${w9.workerId || "-"}</div>
         </td>
-        <td style="padding:10px;">${w9.legalName || '-'}</td>
-        <td style="padding:10px;">${w9.taxClassification || '-'}</td>
+        <td style="padding:10px;">${w9.legalName || "-"}</td>
+        <td style="padding:10px;">${w9.taxClassification || "-"}</td>
         <td style="padding:10px;">${submittedDate}</td>
         <td style="padding:10px;text-align:center;">
           <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-            ${w9.pdfUrl ? `
+            ${
+              w9.pdfUrl
+                ? `
               <button class="btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="window.open('${w9.pdfUrl}', '_blank')">
                 <i data-feather="external-link" class="w-3 h-3"></i>
                 <span>View PDF</span>
               </button>
-            ` : ''}
-            <button class="btn-primary" style="padding:6px 12px;font-size:12px;" onclick="window.w9Manager.approveW9('${w9.w9RecordId}', '${w9.workerId}', '${w9.displayName}')">
+            `
+                : ""
+            }
+            <button class="btn-primary" style="padding:6px 12px;font-size:12px;" onclick="window.w9Manager.approveW9('${
+              w9.w9RecordId
+            }', '${w9.workerId}', '${w9.displayName}')">
               <i data-feather="check" class="w-3 h-3"></i>
               <span>Approve</span>
             </button>
-            <button class="btn-secondary" style="padding:6px 12px;font-size:12px;background:#f44336;color:#fff;" onclick="window.w9Manager.rejectW9('${w9.w9RecordId}', '${w9.workerId}', '${w9.displayName}')">
+            <button class="btn-secondary" style="padding:6px 12px;font-size:12px;background:#f44336;color:#fff;" onclick="window.w9Manager.rejectW9('${
+              w9.w9RecordId
+            }', '${w9.workerId}', '${w9.displayName}')">
               <i data-feather="x" class="w-3 h-3"></i>
               <span>Reject</span>
             </button>
@@ -193,42 +213,50 @@ export class W9Management {
    */
   async approveW9(w9RecordId, workerId, displayName) {
     const confirmed = await Dialog.confirm(
-      'Approve W-9',
+      "Approve W-9",
       `Approve W-9 for ${displayName} (${workerId})?\n\nThis will mark the W-9 as approved and notify the worker.`,
-      { confirmText: 'Approve', cancelText: 'Cancel', variant: 'default' }
+      { confirmText: "Approve", cancelText: "Cancel", variant: "default" }
     );
-    
+
     if (!confirmed) return;
 
     try {
-      this.showLoading('Approving W-9...');
+      this.showLoading("Approving W-9...");
 
-      const adminId = localStorage.getItem('CLS_WorkerID');
-      const deviceInfo = typeof getDeviceInfo === 'function' ? getDeviceInfo() : { displayString: 'Unknown' };
-      
-      const url = `${this.apiUrl}?action=approveW9&w9RecordId=${encodeURIComponent(w9RecordId)}&adminId=${encodeURIComponent(adminId)}&device=${encodeURIComponent(deviceInfo.displayString)}`;
-      
+      const adminId = localStorage.getItem("CLS_WorkerID");
+      const deviceInfo =
+        typeof getDeviceInfo === "function"
+          ? getDeviceInfo()
+          : { displayString: "Unknown" };
+
+      const url = `${
+        this.apiUrl
+      }?action=approveW9&w9RecordId=${encodeURIComponent(
+        w9RecordId
+      )}&adminId=${encodeURIComponent(adminId)}&device=${encodeURIComponent(
+        deviceInfo.displayString
+      )}`;
+
       const response = await fetch(url);
       const data = await response.json();
 
       this.hideLoading();
 
       if (!data.ok) {
-        throw new Error(data.message || 'Failed to approve W-9');
+        throw new Error(data.message || "Failed to approve W-9");
       }
 
       await Dialog.alert(
-        '✅ W-9 Approved',
+        "✅ W-9 Approved",
         `W-9 for ${displayName} has been approved successfully.`
       );
 
       // Reload the list
       await this.loadPendingW9s();
-
     } catch (err) {
       this.hideLoading();
-      console.error('Failed to approve W-9:', err);
-      await Dialog.alert('Error', err.message);
+      console.error("Failed to approve W-9:", err);
+      await Dialog.alert("Error", err.message);
     }
   }
 
@@ -238,49 +266,60 @@ export class W9Management {
   async rejectW9(w9RecordId, workerId, displayName) {
     // Prompt for rejection reason
     const reason = prompt(`Enter reason for rejecting ${displayName}'s W-9:`);
-    
+
     if (!reason || !reason.trim()) {
-      await Dialog.alert('Reason Required', 'Please provide a reason for rejection.');
+      await Dialog.alert(
+        "Reason Required",
+        "Please provide a reason for rejection."
+      );
       return;
     }
 
     const confirmed = await Dialog.confirm(
-      '⚠️ Reject W-9',
+      "⚠️ Reject W-9",
       `Reject W-9 for ${displayName} (${workerId})?\n\nReason: ${reason}\n\nThe worker will need to resubmit.`,
-      { confirmText: 'Reject', cancelText: 'Cancel', variant: 'destructive' }
+      { confirmText: "Reject", cancelText: "Cancel", variant: "destructive" }
     );
-    
+
     if (!confirmed) return;
 
     try {
-      this.showLoading('Rejecting W-9...');
+      this.showLoading("Rejecting W-9...");
 
-      const adminId = localStorage.getItem('CLS_WorkerID');
-      const deviceInfo = typeof getDeviceInfo === 'function' ? getDeviceInfo() : { displayString: 'Unknown' };
-      
-      const url = `${this.apiUrl}?action=rejectW9&w9RecordId=${encodeURIComponent(w9RecordId)}&adminId=${encodeURIComponent(adminId)}&reason=${encodeURIComponent(reason)}&device=${encodeURIComponent(deviceInfo.displayString)}`;
-      
+      const adminId = localStorage.getItem("CLS_WorkerID");
+      const deviceInfo =
+        typeof getDeviceInfo === "function"
+          ? getDeviceInfo()
+          : { displayString: "Unknown" };
+
+      const url = `${
+        this.apiUrl
+      }?action=rejectW9&w9RecordId=${encodeURIComponent(
+        w9RecordId
+      )}&adminId=${encodeURIComponent(adminId)}&reason=${encodeURIComponent(
+        reason
+      )}&device=${encodeURIComponent(deviceInfo.displayString)}`;
+
       const response = await fetch(url);
       const data = await response.json();
 
       this.hideLoading();
 
       if (!data.ok) {
-        throw new Error(data.message || 'Failed to reject W-9');
+        throw new Error(data.message || "Failed to reject W-9");
       }
 
       await Dialog.alert(
-        'W-9 Rejected',
+        "W-9 Rejected",
         `W-9 for ${displayName} has been rejected.\n\nThe worker will be notified.`
       );
 
       // Reload the list
       await this.loadPendingW9s();
-
     } catch (err) {
       this.hideLoading();
-      console.error('Failed to reject W-9:', err);
-      await Dialog.alert('Error', err.message);
+      console.error("Failed to reject W-9:", err);
+      await Dialog.alert("Error", err.message);
     }
   }
 
@@ -288,10 +327,10 @@ export class W9Management {
    * Show loading overlay
    */
   showLoading(message) {
-    const overlay = document.getElementById('loadingOverlay');
-    const text = document.getElementById('loadingText');
+    const overlay = document.getElementById("loadingOverlay");
+    const text = document.getElementById("loadingText");
     if (overlay) {
-      overlay.style.display = 'block';
+      overlay.style.display = "block";
       if (text) text.textContent = message;
     }
   }
@@ -300,9 +339,9 @@ export class W9Management {
    * Hide loading overlay
    */
   hideLoading() {
-    const overlay = document.getElementById('loadingOverlay');
+    const overlay = document.getElementById("loadingOverlay");
     if (overlay) {
-      overlay.style.display = 'none';
+      overlay.style.display = "none";
     }
   }
 }

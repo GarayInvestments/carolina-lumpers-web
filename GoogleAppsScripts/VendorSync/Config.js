@@ -1,5 +1,3 @@
-
-
 // Load credentials from Script Properties (secure storage)
 const PROPS = PropertiesService.getScriptProperties();
 
@@ -10,7 +8,7 @@ const CONFIG = {
   APP_ID: "4a5b8255-5ee1-4473-bc44-090ac907035b",
   APP_API_KEY: PROPS.getProperty("APPSHEET_API_KEY"),
   APPSHEET_BASE_URL: "https://api.appsheet.com/api/v2/apps/",
-  
+
   /**
    * QuickBooks Online (QBO) Configuration
    */
@@ -24,30 +22,34 @@ const CONFIG = {
   /**
    * OAuth Configuration
    */
-  OAUTH_REDIRECT_URI: "https://script.google.com/macros/d/13M5HYsUrxKg_HsHtmcKs1WdUzJWUe3x94oikKEBFJ6LIluQiBuUnwHR8/usercallback",
+  OAUTH_REDIRECT_URI:
+    "https://script.google.com/macros/d/13M5HYsUrxKg_HsHtmcKs1WdUzJWUe3x94oikKEBFJ6LIluQiBuUnwHR8/usercallback",
   OAUTH_AUTHORIZATION_URL: "https://appcenter.intuit.com/connect/oauth2",
   OAUTH_TOKEN_URL: "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer",
   OAUTH_SCOPE: "com.intuit.quickbooks.accounting",
-  
+
   /**
    * Google Sheets Configuration
    */
-  SPREADSHEET_ID: PROPS.getProperty('SPREADSHEET_ID'),
+  SPREADSHEET_ID:
+    PROPS.getProperty("SPREADSHEET_ID") ||
+    "1U8hSNREN5fEhskp0UM-Z80iiW39beaOj3oIsaLZyFzk", // Fallback to CLS_Hub_Backend
   SHEETS: {
     INVOICES: "Invoices",
     LINE_ITEMS: "Invoice LineItems",
     LOG: "Log",
     CLIENTS: "Clients",
-    WORKERS: "Workers"
+    WORKERS: "Workers",
   },
 
-    /**
+  /**
    * Google Drive Configuration
    */
   DRIVE: {
-    INVOICE_FOLDER_ID: PropertiesService.getScriptProperties().getProperty("INVOICE_FOLDER_ID") // 📂 Ensure this is set
+    INVOICE_FOLDER_ID:
+      PropertiesService.getScriptProperties().getProperty("INVOICE_FOLDER_ID"), // 📂 Ensure this is set
   },
-  
+
   /**
    * Column Names
    */
@@ -61,7 +63,7 @@ const CONFIG = {
       STATUS: "Status",
       SYNCED: "Synced?",
       PUSH_TO_QBO: "Push to QBO",
-      LAST_UPDATED: "LastUpdated"
+      LAST_UPDATED: "LastUpdated",
     },
     LINE_ITEMS: {
       LINE_ITEM_ID: "LineItemID",
@@ -78,7 +80,7 @@ const CONFIG = {
       WORKER_NAME: "Worker Name",
       LAST_UPDATED: "Last Update",
       START_TIME_SORTING: "Start Time (Sorting)",
-      SYNCED: "Synced?"
+      SYNCED: "Synced?",
     },
     CLIENTS: {
       CLIENT_ID: "ClientID",
@@ -90,7 +92,7 @@ const CONFIG = {
       PAYABLES_EMAIL_BCC: "Payables Email BCC",
       K_NICKNAME: "Knickname",
       QBO_ID: "QBOID",
-      PORTAL_ACCESS: "Portal Access"
+      PORTAL_ACCESS: "Portal Access",
     },
     WORKERS: {
       WORKER_ID: "WorkerID",
@@ -112,24 +114,24 @@ const CONFIG = {
       DOCS: "Docs",
       COLUMN_1: "Column 1",
       DISPLAY_NAME: "Display Name",
-      QBO_VENDOR_ID: "QBOID"
-    }
+      QBO_VENDOR_ID: "QBOID",
+    },
   },
-  
+
   /**
    * Logging Configuration
    */
   LOGGING: {
     ENABLED: true,
-    LEVEL: "INFO" // Options: "DEBUG", "INFO", "ERROR"
+    LEVEL: "INFO", // Options: "DEBUG", "INFO", "ERROR"
   },
-  
+
   /**
    * Time & Sync Settings
    */
   SYNC_SETTINGS: {
     RETRY_LIMIT: 1,
     INVOICE_CREATION_TIME: "08:00 AM", // Automated invoice creation time
-    TIMEZONE: "America/New_York"
-  }
+    TIMEZONE: "America/New_York",
+  },
 };

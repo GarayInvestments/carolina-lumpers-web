@@ -211,7 +211,7 @@ if (useSupabase) {
 
 ```env
 # Supabase Configuration
-VITE_SUPABASE_URL=https://ckjvnvehxhqptmdykgdv.supabase.co
+VITE_SUPABASE_URL=https://dxbybjxpglpslmoenqyg.supabase.co
 VITE_SUPABASE_ANON_KEY=<anon_key>
 
 # Feature Flags

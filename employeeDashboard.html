@@ -4,14 +4,14 @@
 <head>
   <!-- Theme Initialization - Must be first to prevent flash -->
   <script>
-    (function() {
+    (function () {
       try {
         var theme = localStorage.getItem('CLS_Theme');
         if (!theme) {
           theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
         document.documentElement.setAttribute('data-theme', theme);
-      } catch(e) {}
+      } catch (e) { }
     })();
   </script>
 
@@ -31,12 +31,12 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <!-- Cache Control - Force fresh resources -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  
+
   <title data-en="Employee Dashboard | Carolina Lumper Service" data-es="Panel del Empleado | Carolina Lumper Service"
     data-pt="Painel do Funcionário | Carolina Lumper Service">
     Employee Dashboard | Carolina Lumper Service
@@ -262,19 +262,19 @@
 
     // ======================== THEME TOGGLE ========================
     // Theme toggle function (must be global for onclick handlers)
-    window.toggleTheme = function() {
+    window.toggleTheme = function () {
       const html = document.documentElement;
       const currentTheme = html.getAttribute('data-theme') || 'dark';
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      
+
       html.setAttribute('data-theme', newTheme);
       localStorage.setItem('CLS_Theme', newTheme);
-      
+
       // Re-render feather icons after theme change
       if (typeof feather !== 'undefined') {
         feather.replace();
       }
-      
+
       console.log('Theme switched to:', newTheme);
     };
 
@@ -282,16 +282,16 @@
     (function initTheme() {
       // Check if user has a saved preference, otherwise use system preference
       let theme = localStorage.getItem('CLS_Theme');
-      
+
       if (!theme) {
         // Detect system preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         theme = prefersDark ? 'dark' : 'light';
       }
-      
+
       document.documentElement.setAttribute('data-theme', theme);
       console.log('Theme initialized:', theme);
-      
+
       // Listen for system theme changes (if user hasn't set a preference)
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         // Only auto-update if user hasn't manually set a preference
@@ -603,9 +603,10 @@
       // Check if user is admin first (admins exempt from W-9 requirement)
       const storedRole = localStorage.getItem("CLS_Role");
       if (storedRole !== 'Admin' && storedRole !== 'Supervisor') {
-        // Only block if no W-9 submitted - must submit first
-        if (!w9Status || w9Status === 'none') {
-          // No W-9 submitted - redirect to form (blocking)
+        const w9Bypass = sessionStorage.getItem('CLS_W9BypassOnce') === 'true';
+        if (w9Bypass) {
+          sessionStorage.removeItem('CLS_W9BypassOnce');
+        } else if (!w9Status || w9Status === 'none') {
           window.location.href = 'w9Form.html';
         }
         // pending_admin_review, rejected, approved → Allow dashboard access
@@ -1689,7 +1690,7 @@
           // Check if user has explicitly requested employee view via URL parameter
           const urlParams = new URLSearchParams(window.location.search);
           const forceEmployeeView = urlParams.get('view') === 'employee';
-          
+
           if (!forceEmployeeView) {
             console.log('Admin detected - redirecting to adminDashboard.html');
             window.location.href = 'adminDashboard.html';
