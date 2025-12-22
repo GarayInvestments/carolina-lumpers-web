@@ -86,6 +86,14 @@
     <h2 id="welcomeName"></h2>
     <div class="info" id="userInfo"></div>
 
+    <!-- W-9 BYPASS WARNING (shown only when user bypassed form) -->
+    <div id="w9BypassBanner"
+      style="display: none; margin: var(--space-lg) 0; padding: var(--space-md); border-radius: var(--radius-md); text-align: center; background: #3b2f00; color: #f1c40f; border: 1px solid #f1c40f;">
+      <span style="font-weight: 700; margin-right: var(--space-sm);" data-en="Action needed:" data-es="Acción requerida:" data-pt="Ação necessária:">Action needed:</span>
+      <span id="w9BypassText" data-en="Please complete your W-9 to continue working." data-es="Por favor complete su W-9 para continuar trabajando." data-pt="Conclua seu W-9 para continuar trabalhando.">Please complete your W-9 to continue working.</span>
+      <a href="w9Form.html" style="margin-left: var(--space-md); text-decoration: underline; color: #ffd54f; font-weight: 700;" data-en="Complete W-9" data-es="Completar W-9" data-pt="Completar W-9">Complete W-9</a>
+    </div>
+
     <!-- W-9 STATUS BANNER (shown for pending/rejected only) -->
     <div id="w9StatusBanner"
       style="display: none; margin: var(--space-lg) 0; padding: var(--space-md); border-radius: var(--radius-md); text-align: center;">
@@ -586,6 +594,7 @@
     const displayName = localStorage.getItem("CLS_WorkerName");
     const email = localStorage.getItem("CLS_Email");
     const w9Status = localStorage.getItem("CLS_W9Status"); // W-9 compliance status
+    let w9BypassUsed = false;
 
     if (!workerId) {
       const currentLang = localStorage.getItem("CLS_Lang") || "en";
@@ -605,7 +614,9 @@
       if (storedRole !== 'Admin' && storedRole !== 'Supervisor') {
         const w9Bypass = sessionStorage.getItem('CLS_W9BypassOnce') === 'true';
         if (w9Bypass) {
+          w9BypassUsed = true;
           sessionStorage.removeItem('CLS_W9BypassOnce');
+          window.w9BypassUsed = true; // make available to banner init
         } else if (!w9Status || w9Status === 'none') {
           window.location.href = 'w9Form.html';
         }
@@ -800,13 +811,25 @@
       const banner = document.getElementById('w9StatusBanner');
       const icon = document.getElementById('w9BannerIcon');
       const text = document.getElementById('w9BannerText');
+      const bypassBanner = document.getElementById('w9BypassBanner');
       const w9Status = localStorage.getItem('CLS_W9Status');
       const storedRole = localStorage.getItem('CLS_Role');
+      const bypassUsed = window.w9BypassUsed === true;
 
       // Only show for non-admin workers with pending/rejected status
       if (storedRole === 'Admin' || storedRole === 'Supervisor') {
         banner.style.display = 'none';
+        if (bypassBanner) bypassBanner.style.display = 'none';
         return;
+      }
+
+      // If user bypassed W-9 and still has no submission, show warning banner
+      if (bypassBanner) {
+        if (bypassUsed && (!w9Status || w9Status === 'none')) {
+          bypassBanner.style.display = 'block';
+        } else {
+          bypassBanner.style.display = 'none';
+        }
       }
 
       if (w9Status === 'pending_admin_review') {
