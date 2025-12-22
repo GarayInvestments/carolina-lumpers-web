@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <!-- Cache Version Control - Update this timestamp when deploying -->
   <script>
@@ -10,31 +11,30 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JPETF03TJ0"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-JPETF03TJ0');
   </script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-en="Employee Sign Up | Carolina Lumper Service"
-          data-es="Registro de Empleado | Carolina Lumper Service"
-          data-pt="Cadastro de Funcionário | Carolina Lumper Service">
-          Employee Sign Up | Carolina Lumper Service
+  <title data-en="Employee Sign Up | Carolina Lumper Service" data-es="Registro de Empleado | Carolina Lumper Service"
+    data-pt="Cadastro de Funcionário | Carolina Lumper Service">
+    Employee Sign Up | Carolina Lumper Service
   </title>
 
   <link rel="icon" type="image/png" href="assets/CLS-favicon.png">
   <link rel="manifest" href="manifest-employee.json">
   <meta name="theme-color" content="#ffcc00">
-  
+
   <!-- iOS PWA Support -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CLS Employee">
   <link rel="apple-touch-icon" href="assets/CLS-icon-192.png">
-  
+
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-  
+
   <!-- Dynamic CSS Loading with Cache Version -->
   <script>
     document.write('<link rel="stylesheet" href="css/style.css?v=' + CACHE_VERSION + '">');
@@ -48,22 +48,27 @@
 
   <!-- SIGN UP FORM -->
   <div class="signup-container">
-    <h1 data-en="Employee Sign Up" data-es="Registro de Empleado" data-pt="Cadastro de Funcionário">Employee Sign Up</h1>
-    
-    <form id="signupForm" class="amber-glow" action="https://script.google.com/macros/s/AKfycbwHBLEQ5QHuhD-O4uI4hRN_5_yS9YsFgtn_dMAdoAO2C7zHLoi3qfHO82vas3Uv0wXXpg/exec" method="POST">
+    <h1 data-en="Employee Sign Up" data-es="Registro de Empleado" data-pt="Cadastro de Funcionário">Employee Sign Up
+    </h1>
+
+    <form id="signupForm" class="amber-glow"
+      action="https://script.google.com/macros/s/AKfycbwHBLEQ5QHuhD-O4uI4hRN_5_yS9YsFgtn_dMAdoAO2C7zHLoi3qfHO82vas3Uv0wXXpg/exec"
+      method="POST">
       <input type="hidden" name="action" value="signup">
-      <input type="email" id="email" name="email" placeholder="Work Email" required
-             data-en="Work Email" data-es="Correo de Trabajo" data-pt="Email de Trabalho">
+      <input type="email" id="email" name="email" placeholder="Work Email" required data-en="Work Email"
+        data-es="Correo de Trabajo" data-pt="Email de Trabalho">
       <input type="password" id="password" name="password" placeholder="Create Password" required
-             data-en="Create Password" data-es="Crear Contraseña" data-pt="Criar Senha">
+        data-en="Create Password" data-es="Crear Contraseña" data-pt="Criar Senha">
       <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required
-             data-en="Confirm Password" data-es="Confirmar Contraseña" data-pt="Confirmar Senha">
-      <button type="submit" data-en="Create Account" data-es="Crear Cuenta" data-pt="Criar Conta">Create Account</button>
+        data-en="Confirm Password" data-es="Confirmar Contraseña" data-pt="Confirmar Senha">
+      <button type="submit" data-en="Create Account" data-es="Crear Cuenta" data-pt="Criar Conta">Create
+        Account</button>
       <p id="status" role="status" aria-live="polite"></p>
     </form>
 
     <p style="margin-top:20px;">
-      <span data-en="Already have an account?" data-es="¿Ya tienes una cuenta?" data-pt="Já tem uma conta?">Already have an account?</span>
+      <span data-en="Already have an account?" data-es="¿Ya tienes una cuenta?" data-pt="Já tem uma conta?">Already have
+        an account?</span>
       <a href="employeelogin.html" data-en="Login here" data-es="Inicia sesión aquí" data-pt="Entre aqui">Login here</a>
     </p>
   </div>
@@ -75,4 +80,5 @@
   <script src="js/cache-buster.js?v=2025-11-04" defer></script>
   <script src="js/script.js?v=2025-11-04-signup" defer></script>
 </body>
+
 </html>

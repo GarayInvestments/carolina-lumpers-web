@@ -6,7 +6,7 @@
   <script>
     const CACHE_VERSION = '20251222-1230'; // Format: YYYYMMDD-HHMM
   </script>
-  
+
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JPETF03TJ0"></script>
   <script>
@@ -26,20 +26,20 @@
   <link rel="icon" type="image/png" href="assets/CLS-favicon.png">
   <link rel="manifest" href="manifest-employee.json">
   <meta name="theme-color" content="#ffcc00">
-  
+
   <!-- iOS PWA Support -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CLS Employee">
   <link rel="apple-touch-icon" href="assets/CLS-icon-192.png">
-  
+
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
   <script>
     // Apply cache version to stylesheets dynamically
     document.write('<link rel="stylesheet" href="css/style.css?v=' + CACHE_VERSION + '">');
     document.write('<link rel="stylesheet" href="css/forms.css?v=' + CACHE_VERSION + '">');
   </script>
-  
+
   <style>
     /* Full-Screen Loading Overlay */
     .loading-overlay {
@@ -55,16 +55,16 @@
       justify-content: center;
       align-items: center;
     }
-    
+
     .loading-overlay.active {
       display: flex;
     }
-    
+
     .loading-content {
       text-align: center;
       color: #FFC107;
     }
-    
+
     .loading-spinner {
       width: 60px;
       height: 60px;
@@ -74,16 +74,18 @@
       animation: spin 1s linear infinite;
       margin: 0 auto 20px;
     }
-    
+
     .loading-text {
       font-size: 18px;
       font-weight: 500;
       margin: 0;
       color: #FFC107;
     }
-    
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
 
@@ -106,8 +108,8 @@
     <!-- PWA Install Prompt -->
     <div id="pwaInstallBanner" class="pwa-banner" style="display:none;">
       <span data-en="📲 Install CLS Employee App for faster access and offline features!"
-            data-es="📲 ¡Instala la App de Empleado CLS para un acceso más rápido y funciones sin conexión!"
-            data-pt="📲 Instale o App de Funcionário CLS para acesso mais rápido e recursos offline!">
+        data-es="📲 ¡Instala la App de Empleado CLS para un acceso más rápido y funciones sin conexión!"
+        data-pt="📲 Instale o App de Funcionário CLS para acesso mais rápido e recursos offline!">
         📲 Install CLS Employee App for faster access and offline features!
       </span>
       <div class="pwa-buttons">
@@ -115,23 +117,25 @@
         <button id="dismissPwaBtn" class="pwa-dismiss-btn">Later</button>
       </div>
     </div>
-    
+
     <!-- Offline Status Indicator -->
-    <div id="offlineIndicator" style="display: none; background: #ff9800; color: #000; padding: 8px; text-align: center; font-size: 0.9em;">
+    <div id="offlineIndicator"
+      style="display: none; background: #ff9800; color: #000; padding: 8px; text-align: center; font-size: 0.9em;">
       📱 You're offline - Some features may be limited
     </div>
 
     <div class="login-container">
-      <h1 data-en="Employee Login" data-es="Inicio de Sesión de Empleado" data-pt="Login de Funcionário">Employee Login</h1>
+      <h1 data-en="Employee Login" data-es="Inicio de Sesión de Empleado" data-pt="Login de Funcionário">Employee Login
+      </h1>
 
       <form id="loginForm" class="amber-glow">
-        <input type="email" id="email" name="email" autocomplete="email" placeholder="Work Email" 
-               data-en="Work Email" data-es="Correo de Trabajo" data-pt="Email de Trabalho" required>
-        <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Password" 
-               data-en="Password" data-es="Contraseña" data-pt="Senha" required>
+        <input type="email" id="email" name="email" autocomplete="email" placeholder="Work Email" data-en="Work Email"
+          data-es="Correo de Trabajo" data-pt="Email de Trabalho" required>
+        <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Password"
+          data-en="Password" data-es="Contraseña" data-pt="Senha" required>
 
         <button type="submit" id="loginBtn" data-en="Login" data-es="Iniciar Sesión" data-pt="Entrar">Login</button>
-        
+
         <p id="status" class="message" role="status" aria-live="polite"></p>
       </form>
 
@@ -154,7 +158,7 @@
         .then(registration => {
           console.log('✅ SW ready on login page:', registration.scope);
           console.log('📦 Cache version:', CACHE_VERSION);
-          
+
           // Listen for updates
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
@@ -167,12 +171,12 @@
         })
         .catch(err => console.error('❌ SW registration failed:', err));
     }
-    
+
     // Initialize page-specific functionality after DOM is ready
     // This will run after the deferred script.js has loaded and initialized
     function initLoginPageFeatures() {
       console.log('🔧 Login page: Initializing page-specific features');
-      
+
       // Update offline indicator
       function updateOfflineStatus() {
         const indicator = document.getElementById('offlineIndicator');
@@ -180,31 +184,31 @@
           indicator.style.display = navigator.onLine ? 'none' : 'block';
         }
       }
-      
+
       updateOfflineStatus();
-      
+
       // ✅ Check for valid session and auto-redirect (both online and offline)
       function checkActiveSessionAndRedirect() {
         const workerId = localStorage.getItem('CLS_WorkerID');
         const rememberUser = localStorage.getItem('CLS_RememberUser');
         const sessionExpiry = localStorage.getItem('CLS_SessionExpiry');
-        
+
         // Check if user has valid session
         if (workerId && rememberUser === 'true') {
           // If sessionExpiry exists, validate it; otherwise, session is infinite
           const isSessionValid = !sessionExpiry || new Date(sessionExpiry) > new Date();
-          
+
           if (isSessionValid) {
             const displayName = localStorage.getItem('CLS_WorkerName') || workerId;
             console.log(`✅ Valid session found for ${displayName}, auto-redirecting to dashboard`);
-            
+
             // Show friendly message
             const statusEl = document.getElementById('status');
             if (statusEl) {
               statusEl.textContent = `✅ Welcome back, ${displayName}! Redirecting...`;
               statusEl.style.color = '#4CAF50';
             }
-            
+
             // Redirect to dashboard
             setTimeout(() => {
               window.location.href = 'employeeDashboard.html';
@@ -216,7 +220,7 @@
             localStorage.removeItem('CLS_SessionExpiry');
           }
         }
-        
+
         // No valid session, check if offline and show appropriate message
         if (!navigator.onLine) {
           const statusEl = document.getElementById('status');
@@ -225,19 +229,19 @@
             statusEl.style.color = '#FFC107';
           }
         }
-        
+
         return false; // No redirect
       }
-      
+
       checkActiveSessionAndRedirect();
-      
+
       // Listen for online/offline events
       window.addEventListener('offline', () => {
         console.log('📱 Device went offline');
         updateOfflineStatus();
         checkOfflineAccess();
       });
-      
+
       window.addEventListener('online', () => {
         console.log('🌐 Device back online');
         updateOfflineStatus();
@@ -247,7 +251,7 @@
         }
       });
     }
-    
+
     // Initialize when DOM is ready OR immediately if already ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initLoginPageFeatures);
@@ -255,11 +259,11 @@
       // DOM is already ready
       setTimeout(initLoginPageFeatures, 100); // Small delay to ensure script.js has run
     }
-    
+
     // Comprehensive failsafe system
     setTimeout(() => {
       console.log('🛡️ Running comprehensive failsafe checks...');
-      
+
       // Ensure login form is initialized
       if (window.initLoginForm && document.getElementById('loginForm')) {
         const form = document.getElementById('loginForm');
