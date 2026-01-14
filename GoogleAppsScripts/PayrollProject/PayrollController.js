@@ -1,13 +1,19 @@
 /**
  * Main function to process payroll and post bills to QuickBooks.
  * @param {string} weekPeriod - The week period to process (in "yyyy-MM-dd" format).
- * Dependencies: getActiveWorkers, mapWorkersById, getPayrollLineItems, 
- *               formatDateYYYYMMDD, parseDate, groupLineItemsByWorker, 
+ * Dependencies: getActiveWorkers, mapWorkersById, getPayrollLineItems,
+ *               formatDateYYYYMMDD, parseDate, groupLineItemsByWorker,
  *               buildBillPayloads, findExistingBill, callQBOApi, Logger, CONFIG
  */
 function processPayroll(weekPeriod) {
-  const summary = { success: true, weekPeriod: '', bills: [], errors: [], totalAmount: 0 };
-  
+  const summary = {
+    success: true,
+    weekPeriod: "",
+    bills: [],
+    errors: [],
+    totalAmount: 0,
+  };
+
   try {
     Logger.log("🚀 Starting Payroll Processing...");
 
@@ -26,10 +32,12 @@ function processPayroll(weekPeriod) {
     const targetWeekPeriod = formatDateYYYYMMDD(parseDate(weekPeriod));
     summary.weekPeriod = targetWeekPeriod;
 
-    lineItems = lineItems.filter(item =>
-      formatDateYYYYMMDD(parseDate(item[itemCols.WEEK_PERIOD])) === targetWeekPeriod
+    lineItems = lineItems.filter(
+      (item) =>
+        formatDateYYYYMMDD(parseDate(item[itemCols.WEEK_PERIOD])) ===
+        targetWeekPeriod
     );
-    
+
     if (!lineItems.length) {
       Logger.log(`❌ No payroll line items for ${targetWeekPeriod}`);
       summary.success = false;
@@ -38,89 +46,181 @@ function processPayroll(weekPeriod) {
     }
 
     const groupedByWorker = groupLineItemsByWorker(lineItems);
-    const billPayloads = buildBillPayloads(groupedByWorker, workerLookup, targetWeekPeriod);
-    
+    const billPayloads = buildBillPayloads(
+      groupedByWorker,
+      workerLookup,
+      targetWeekPeriod
+    );
+
     // Add owner distribution bills even if they have no payroll line items
-    const ownerBills = createOwnerDistributionBills(targetWeekPeriod, workerLookup);
+    const ownerBills = createOwnerDistributionBills(
+      targetWeekPeriod,
+      workerLookup
+    );
     billPayloads.push(...ownerBills);
 
-    Logger.log(`📋 Processing ${billPayloads.length} total bills (${billPayloads.length - ownerBills.length} workers + ${ownerBills.length} owners)`);
+    Logger.log(
+      `📋 Processing ${billPayloads.length} total bills (${
+        billPayloads.length - ownerBills.length
+      } workers + ${ownerBills.length} owners)`
+    );
+
+    // Track DocNumbers to detect and handle duplicates
+    const usedDocNumbers = new Set();
 
     for (const fullPayload of billPayloads) {
       try {
-        const isOwner = fullPayload.DocNumber.includes('SG-001-844c9f7b') || fullPayload.DocNumber.includes('DMR-002-5c6334ca');
-        
-        if (isOwner) {
-          logToSheet("Owner Bill Start", {
-            vendor: fullPayload.VendorRef.name,
-            docNumber: fullPayload.DocNumber,
-            amount: fullPayload.TotalAmt,
-            vendorId: fullPayload.VendorRef.value,
-            payload: fullPayload
-          }, `🔍 Processing owner bill: ${fullPayload.VendorRef.name}`);
+        // Handle duplicate DocNumbers by using Employee ID
+        let originalDocNumber = fullPayload.DocNumber;
+        let finalDocNumber = originalDocNumber;
+
+        if (usedDocNumbers.has(finalDocNumber) && fullPayload._workerId) {
+          // Extract Employee ID (e.g., "AM-040-7ab3b1ef" → "AM-040")
+          const employeeId = fullPayload._workerId.substring(
+            0,
+            fullPayload._workerId.lastIndexOf("-")
+          );
+          const dateObj = parseDate(targetWeekPeriod);
+          const yy = String(dateObj.getFullYear()).slice(-2);
+          const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+          const dd = String(dateObj.getDate()).padStart(2, "0");
+          finalDocNumber = `${employeeId}-${yy}${mm}${dd}`;
+
+          Logger.log(
+            `⚠️ Duplicate DocNumber detected: ${originalDocNumber} → ${finalDocNumber} (using Employee ID)`
+          );
+          fullPayload.DocNumber = finalDocNumber;
+          fullPayload.PrivateNote = finalDocNumber;
         }
-        
+
+        usedDocNumbers.add(finalDocNumber);
+
+        // Remove temporary workerId property before sending to QuickBooks
+        delete fullPayload._workerId;
+
+        const isOwner =
+          fullPayload.DocNumber.includes("SG-001-844c9f7b") ||
+          fullPayload.DocNumber.includes("DMR-002-5c6334ca");
+
+        if (isOwner) {
+          logToSheet(
+            "Owner Bill Start",
+            {
+              vendor: fullPayload.VendorRef.name,
+              docNumber: fullPayload.DocNumber,
+              amount: fullPayload.TotalAmt,
+              vendorId: fullPayload.VendorRef.value,
+              payload: fullPayload,
+            },
+            `🔍 Processing owner bill: ${fullPayload.VendorRef.name}`
+          );
+        }
+
         const existingBill = findExistingBill(fullPayload.DocNumber);
-        const action = existingBill ? 'updated' : 'created';
-        
+        const action = existingBill ? "updated" : "created";
+
         if (isOwner) {
-          logToSheet("Owner Bill Existing Check", {
-            docNumber: fullPayload.DocNumber,
-            existingBillFound: !!existingBill,
-            existingBillId: existingBill?.Id,
-            syncToken: existingBill?.SyncToken
-          }, `🔎 ${existingBill ? 'Found existing (updating)' : 'Not found (creating)'}`);
+          logToSheet(
+            "Owner Bill Existing Check",
+            {
+              docNumber: fullPayload.DocNumber,
+              existingBillFound: !!existingBill,
+              existingBillId: existingBill?.Id,
+              syncToken: existingBill?.SyncToken,
+            },
+            `🔎 ${
+              existingBill
+                ? "Found existing (updating)"
+                : "Not found (creating)"
+            }`
+          );
         }
-        
+
         if (existingBill) {
           fullPayload.Id = existingBill.Id;
           fullPayload.SyncToken = existingBill.SyncToken;
-          const qboResponse = callQBOApi(`/bill`, 'POST', fullPayload);
-          
+          const qboResponse = callQBOApi(`/bill`, "POST", fullPayload);
+
           if (isOwner) {
-            logToSheet("Owner Bill QBO Response", {
-              docNumber: fullPayload.DocNumber,
-              responseIsNull: qboResponse === null,
-              response: qboResponse,
-              billId: qboResponse?.Bill?.Id,
-              fault: qboResponse?.Fault
-            }, `📥 QBO Response: ${qboResponse === null ? 'NULL' : 'HAS DATA'}`);
+            logToSheet(
+              "Owner Bill QBO Response",
+              {
+                docNumber: fullPayload.DocNumber,
+                responseIsNull: qboResponse === null,
+                response: qboResponse,
+                billId: qboResponse?.Bill?.Id,
+                fault: qboResponse?.Fault,
+              },
+              `📥 QBO Response: ${qboResponse === null ? "NULL" : "HAS DATA"}`
+            );
           }
-          
-          Logger.log(`✅ Bill updated: ${fullPayload.VendorRef.name} - $${fullPayload.TotalAmt}`);
+
+          Logger.log(
+            `✅ Bill updated: ${fullPayload.VendorRef.name} - $${fullPayload.TotalAmt}`
+          );
         } else {
-          const qboResponse = callQBOApi(`/bill`, 'POST', fullPayload);
-          
+          const qboResponse = callQBOApi(`/bill`, "POST", fullPayload);
+
           if (isOwner) {
-            logToSheet("Owner Bill QBO Response", {
-              docNumber: fullPayload.DocNumber,
-              responseIsNull: qboResponse === null,
-              response: qboResponse,
-              billId: qboResponse?.Bill?.Id,
-              fault: qboResponse?.Fault
-            }, `📥 QBO Response: ${qboResponse === null ? 'NULL' : 'HAS DATA'}`);
+            logToSheet(
+              "Owner Bill QBO Response",
+              {
+                docNumber: fullPayload.DocNumber,
+                responseIsNull: qboResponse === null,
+                response: qboResponse,
+                billId: qboResponse?.Bill?.Id,
+                fault: qboResponse?.Fault,
+              },
+              `📥 QBO Response: ${qboResponse === null ? "NULL" : "HAS DATA"}`
+            );
           }
-          
-          Logger.log(`✅ Bill created: ${fullPayload.VendorRef.name} - $${fullPayload.TotalAmt}`);
+
+          Logger.log(
+            `✅ Bill created: ${fullPayload.VendorRef.name} - $${fullPayload.TotalAmt}`
+          );
         }
-        
+
+        // Log per bill with DocNumber, vendor, amount, and action for audit trail
+        const billLogMessage = `🧾 Bill ${action}: ${fullPayload.DocNumber} | ${fullPayload.VendorRef.name} | $${fullPayload.TotalAmt}`;
+        Logger.log(billLogMessage);
+
+        // Also write to sheet for non-owner bills so all bills are captured
+        if (!isOwner) {
+          try {
+            logToSheet(
+              "Bill Audit",
+              {
+                docNumber: fullPayload.DocNumber,
+                vendor: fullPayload.VendorRef.name,
+                amount: fullPayload.TotalAmt,
+                action: action,
+              },
+              billLogMessage
+            );
+          } catch (sheetErr) {
+            Logger.log(
+              `⚠️ logToSheet failed for ${fullPayload.DocNumber}: ${sheetErr.message}`
+            );
+          }
+        }
+
         // Add to summary
         summary.bills.push({
           workerName: fullPayload.VendorRef.name,
           checkNumber: fullPayload.DocNumber,
           amount: fullPayload.TotalAmt,
-          action: action
+          action: action,
         });
         summary.totalAmount += fullPayload.TotalAmt;
-        
       } catch (apiErr) {
-        Logger.log(`❌ API Error for ${fullPayload.VendorRef.name}: ${apiErr.message}`);
+        Logger.log(
+          `❌ API Error for ${fullPayload.VendorRef.name}: ${apiErr.message}`
+        );
         summary.errors.push(`${fullPayload.VendorRef.name}: ${apiErr.message}`);
       }
     }
-    
+
     return summary;
-    
   } catch (err) {
     Logger.log(`❌ processPayroll() Error: ${err.message}`);
     summary.success = false;
@@ -136,82 +236,96 @@ function processPayroll(weekPeriod) {
 function getWeeklyFinancialsFromSheet() {
   try {
     const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
-    
+
     // Get Invoice LineItems
     const invoiceSheet = ss.getSheetByName("Invoice LineItems");
     const payrollSheet = ss.getSheetByName(CONFIG.SHEETS.PAYROLL_LINE_ITEMS);
-    
+
     if (!invoiceSheet || !payrollSheet) {
       Logger.log("❌ Missing Invoice LineItems or Payroll LineItems sheet");
       return [];
     }
-    
+
     const invoiceData = invoiceSheet.getDataRange().getValues();
     const payrollData = payrollSheet.getDataRange().getValues();
-    
+
     if (invoiceData.length < 2 || payrollData.length < 2) {
       Logger.log("⚠️ No data in Invoice or Payroll LineItems");
       return [];
     }
-    
+
     // Parse Invoice LineItems
     const invoiceHeaders = invoiceData[0];
     const iWeekPeriod = invoiceHeaders.indexOf("Week Period");
     const iInvoiceAmount = invoiceHeaders.indexOf("Invoice Amount");
-    
+
     // Group invoice amounts by week period
     const invoiceByWeek = {};
     for (let i = 1; i < invoiceData.length; i++) {
-      const weekPeriod = formatDateYYYYMMDD(parseDate(invoiceData[i][iWeekPeriod]));
+      const weekPeriod = formatDateYYYYMMDD(
+        parseDate(invoiceData[i][iWeekPeriod])
+      );
       const amount = parseFloat(invoiceData[i][iInvoiceAmount]) || 0;
-      
+
       if (!invoiceByWeek[weekPeriod]) {
         invoiceByWeek[weekPeriod] = 0;
       }
       invoiceByWeek[weekPeriod] += amount;
     }
-    
+
     // Parse Payroll LineItems
     const payrollHeaders = payrollData[0];
-    const pWeekPeriod = payrollHeaders.indexOf(CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.WEEK_PERIOD);
-    const pCheckAmount = payrollHeaders.indexOf(CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.CHECK_AMOUNT);
-    
+    const pWeekPeriod = payrollHeaders.indexOf(
+      CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.WEEK_PERIOD
+    );
+    const pCheckAmount = payrollHeaders.indexOf(
+      CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.CHECK_AMOUNT
+    );
+
     // Group payroll amounts by week period
     const payrollByWeek = {};
     for (let i = 1; i < payrollData.length; i++) {
-      const weekPeriod = formatDateYYYYMMDD(parseDate(payrollData[i][pWeekPeriod]));
+      const weekPeriod = formatDateYYYYMMDD(
+        parseDate(payrollData[i][pWeekPeriod])
+      );
       const amount = parseFloat(payrollData[i][pCheckAmount]) || 0;
-      
+
       if (!payrollByWeek[weekPeriod]) {
         payrollByWeek[weekPeriod] = 0;
       }
       payrollByWeek[weekPeriod] += amount;
     }
-    
+
     // Calculate net income for each week
-    const allWeeks = new Set([...Object.keys(invoiceByWeek), ...Object.keys(payrollByWeek)]);
+    const allWeeks = new Set([
+      ...Object.keys(invoiceByWeek),
+      ...Object.keys(payrollByWeek),
+    ]);
     const financials = [];
-    
-    allWeeks.forEach(weekPeriod => {
+
+    allWeeks.forEach((weekPeriod) => {
       const invoiceTotal = invoiceByWeek[weekPeriod] || 0;
       const payrollTotal = payrollByWeek[weekPeriod] || 0;
       const netIncome = invoiceTotal - payrollTotal;
-      
+
       financials.push({
         WeekPeriod: weekPeriod,
-        NetIncome: parseFloat(netIncome.toFixed(2))
+        NetIncome: parseFloat(netIncome.toFixed(2)),
       });
-      
-      Logger.log(`📊 Week ${weekPeriod}: Invoice=$${invoiceTotal.toFixed(2)}, Payroll=$${payrollTotal.toFixed(2)}, Net=$${netIncome.toFixed(2)}`);
+
+      Logger.log(
+        `📊 Week ${weekPeriod}: Invoice=$${invoiceTotal.toFixed(
+          2
+        )}, Payroll=$${payrollTotal.toFixed(2)}, Net=$${netIncome.toFixed(2)}`
+      );
     });
-    
+
     return financials;
   } catch (err) {
     Logger.log(`❌ Error calculating weekly financials: ${err.message}`);
     return [];
   }
 }
-
 
 /**
  * Searches for an existing bill by DocNumber.
@@ -221,8 +335,16 @@ function getWeeklyFinancialsFromSheet() {
  */
 function findExistingBill(docNumber) {
   const query = `SELECT * FROM Bill WHERE DocNumber = '${docNumber}'`;
-  const response = callQBOApi(`/query?query=${encodeURIComponent(query)}`, 'GET');
-  if (response && response.QueryResponse && response.QueryResponse.Bill && response.QueryResponse.Bill.length > 0) {
+  const response = callQBOApi(
+    `/query?query=${encodeURIComponent(query)}`,
+    "GET"
+  );
+  if (
+    response &&
+    response.QueryResponse &&
+    response.QueryResponse.Bill &&
+    response.QueryResponse.Bill.length > 0
+  ) {
     return response.QueryResponse.Bill[0];
   }
   return null;
@@ -255,99 +377,135 @@ function groupLineItemsByWorker(lineItems) {
 function createOwnerDistributionBills(weekPeriod, workerLookup) {
   const billPayloads = [];
   const weeklyFinancials = getWeeklyFinancialsFromSheet();
-  const thisWeek = weeklyFinancials.find(row => row.WeekPeriod === weekPeriod);
-  
+  const thisWeek = weeklyFinancials.find(
+    (row) => row.WeekPeriod === weekPeriod
+  );
+
   if (!thisWeek || isNaN(thisWeek.NetIncome)) {
     Logger.log("⚠️ No valid net income for owner distributions");
     return billPayloads;
   }
-  
+
   const distAmount = parseFloat((thisWeek.NetIncome / 3).toFixed(2));
   const txnDate = weekPeriod;
   const dueDate = formatDateYYYYMMDD(getNextFriday(parseDate(txnDate)));
-  
+
   // Steve's distribution bill
   const steveId = "SG-001-844c9f7b";
-  logToSheet("Steve Lookup", {
-    found: !!workerLookup[steveId],
-    displayName: workerLookup[steveId]?.displayName,
-    qboVendorId: workerLookup[steveId]?.qboVendorId
-  }, `🔍 Steve lookup: ${workerLookup[steveId] ? 'Found' : 'NOT FOUND'}`);
-  
+  logToSheet(
+    "Steve Lookup",
+    {
+      found: !!workerLookup[steveId],
+      displayName: workerLookup[steveId]?.displayName,
+      qboVendorId: workerLookup[steveId]?.qboVendorId,
+    },
+    `🔍 Steve lookup: ${workerLookup[steveId] ? "Found" : "NOT FOUND"}`
+  );
+
   if (workerLookup[steveId] && workerLookup[steveId].qboVendorId) {
     // Format: SG-YYMMDD (e.g., SG-251122)
     const dateObj = parseDate(weekPeriod);
     const yy = String(dateObj.getFullYear()).slice(-2);
-    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const dd = String(dateObj.getDate()).padStart(2, '0');
+    const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const dd = String(dateObj.getDate()).padStart(2, "0");
     const steveCheckNumber = `SG-${yy}${mm}${dd}`;
-    
+
     billPayloads.push({
       TxnDate: txnDate,
       DueDate: dueDate,
-      VendorRef: { value: workerLookup[steveId].qboVendorId, name: workerLookup[steveId].displayName },
+      VendorRef: {
+        value: workerLookup[steveId].qboVendorId,
+        name: workerLookup[steveId].displayName,
+      },
       DocNumber: steveCheckNumber,
       PrivateNote: steveCheckNumber,
-      Line: [{
-        LineNum: 1,
-        Description: `${txnDate} | Steve's 1/3 Share of $${thisWeek.NetIncome} Net Income`,
-        Amount: distAmount,
-        DetailType: "AccountBasedExpenseLineDetail",
-        AccountBasedExpenseLineDetail: {
-          AccountRef: { value: "148", name: "Partner Distributions:Steve Distributions" },
-          BillableStatus: "NotBillable",
-          TaxCodeRef: { value: "NON" }
-        }
-      }],
+      Line: [
+        {
+          LineNum: 1,
+          Description: `${txnDate} | Steve's 1/3 Share of $${thisWeek.NetIncome} Net Income`,
+          Amount: distAmount,
+          DetailType: "AccountBasedExpenseLineDetail",
+          AccountBasedExpenseLineDetail: {
+            AccountRef: {
+              value: "148",
+              name: "Partner Distributions:Steve Distributions",
+            },
+            BillableStatus: "NotBillable",
+            TaxCodeRef: { value: "NON" },
+          },
+        },
+      ],
       TotalAmt: distAmount,
       CurrencyRef: { value: "USD", name: "United States Dollar" },
-      APAccountRef: { value: "7", name: "Accounts Payable (A/P)" }
+      APAccountRef: { value: "7", name: "Accounts Payable (A/P)" },
+      _workerId: steveId,
     });
-    
-    logToSheet("Steve Bill Created", { amount: distAmount, docNumber: steveCheckNumber }, `✅ Created distribution bill for Steve: $${distAmount}`);
+
+    logToSheet(
+      "Steve Bill Created",
+      { amount: distAmount, docNumber: steveCheckNumber },
+      `✅ Created distribution bill for Steve: $${distAmount}`
+    );
   }
-  
+
   // Daniela's distribution bill
   const danielaId = "DMR-002-5c6334ca";
-  logToSheet("Daniela Lookup", {
-    found: !!workerLookup[danielaId],
-    displayName: workerLookup[danielaId]?.displayName,
-    qboVendorId: workerLookup[danielaId]?.qboVendorId
-  }, `🔍 Daniela lookup: ${workerLookup[danielaId] ? 'Found' : 'NOT FOUND'}`);
-  
+  logToSheet(
+    "Daniela Lookup",
+    {
+      found: !!workerLookup[danielaId],
+      displayName: workerLookup[danielaId]?.displayName,
+      qboVendorId: workerLookup[danielaId]?.qboVendorId,
+    },
+    `🔍 Daniela lookup: ${workerLookup[danielaId] ? "Found" : "NOT FOUND"}`
+  );
+
   if (workerLookup[danielaId] && workerLookup[danielaId].qboVendorId) {
     // Format: DM-YYMMDD (e.g., DM-251122)
     const dateObj = parseDate(weekPeriod);
     const yy = String(dateObj.getFullYear()).slice(-2);
-    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const dd = String(dateObj.getDate()).padStart(2, '0');
+    const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const dd = String(dateObj.getDate()).padStart(2, "0");
     const danielaCheckNumber = `DM-${yy}${mm}${dd}`;
-    
+
     billPayloads.push({
       TxnDate: txnDate,
       DueDate: dueDate,
-      VendorRef: { value: workerLookup[danielaId].qboVendorId, name: workerLookup[danielaId].displayName },
+      VendorRef: {
+        value: workerLookup[danielaId].qboVendorId,
+        name: workerLookup[danielaId].displayName,
+      },
       DocNumber: danielaCheckNumber,
       PrivateNote: danielaCheckNumber,
-      Line: [{
-        LineNum: 1,
-        Description: `${txnDate} | Daniela's 1/3 Share of $${thisWeek.NetIncome} Net Income`,
-        Amount: distAmount,
-        DetailType: "AccountBasedExpenseLineDetail",
-        AccountBasedExpenseLineDetail: {
-          AccountRef: { value: "149", name: "Partner Distributions:Daniela Distributions" },
-          BillableStatus: "NotBillable",
-          TaxCodeRef: { value: "NON" }
-        }
-      }],
+      Line: [
+        {
+          LineNum: 1,
+          Description: `${txnDate} | Daniela's 1/3 Share of $${thisWeek.NetIncome} Net Income`,
+          Amount: distAmount,
+          DetailType: "AccountBasedExpenseLineDetail",
+          AccountBasedExpenseLineDetail: {
+            AccountRef: {
+              value: "149",
+              name: "Partner Distributions:Daniela Distributions",
+            },
+            BillableStatus: "NotBillable",
+            TaxCodeRef: { value: "NON" },
+          },
+        },
+      ],
       TotalAmt: distAmount,
       CurrencyRef: { value: "USD", name: "United States Dollar" },
-      APAccountRef: { value: "7", name: "Accounts Payable (A/P)" }
+      APAccountRef: { value: "7", name: "Accounts Payable (A/P)" },
+      _workerId: danielaId,
     });
-    
-    logToSheet("Daniela Bill Created", { amount: distAmount, docNumber: danielaCheckNumber }, `✅ Created distribution bill for Daniela: $${distAmount}`);
+
+    logToSheet(
+      "Daniela Bill Created",
+      { amount: distAmount, docNumber: danielaCheckNumber },
+      `✅ Created distribution bill for Daniela: $${distAmount}`
+    );
   }
-  
+
   return billPayloads;
 }
 
@@ -367,35 +525,47 @@ function buildBillPayloads(groupedLineItems, workerLookup, targetWeekPeriod) {
     const workerDetails = workerLookup[workerId];
     if (!workerDetails || !workerDetails.qboVendorId) return;
 
-    const checkNumber = lineItems[0][CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.CHECK_NUMBER];
+    const checkNumber =
+      lineItems[0][CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.CHECK_NUMBER];
     if (!checkNumber) return;
 
-    const txnDate = formatDateYYYYMMDD(lineItems[0][CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.WEEK_PERIOD]);
+    const txnDate = formatDateYYYYMMDD(
+      lineItems[0][CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.WEEK_PERIOD]
+    );
     const dueDate = formatDateYYYYMMDD(getNextFriday(parseDate(txnDate)));
 
     // Sort lineItems by PAYROLL_DATE
-    lineItems.sort((a, b) =>
-      new Date(a[CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.PAYROLL_DATE]) -
-      new Date(b[CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.PAYROLL_DATE])
+    lineItems.sort(
+      (a, b) =>
+        new Date(a[CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.PAYROLL_DATE]) -
+        new Date(b[CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.PAYROLL_DATE])
     );
 
-    const formattedLineItems = lineItems.map((item, index) => {
-      const payrollDate = formatDateYYYYMMDD(parseDate(item[CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.PAYROLL_DATE]));
-      return {
-        LineNum: index + 1,
-        Description: `${payrollDate} | ${item[CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.DETAILS]}`,
-        Amount: parseFloat(item[CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.CHECK_AMOUNT]),
-        DetailType: "AccountBasedExpenseLineDetail",
-        AccountBasedExpenseLineDetail: {
-          AccountRef: { value: "142", name: "Subcontractor Expense" },
-          BillableStatus: "NotBillable",
-          TaxCodeRef: { value: "NON" }
-        }
-      };
-    }).filter(item => item.Amount > 0);
+    const formattedLineItems = lineItems
+      .map((item, index) => {
+        const payrollDate = formatDateYYYYMMDD(
+          parseDate(item[CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.PAYROLL_DATE])
+        );
+        return {
+          LineNum: index + 1,
+          Description: `${payrollDate} | ${
+            item[CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.DETAILS]
+          }`,
+          Amount: parseFloat(
+            item[CONFIG.COLUMNS.PAYROLL_LINE_ITEMS.CHECK_AMOUNT]
+          ),
+          DetailType: "AccountBasedExpenseLineDetail",
+          AccountBasedExpenseLineDetail: {
+            AccountRef: { value: "142", name: "Subcontractor Expense" },
+            BillableStatus: "NotBillable",
+            TaxCodeRef: { value: "NON" },
+          },
+        };
+      })
+      .filter((item) => item.Amount > 0);
 
     // Add Partner Distribution Line (if applicable)
-    const thisWeek = weeklyFinancials.find(row => row.WeekPeriod === txnDate);
+    const thisWeek = weeklyFinancials.find((row) => row.WeekPeriod === txnDate);
 
     if (thisWeek && !isNaN(thisWeek.NetIncome)) {
       const distAmount = parseFloat((thisWeek.NetIncome / 3).toFixed(2));
@@ -407,10 +577,13 @@ function buildBillPayloads(groupedLineItems, workerLookup, targetWeekPeriod) {
           Amount: distAmount,
           DetailType: "AccountBasedExpenseLineDetail",
           AccountBasedExpenseLineDetail: {
-            AccountRef: { value: "148", name: "Partner Distributions:Steve Distributions" },
+            AccountRef: {
+              value: "148",
+              name: "Partner Distributions:Steve Distributions",
+            },
             BillableStatus: "NotBillable",
-            TaxCodeRef: { value: "NON" }
-          }
+            TaxCodeRef: { value: "NON" },
+          },
         });
       }
 
@@ -421,26 +594,36 @@ function buildBillPayloads(groupedLineItems, workerLookup, targetWeekPeriod) {
           Amount: distAmount,
           DetailType: "AccountBasedExpenseLineDetail",
           AccountBasedExpenseLineDetail: {
-            AccountRef: { value: "149", name: "Partner Distributions:Daniela Distributions" },
+            AccountRef: {
+              value: "149",
+              name: "Partner Distributions:Daniela Distributions",
+            },
             BillableStatus: "NotBillable",
-            TaxCodeRef: { value: "NON" }
-          }
+            TaxCodeRef: { value: "NON" },
+          },
         });
       }
     }
 
-    const totalAmount = formattedLineItems.reduce((sum, item) => sum + item.Amount, 0);
+    const totalAmount = formattedLineItems.reduce(
+      (sum, item) => sum + item.Amount,
+      0
+    );
 
     const billPayload = {
       TxnDate: txnDate,
       DueDate: dueDate,
-      VendorRef: { value: workerDetails.qboVendorId, name: workerDetails.displayName },
+      VendorRef: {
+        value: workerDetails.qboVendorId,
+        name: workerDetails.displayName,
+      },
       DocNumber: checkNumber,
       PrivateNote: checkNumber,
       Line: formattedLineItems,
       TotalAmt: totalAmount,
       CurrencyRef: { value: "USD", name: "United States Dollar" },
-      APAccountRef: { value: "7", name: "Accounts Payable (A/P)" }
+      APAccountRef: { value: "7", name: "Accounts Payable (A/P)" },
+      _workerId: workerId, // Temporary property for duplicate resolution
     };
 
     billPayloads.push(billPayload);
@@ -448,7 +631,6 @@ function buildBillPayloads(groupedLineItems, workerLookup, targetWeekPeriod) {
 
   return billPayloads;
 }
-
 
 /**
  * Maps workers by their WorkerID for quick lookup.
@@ -468,7 +650,7 @@ function mapWorkersById(workers) {
 
     lookup[workerId] = {
       qboVendorId,
-      displayName: worker[workerCols.DISPLAY_NAME]
+      displayName: worker[workerCols.DISPLAY_NAME],
     };
     return lookup;
   }, {});
@@ -481,7 +663,10 @@ function mapWorkersById(workers) {
  * Dependencies: None
  */
 function parseDate(value) {
-  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value)) {
+  if (
+    Object.prototype.toString.call(value) === "[object Date]" &&
+    !isNaN(value)
+  ) {
     return value;
   }
   const parsed = new Date(value);
@@ -499,8 +684,8 @@ function parseDate(value) {
  */
 function formatDateYYYYMMDD(dateObj) {
   const y = dateObj.getFullYear();
-  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const d = String(dateObj.getDate()).padStart(2, '0');
+  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const d = String(dateObj.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
 
@@ -523,7 +708,9 @@ function getNextFriday(dateObj) {
  */
 function logToSheet(eventType, payload, status) {
   try {
-    const sheet = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID).getSheetByName(CONFIG.SHEETS.LOG);
+    const sheet = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID).getSheetByName(
+      CONFIG.SHEETS.LOG
+    );
     if (sheet) {
       const timestamp = new Date().toISOString();
       sheet.appendRow([timestamp, eventType, JSON.stringify(payload), status]);
@@ -532,4 +719,3 @@ function logToSheet(eventType, payload, status) {
     // Silent fail if logging fails
   }
 }
-

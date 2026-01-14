@@ -312,6 +312,27 @@ function handleRequest(e) {
         break;
       }
 
+      case 'submitW9Guest': {
+        const device = params.device || 'Unknown';
+        const w9Data = {
+          legalName: params.legalName || '',
+          businessName: params.businessName || '',
+          taxClassification: params.taxClassification || '',
+          address: params.address || '',
+          city: params.city || '',
+          state: params.state || '',
+          zip: params.zip || '',
+          ssn: params.ssn || '',
+          backupWithholding: params.backupWithholding === 'true' || params.backupWithholding === true,
+          signature: params.signature || params.legalName || '',
+          contactEmail: params.contactEmail || '',
+          honeypot: params.extraField || params.honeypot || ''
+        };
+
+        result = submitW9Guest(w9Data, device);
+        break;
+      }
+
       case 'getW9Status': {
         const workerId = params.workerId;
         if (!workerId) {

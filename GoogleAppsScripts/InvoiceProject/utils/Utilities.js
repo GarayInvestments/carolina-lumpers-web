@@ -10,20 +10,66 @@
  * @returns {string} - The formatted timestamp.
  */
 function getCurrentTimestamp() {
-    var now = new Date();
-    var formattedTimestamp = Utilities.formatDate(now, "America/New_York", "M/d/yyyy HH:mm:ss");
-    Logger.log(formattedTimestamp); // Output: "3/21/2025 18:30:09"
-    return formattedTimestamp;
+  var now = new Date();
+  var formattedTimestamp = Utilities.formatDate(
+    now,
+    "America/New_York",
+    "M/d/yyyy HH:mm:ss"
+  );
+  Logger.log(formattedTimestamp); // Output: "3/21/2025 18:30:09"
+  return formattedTimestamp;
 }
 /**
  * Logs a message with details to the Log sheet.
+ * Supports 2 or 4 parameter signatures for flexibility.
  * @param {string} details - The details of the log event.
- * @param {string} status - The status of the log event (e.g., "Success", "Failed").
+ * @param {string} statusOrInvoiceNumber - The status (2-param) or invoice number (4-param).
+ * @param {string} statusIfFourParam - The status (4-param only).
+ * @param {string} descriptionIfFourParam - The description (4-param only).
  */
-function logEvent(details, status) {
+function logEvent(
+  details,
+  statusOrInvoiceNumber,
+  statusIfFourParam,
+  descriptionIfFourParam
+) {
+  try {
     const sheet = getLogSheet();
     const timestamp = getCurrentTimestamp();
-    sheet.appendRow([timestamp, details, status]);
+
+    // Handle both 2-param and 4-param signatures
+    if (statusIfFourParam === undefined) {
+      // 2-param signature: logEvent(details, status)
+      sheet.appendRow([timestamp, details, statusOrInvoiceNumber]);
+    } else {
+      // 4-param signature: logEvent(details, invoiceNumber, status, description)
+      const invoiceNumber = statusOrInvoiceNumber;
+      const status = statusIfFourParam;
+      const description = descriptionIfFourParam;
+      sheet.appendRow([
+        timestamp,
+        `${details} (Invoice: ${invoiceNumber})`,
+        description,
+        status,
+      ]);
+    }
+  } catch (err) {
+    Logger.log(`❌ logEvent Error: ${err.message}`);
+    // Attempt to log the error to sheet as fallback
+    try {
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Log");
+      if (sheet) {
+        sheet.appendRow([
+          new Date().toISOString(),
+          "LOGGING ERROR",
+          err.message,
+          "Error",
+        ]);
+      }
+    } catch (fallbackErr) {
+      // Silent fail if logging fails completely
+    }
+  }
 }
 
 /**
@@ -32,12 +78,12 @@ function logEvent(details, status) {
  * @returns {Array|null} - A 2D array of sheet data or null if the sheet is not found.
  */
 function getSheetData(sheetName) {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
-    if (!sheet) {
-        logEvent("Sheet Access", sheetName, "Error", "Sheet not found.");
-        return null;
-    }
-    return sheet.getDataRange().getValues();
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  if (!sheet) {
+    logEvent("Sheet Access", sheetName, "Error", "Sheet not found.");
+    return null;
+  }
+  return sheet.getDataRange().getValues();
 }
 
 /**
@@ -47,25 +93,26 @@ function getSheetData(sheetName) {
  * @returns {Object} - A map with keys corresponding to the selected column.
  */
 function getInvoiceMap(sheetName, keyColumnIndex) {
-    const data = getSheetData(sheetName);
-    if (!data) return {};
-    let map = {};
-    for (let i = 1; i < data.length; i++) {
-        if (data[i][keyColumnIndex]) { // Ensuring key column has valid data
-            map[data[i][keyColumnIndex]] = data[i];
-        }
+  const data = getSheetData(sheetName);
+  if (!data) return {};
+  let map = {};
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][keyColumnIndex]) {
+      // Ensuring key column has valid data
+      map[data[i][keyColumnIndex]] = data[i];
     }
-    return map;
+  }
+  return map;
 }
 /**
  * Returns the log sheet where log entries are stored.
  * @returns {GoogleAppsScript.Spreadsheet.Sheet} - The log sheet.
  */
 function getLogSheet() {
-    const sheetName = "Log"; // Replace with the actual name of your log sheet
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
-    if (!sheet) {
-        throw new Error(`Log sheet with name '${sheetName}' not found.`);
-    }
-    return sheet;
+  const sheetName = "Log"; // Replace with the actual name of your log sheet
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  if (!sheet) {
+    throw new Error(`Log sheet with name '${sheetName}' not found.`);
+  }
+  return sheet;
 }

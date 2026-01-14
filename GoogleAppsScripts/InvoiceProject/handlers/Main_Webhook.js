@@ -10,83 +10,143 @@
  * @returns {GoogleAppsScript.Content.TextOutput} - Response message.
  */
 function doPost(e) {
-    try {
-        if (!e.postData || !e.postData.contents) {
-            logEvent("Webhook Error: No postData received", "Failed");
-            return ContentService.createTextOutput(
-                JSON.stringify({ status: "❌ Error", message: "No postData received" })
-            ).setMimeType(ContentService.MimeType.JSON);
-        }
-
-        // Log the raw payload for debugging
-        logEvent("Webhook Raw Payload received", "Info");
-
-        const requestData = JSON.parse(e.postData.contents);
-        const eventType = requestData.event;
-        let invoiceNumber = requestData.invoiceNumber;
-
-        // Handle different payload structures
-        if (!invoiceNumber && requestData.eventNotifications) {
-            const entities = requestData.eventNotifications[0].dataChangeEvent.entities;
-            if (entities && entities.length > 0) {
-                invoiceNumber = entities[0].id;
-            }
-        }
-
-        // Invoice number is optional for certain events (like Check_Payment_Status)
-        const eventsWithoutInvoiceNumber = ["Check_Payment_Status"];
-        if (!invoiceNumber && !eventsWithoutInvoiceNumber.includes(eventType)) {
-            logEvent("Webhook Error: Missing Invoice Number", "Failed");
-            return ContentService.createTextOutput(
-                JSON.stringify({ status: "❌ Error", message: "Missing Invoice Number" })
-            ).setMimeType(ContentService.MimeType.JSON);
-        }
-
-        // Route event to appropriate handler
-        let result;
-        switch (eventType) {
-            case "Invoice_Creation":
-                handleInvoiceCreation(requestData);
-                break;
-            case "LineItem_Update":
-                handleLineItemUpdate(requestData);
-                break;
-            case "QBO_Approval":
-                result = handleQBOApproval(requestData);
-                // Return the result from QBO sync (includes qboInvoiceId)
-                return ContentService.createTextOutput(
-                    JSON.stringify({ 
-                        status: result?.success ? "✅ Success" : "❌ Error",
-                        event: eventType,
-                        invoiceNumber: invoiceNumber,
-                        qboInvoiceId: result?.qboInvoiceId,
-                        error: result?.error
-                    })
-                ).setMimeType(ContentService.MimeType.JSON);
-            case "QBO_Payment_Update":
-                handleQBO_PaymentUpdate(requestData);
-                break;
-            case "Check_Payment_Status":
-                // Manual trigger to check all unpaid invoices
-                dailyPaymentStatusCheck();
-                break;
-            default:
-        }
-
-        return ContentService.createTextOutput(
-            JSON.stringify({ 
-                status: "✅ Success", 
-                event: eventType,
-                invoiceNumber: invoiceNumber || "N/A"
-            })
-        ).setMimeType(ContentService.MimeType.JSON);
-
-    } catch (error) {
-        logEvent(`Webhook Error: ${error.message}`, "Failed");
-        return ContentService.createTextOutput(
-            JSON.stringify({ status: "❌ Error", message: error.message })
-        ).setMimeType(ContentService.MimeType.JSON);
+  try {
+    if (!e.postData || !e.postData.contents) {
+      logEvent("Webhook Error: No postData received", "Failed");
+      return ContentService.createTextOutput(
+        JSON.stringify({ status: "❌ Error", message: "No postData received" })
+      ).setMimeType(ContentService.MimeType.JSON);
     }
+
+    // Log the raw payload for debugging
+    logEvent("Webhook Raw Payload received", "Info");
+
+    const requestData = JSON.parse(e.postData.contents);
+    const eventType = requestData.event;
+    let invoiceNumber = requestData.invoiceNumber;
+
+    // Handle different payload structures
+    if (!invoiceNumber && requestData.eventNotifications) {
+      const entities =
+        requestData.eventNotifications[0].dataChangeEvent.entities;
+      if (entities && entities.length > 0) {
+        invoiceNumber = entities[0].id;
+      }
+    }
+
+    // Invoice number is optional for certain events (like Check_Payment_Status)
+    const eventsWithoutInvoiceNumber = ["Check_Payment_Status"];
+    if (!invoiceNumber && !eventsWithoutInvoiceNumber.includes(eventType)) {
+      logEvent("Webhook Error: Missing Invoice Number", "Failed");
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          status: "❌ Error",
+          message: "Missing Invoice Number",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Route event to appropriate handler
+    let result;
+    switch (eventType) {
+      case "Invoice_Creation":
+        try {
+          handleInvoiceCreation(requestData);
+        } catch (err) {
+          logEvent(
+            "Invoice_Creation Handler Error",
+            invoiceNumber || "Unknown",
+            "Error",
+            err.message
+          );
+          Logger.log(`❌ Invoice_Creation error: ${err.message}`);
+        }
+        break;
+      case "LineItem_Update":
+        try {
+          handleLineItemUpdate(requestData);
+        } catch (err) {
+          logEvent(
+            "LineItem_Update Handler Error",
+            invoiceNumber || "Unknown",
+            "Error",
+            err.message
+          );
+          Logger.log(`❌ LineItem_Update error: ${err.message}`);
+        }
+        break;
+      case "QBO_Approval":
+        try {
+          result = handleQBOApproval(requestData);
+          // Return the result from QBO sync (includes qboInvoiceId)
+          return ContentService.createTextOutput(
+            JSON.stringify({
+              status: result?.success ? "✅ Success" : "❌ Error",
+              event: eventType,
+              invoiceNumber: invoiceNumber,
+              qboInvoiceId: result?.qboInvoiceId,
+              error: result?.error,
+            })
+          ).setMimeType(ContentService.MimeType.JSON);
+        } catch (err) {
+          logEvent(
+            "QBO_Approval Handler Error",
+            invoiceNumber || "Unknown",
+            "Error",
+            err.message
+          );
+          Logger.log(`❌ QBO_Approval error: ${err.message}`);
+          return ContentService.createTextOutput(
+            JSON.stringify({
+              status: "❌ Error",
+              event: eventType,
+              error: err.message,
+            })
+          ).setMimeType(ContentService.MimeType.JSON);
+        }
+      case "QBO_Payment_Update":
+        try {
+          handleQBO_PaymentUpdate(requestData);
+        } catch (err) {
+          logEvent(
+            "QBO_Payment_Update Handler Error",
+            invoiceNumber || "Unknown",
+            "Error",
+            err.message
+          );
+          Logger.log(`❌ QBO_Payment_Update error: ${err.message}`);
+        }
+        break;
+      case "Check_Payment_Status":
+        try {
+          // Manual trigger to check all unpaid invoices
+          dailyPaymentStatusCheck();
+        } catch (err) {
+          logEvent(
+            "Check_Payment_Status Handler Error",
+            "N/A",
+            "Error",
+            err.message
+          );
+          Logger.log(`❌ Check_Payment_Status error: ${err.message}`);
+        }
+        break;
+      default:
+    }
+
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        status: "✅ Success",
+        event: eventType,
+        invoiceNumber: invoiceNumber || "N/A",
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    logEvent(`Webhook Error: ${error.message}`, "Failed");
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "❌ Error", message: error.message })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 /**
@@ -94,42 +154,47 @@ function doPost(e) {
  * @param {object} requestData - Data payload from the webhook.
  */
 function handleInvoiceCreation(requestData) {
-    const invoiceNumber = requestData.invoiceNumber;
-    const existingInvoice = fetchInvoice(invoiceNumber);
+  const invoiceNumber = requestData.invoiceNumber;
+  const existingInvoice = fetchInvoice(invoiceNumber);
 
-    if (existingInvoice) {
-        updateInvoice(invoiceNumber, { LastUpdated: getCurrentTimestamp() });
-        updateInvoiceMetadata(invoiceNumber); // Ensure metadata is updated
-        logEvent(`Invoice Updated: ${invoiceNumber}`, "Success");
-    } else {
-        createInvoice({ invoiceNumber: invoiceNumber });
-        updateInvoiceMetadata(invoiceNumber); // Ensure metadata is updated
-        logEvent(`Invoice Created: ${invoiceNumber}`, "Success");
-    }
+  if (existingInvoice) {
+    updateInvoice(invoiceNumber, { LastUpdated: getCurrentTimestamp() });
+    updateInvoiceMetadata(invoiceNumber); // Ensure metadata is updated
+    logEvent(`Invoice Updated: ${invoiceNumber}`, "Success");
+  } else {
+    createInvoice({ invoiceNumber: invoiceNumber });
+    updateInvoiceMetadata(invoiceNumber); // Ensure metadata is updated
+    logEvent(`Invoice Created: ${invoiceNumber}`, "Success");
+  }
 }
 /**
  * Updates the metadata for a given invoice.
  * @param {string} invoiceNumber - The invoice number to update metadata for.
  */
 function updateInvoiceMetadata(invoiceNumber) {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Invoices");
-    const data = sheet.getDataRange().getValues();
-    for (let i = 1; i < data.length; i++) {
-        if (data[i][0] === invoiceNumber) { // Assuming the invoice number is in the first column
-            sheet.getRange(i + 1, 9).setValue(getCurrentTimestamp()); // Assuming metadata is in the 5th column
-            return;
-        }
+  const sheet =
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Invoices");
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === invoiceNumber) {
+      // Assuming the invoice number is in the first column
+      sheet.getRange(i + 1, 9).setValue(getCurrentTimestamp()); // Assuming metadata is in the 5th column
+      return;
     }
-    logEvent(`Metadata Update Error: Invoice ${invoiceNumber} not found`, "Failed");
+  }
+  logEvent(
+    `Metadata Update Error: Invoice ${invoiceNumber} not found`,
+    "Failed"
+  );
 }
 /**
  * Updates invoice timestamps when line items are modified.
  * @param {object} requestData - Data payload from the webhook.
  */
 function handleLineItemUpdate(requestData) {
-    const invoiceNumber = requestData.invoiceNumber;
-    updateInvoiceTimestamp(invoiceNumber);
-    logEvent(`Line Item Update: ${invoiceNumber}`, "Success");
+  const invoiceNumber = requestData.invoiceNumber;
+  updateInvoiceTimestamp(invoiceNumber);
+  logEvent(`Line Item Update: ${invoiceNumber}`, "Success");
 }
 
 /**
@@ -138,13 +203,13 @@ function handleLineItemUpdate(requestData) {
  * @returns {object} - Result with success status and qboInvoiceId if successful
  */
 function handleQBOApproval(requestData) {
-    logEvent(`QBO Approval: ${JSON.stringify(requestData)}`, "Processing");
-    const invoiceNumber = requestData.invoiceNumber;
-    if (!invoiceNumber) {
-        logEvent("QBO Approval Error: Invoice number is not defined", "Error");
-        return { success: false, error: 'Invoice number is not defined' };
-    }
-    return sendInvoiceToQBO(invoiceNumber);
+  logEvent(`QBO Approval: ${JSON.stringify(requestData)}`, "Processing");
+  const invoiceNumber = requestData.invoiceNumber;
+  if (!invoiceNumber) {
+    logEvent("QBO Approval Error: Invoice number is not defined", "Error");
+    return { success: false, error: "Invoice number is not defined" };
+  }
+  return sendInvoiceToQBO(invoiceNumber);
 }
 
 /**
@@ -152,49 +217,65 @@ function handleQBOApproval(requestData) {
  * @param {object} requestData - Data payload from the webhook.
  */
 function handleQBO_PaymentUpdate(requestData) {
-    try {
-        const entity = requestData?.eventNotifications?.[0]?.dataChangeEvent?.entities?.[0];
-        if (!entity || !entity.id) {
-            logEvent("Payment Update", "Unknown", "Error", "Missing QBO entity ID in webhook payload");
-            return;
-        }
-
-        const qboId = entity.id;
-
-        // Fetch invoice details from QBO using internal ID
-        const accessToken = getOAuthService().getAccessToken() || refreshAccessToken();
-        const realmId = CONFIG.QBO_REALM_ID;
-        const url = `${CONFIG.QBO_BASE_URL}${realmId}/invoice/${qboId}?minorversion=65`;
-
-        const response = UrlFetchApp.fetch(url, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                Accept: "application/json"
-            },
-            muteHttpExceptions: true
-        });
-
-        if (response.getResponseCode() !== 200) {
-            logEvent("Payment Update", qboId, "Error", `Failed to fetch QBO invoice. Response: ${response.getContentText()}`);
-            return;
-        }
-
-        const invoiceData = JSON.parse(response.getContentText()).Invoice;
-        const docNumber = invoiceData.DocNumber;
-        const balance = invoiceData.Balance || 0;
-
-        // Only mark paid if balance = 0
-        const newStatus = balance === 0 ? "Paid" : "Partial";
-
-        updateInvoice(docNumber, { Status: newStatus });
-        updateInvoiceMetadata(docNumber);
-
-        logEvent("Payment Update", docNumber, "Success", `Invoice marked as ${newStatus}.`);
-
-    } catch (err) {
-        logEvent("Payment Update", "Unknown", "Error", err.message);
+  try {
+    const entity =
+      requestData?.eventNotifications?.[0]?.dataChangeEvent?.entities?.[0];
+    if (!entity || !entity.id) {
+      logEvent(
+        "Payment Update",
+        "Unknown",
+        "Error",
+        "Missing QBO entity ID in webhook payload"
+      );
+      return;
     }
+
+    const qboId = entity.id;
+
+    // Fetch invoice details from QBO using internal ID
+    const accessToken =
+      getOAuthService().getAccessToken() || refreshAccessToken();
+    const realmId = CONFIG.QBO_REALM_ID;
+    const url = `${CONFIG.QBO_BASE_URL}${realmId}/invoice/${qboId}?minorversion=65`;
+
+    const response = UrlFetchApp.fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
+      },
+      muteHttpExceptions: true,
+    });
+
+    if (response.getResponseCode() !== 200) {
+      logEvent(
+        "Payment Update",
+        qboId,
+        "Error",
+        `Failed to fetch QBO invoice. Response: ${response.getContentText()}`
+      );
+      return;
+    }
+
+    const invoiceData = JSON.parse(response.getContentText()).Invoice;
+    const docNumber = invoiceData.DocNumber;
+    const balance = invoiceData.Balance || 0;
+
+    // Only mark paid if balance = 0
+    const newStatus = balance === 0 ? "Paid" : "Partial";
+
+    updateInvoice(docNumber, { Status: newStatus });
+    updateInvoiceMetadata(docNumber);
+
+    logEvent(
+      "Payment Update",
+      docNumber,
+      "Success",
+      `Invoice marked as ${newStatus}.`
+    );
+  } catch (err) {
+    logEvent("Payment Update", "Unknown", "Error", err.message);
+  }
 }
 
 /**
@@ -208,7 +289,9 @@ function handleQBO_PaymentUpdate(requestData) {
  */
 function dailyPaymentStatusCheck() {
   try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEET_NAMES.INVOICES);
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(
+      CONFIG.SHEET_NAMES.INVOICES
+    );
     const data = sheet.getDataRange().getValues();
     const headers = data[0];
     const invoiceCol = headers.indexOf(CONFIG.COLUMNS.INVOICES.INVOICE_NUMBER);
@@ -234,13 +317,18 @@ function dailyPaymentStatusCheck() {
           method: "GET",
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            Accept: "application/json"
+            Accept: "application/json",
           },
-          muteHttpExceptions: true
+          muteHttpExceptions: true,
         });
 
         if (response.getResponseCode() !== 200) {
-          logEvent("Daily Payment Check", invoiceNumber, "Error", `QBO query failed: ${response.getContentText()}`);
+          logEvent(
+            "Daily Payment Check",
+            invoiceNumber,
+            "Error",
+            `QBO query failed: ${response.getContentText()}`
+          );
           continue;
         }
 
@@ -257,14 +345,22 @@ function dailyPaymentStatusCheck() {
           updateInvoiceMetadata(invoiceNumber);
           updates.push(`${invoiceNumber}: ${newStatus}`);
         }
-
       } catch (innerErr) {
-        logEvent("Daily Payment Check", invoiceNumber, "Error", innerErr.message);
+        logEvent(
+          "Daily Payment Check",
+          invoiceNumber,
+          "Error",
+          innerErr.message
+        );
       }
     }
 
-    logEvent("Daily Payment Check", "System", "Success", `Updated ${updates.length} invoices: ${updates.join(", ")}`);
-
+    logEvent(
+      "Daily Payment Check",
+      "System",
+      "Success",
+      `Updated ${updates.length} invoices: ${updates.join(", ")}`
+    );
   } catch (err) {
     logEvent("Daily Payment Check", "System", "Error", err.message);
   }

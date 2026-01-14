@@ -30,7 +30,9 @@ function getActiveWorkers() {
   const ss = SpreadsheetApp.openById(spreadsheetId);
   const sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
-    throw new Error(`Sheet "${sheetName}" not found in spreadsheet "${spreadsheetId}".`);
+    throw new Error(
+      `Sheet "${sheetName}" not found in spreadsheet "${spreadsheetId}".`
+    );
   }
 
   // Read all data
@@ -49,10 +51,10 @@ function getActiveWorkers() {
   const availabilityIdx = headers.indexOf(availabilityColName);
 
   // Build array of objects, skipping header and blank rows
-  const dataRows = allRows.slice(1).filter(row => !isBlankRow(row));
+  const dataRows = allRows.slice(1).filter((row) => !isBlankRow(row));
 
   // Convert each row to an object keyed by the header
-  const workers = dataRows.map(row => {
+  const workers = dataRows.map((row) => {
     const rowObject = {};
     headers.forEach((headerName, colIndex) => {
       rowObject[headerName] = row[colIndex];
@@ -60,9 +62,12 @@ function getActiveWorkers() {
     return rowObject;
   });
 
-  // Filter only active workers
-  const activeWorkers = workers.filter(w => {
-    return w[availabilityColName] === 'Active';
+  // Filter workers marked Active or OWNER (case-insensitive) so owner distributions always run
+  const activeWorkers = workers.filter((w) => {
+    const status = String(w[availabilityColName] || "")
+      .trim()
+      .toLowerCase();
+    return status === "active" || status === "owner";
   });
 
   return activeWorkers;
@@ -81,7 +86,9 @@ function getPayrollLineItems() {
   const ss = SpreadsheetApp.openById(spreadsheetId);
   const sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
-    throw new Error(`Sheet "${sheetName}" not found in spreadsheet "${spreadsheetId}".`);
+    throw new Error(
+      `Sheet "${sheetName}" not found in spreadsheet "${spreadsheetId}".`
+    );
   }
 
   const allRows = sheet.getDataRange().getValues();
@@ -95,9 +102,9 @@ function getPayrollLineItems() {
   validateRequiredColumns(headers, Object.values(columns), sheetName);
 
   // Build array of objects, skipping header and blank rows
-  const dataRows = allRows.slice(1).filter(row => !isBlankRow(row));
+  const dataRows = allRows.slice(1).filter((row) => !isBlankRow(row));
 
-  const lineItems = dataRows.map(row => {
+  const lineItems = dataRows.map((row) => {
     const rowObject = {};
     headers.forEach((headerName, colIndex) => {
       rowObject[headerName] = row[colIndex];
@@ -122,12 +129,14 @@ function appendLogEntry(logLevel, message, contextData) {
   const ss = SpreadsheetApp.openById(spreadsheetId);
   const sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
-    throw new Error(`Log sheet "${sheetName}" not found in spreadsheet "${spreadsheetId}".`);
+    throw new Error(
+      `Log sheet "${sheetName}" not found in spreadsheet "${spreadsheetId}".`
+    );
   }
 
   // Convert objects to string for logging
   let contextString = contextData;
-  if (typeof contextData === 'object') {
+  if (typeof contextData === "object") {
     contextString = JSON.stringify(contextData);
   }
 
@@ -150,7 +159,9 @@ function appendLogEntry(logLevel, message, contextData) {
 function validateRequiredColumns(headers, requiredColumns, sheetName) {
   for (const colName of requiredColumns) {
     if (!headers.includes(colName)) {
-      throw new Error(`Required column "${colName}" missing in sheet "${sheetName}".`);
+      throw new Error(
+        `Required column "${colName}" missing in sheet "${sheetName}".`
+      );
     }
   }
 }
@@ -162,5 +173,5 @@ function validateRequiredColumns(headers, requiredColumns, sheetName) {
  */
 function isBlankRow(row) {
   // If every cell is empty or blank, we consider the row blank
-  return row.every(cell => cell === '' || cell === null);
+  return row.every((cell) => cell === "" || cell === null);
 }

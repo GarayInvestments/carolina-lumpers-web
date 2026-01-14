@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    const CACHE_VERSION = '20260114-guest-w9';
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-en="W-9 Guest Form | Carolina Lumper Service" data-es="Formulario W-9 Invitado | Carolina Lumper Service" data-pt="Formulário W-9 Convidado | Carolina Lumper Service">W-9 Guest Form | Carolina Lumper Service</title>
+  <link rel="icon" type="image/png" href="assets/CLS-favicon.png">
+  <link rel="manifest" href="manifest-employee.json">
+  <meta name="theme-color" content="#ffcc00">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CLS Employee">
+  <link rel="apple-touch-icon" href="assets/CLS-icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+  <script>
+    document.write('<link rel="stylesheet" href="css/style.css?v=' + CACHE_VERSION + '">');
+    document.write('<link rel="stylesheet" href="css/forms.css?v=' + CACHE_VERSION + '">');
+  </script>
+  <style>
+    .guest-container {background-color: var(--bg-secondary); color: var(--text-primary); border-radius: var(--radius-lg); padding: var(--space-2xl) var(--space-xl); max-width: 700px; width: 100%; margin: 0 auto;}
+    .guest-container h1 {color: var(--color-primary); font-family: var(--font-heading); font-size: var(--font-size-3xl); margin: 0 0 var(--space-md) 0; text-align: center;}
+    .info-box {background-color: var(--color-dark); border-left: 4px solid var(--color-primary); padding: var(--space-md); margin-bottom: var(--space-lg); border-radius: var(--radius-md);}
+    .form-grid {display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);}
+    .form-grid.three {grid-template-columns: 2fr 1fr 1fr;}
+    .form-group {display: flex; flex-direction: column; gap: var(--space-xs);}
+    .form-group label {color: var(--text-primary); font-weight: 500; font-size: var(--font-size-sm);}    
+    .form-group label .required {color: var(--color-error); margin-left: 4px;}
+    .form-group input, .form-group select {background-color: var(--color-dark); color: var(--text-primary); border: 1px solid var(--border-color); padding: var(--space-md); border-radius: var(--radius-md); font-size: var(--font-size-base);}
+    .form-group input:focus, .form-group select:focus {outline: none; border-color: var(--color-primary);}
+    .checkbox-row {display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-md); background-color: var(--color-dark); border-radius: var(--radius-md); border: 1px solid var(--border-color);}    
+    .actions {display: flex; gap: var(--space-md); justify-content: center; margin-top: var(--space-xl);} 
+    .btn-primary {background-color: var(--color-primary); color: #000; border: none; font-weight: 600; padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md);} 
+    .btn-secondary {background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md);} 
+    #statusMessage {padding: var(--space-md); border-radius: var(--radius-md); margin-top: var(--space-lg); text-align: center; display: none;} 
+    #statusMessage.success {display: block; background-color: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);} 
+    #statusMessage.error {display: block; background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);} 
+    @media (max-width: 768px) {.guest-container {padding: var(--space-lg);} .form-grid, .form-grid.three {grid-template-columns: 1fr;} .actions {flex-direction: column;}}
+  </style>
+</head>
+<body data-page="w9guest">
+  <div id="navbar-container"></div>
+  <main>
+    <div class="guest-container">
+      <h1 data-en="W-9 Guest Submission" data-es="Envío de W-9 Invitado" data-pt="Envio de W-9 Convidado">W-9 Guest Submission</h1>
+      <div class="info-box">
+        <p data-en="Use this form if you are not yet in our system. Your W-9 will be securely sent to our team for review." data-es="Use este formulario si aún no está en nuestro sistema. Su W-9 se enviará de forma segura a nuestro equipo para revisión." data-pt="Use este formulário se você ainda não está em nosso sistema. Seu W-9 será enviado com segurança para nossa equipe revisar.">Use this form if you are not yet in our system. Your W-9 will be securely sent to our team for review.</p>
+      </div>
+      <form id="guestForm" class="w9-form">
+        <input type="text" name="extraField" id="hpField" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+        <div class="form-group">
+          <label for="legalName"><span data-en="Legal Name" data-es="Nombre Legal" data-pt="Nome Legal">Legal Name</span><span class="required">*</span></label>
+          <input type="text" id="legalName" required>
+        </div>
+        <div class="form-group">
+          <label for="businessName"><span data-en="Business Name (optional)" data-es="Nombre Comercial (opcional)" data-pt="Nome Empresarial (opcional)">Business Name (optional)</span></label>
+          <input type="text" id="businessName">
+        </div>
+        <div class="form-group">
+          <label for="taxClassification"><span data-en="Federal Tax Classification" data-es="Clasificación Fiscal" data-pt="Classificação Fiscal">Federal Tax Classification</span><span class="required">*</span></label>
+          <select id="taxClassification" required>
+            <option value="">Select...</option>
+            <option value="Individual">Individual/Sole Proprietor</option>
+            <option value="C-Corporation">C Corporation</option>
+            <option value="S-Corporation">S Corporation</option>
+            <option value="Partnership">Partnership</option>
+            <option value="Trust/Estate">Trust/Estate</option>
+            <option value="LLC">Limited Liability Company</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="address"><span data-en="Street Address" data-es="Dirección" data-pt="Endereço">Street Address</span><span class="required">*</span></label>
+          <input type="text" id="address" required>
+        </div>
+        <div class="form-grid three">
+          <div class="form-group">
+            <label for="city"><span data-en="City" data-es="Ciudad" data-pt="Cidade">City</span><span class="required">*</span></label>
+            <input type="text" id="city" required>
+          </div>
+          <div class="form-group">
+            <label for="state"><span data-en="State" data-es="Estado" data-pt="Estado">State</span><span class="required">*</span></label>
+            <select id="state" required>
+              <option value="">--</option>
+              <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option><option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option><option value="CT">CT</option><option value="DE">DE</option><option value="FL">FL</option><option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option><option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option><option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option><option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option><option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option><option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option><option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option><option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option><option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option><option value="OR">OR</option><option value="PA">PA</option><option value="RI">RI</option><option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option><option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option><option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option><option value="WI">WI</option><option value="WY">WY</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="zip"><span data-en="ZIP" data-es="Código Postal" data-pt="CEP">ZIP</span><span class="required">*</span></label>
+            <input type="text" id="zip" required maxlength="5" pattern="[0-9]{5}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ssn"><span data-en="SSN (digits only)" data-es="SSN (solo dígitos)" data-pt="SSN (somente dígitos)">SSN (digits only)</span><span class="required">*</span></label>
+          <input type="password" id="ssn" required maxlength="11" placeholder="XXX-XX-XXXX" autocomplete="off">
+          <p class="ssn-info" data-en="Only the last 4 will be shown after submission." data-es="Solo los últimos 4 se mostrarán después del envío." data-pt="Apenas os últimos 4 serão exibidos após o envio.">Only the last 4 will be shown after submission.</p>
+        </div>
+        <div class="form-group">
+          <label for="confirmSsn"><span data-en="Confirm SSN" data-es="Confirmar SSN" data-pt="Confirmar SSN">Confirm SSN</span><span class="required">*</span></label>
+          <input type="password" id="confirmSsn" required maxlength="11" placeholder="XXX-XX-XXXX" autocomplete="off">
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="backupWithholding">
+          <label for="backupWithholding" data-en="I am subject to backup withholding (only if IRS notified you)" data-es="Estoy sujeto a retención de respaldo (solo si el IRS le notificó)" data-pt="Estou sujeito à retenção de backup (apenas se o IRS notificou)">I am subject to backup withholding (only if IRS notified you)</label>
+        </div>
+        <div class="form-group">
+          <label for="signature"><span data-en="Electronic Signature (type legal name)" data-es="Firma Electrónica (escriba su nombre legal)" data-pt="Assinatura Eletrônica (digite seu nome legal)">Electronic Signature (type legal name)</span><span class="required">*</span></label>
+          <input type="text" id="signature" required>
+        </div>
+        <div class="form-group">
+          <label for="contactEmail"><span data-en="Email for confirmation (optional)" data-es="Correo para confirmación (opcional)" data-pt="E-mail para confirmação (opcional)">Email for confirmation (optional)</span></label>
+          <input type="email" id="contactEmail" placeholder="you@example.com">
+        </div>
+        <div id="statusMessage" role="alert" aria-live="assertive"></div>
+        <div class="actions">
+          <button type="button" class="btn-secondary" onclick="window.location.href='index.html'" data-en="Cancel" data-es="Cancelar" data-pt="Cancelar">Cancel</button>
+          <button type="submit" class="btn-primary" id="submitBtn" data-en="Submit W-9" data-es="Enviar W-9" data-pt="Enviar W-9">Submit W-9</button>
+        </div>
+      </form>
+    </div>
+  </main>
+  <div id="footer-container"></div>
+  <script src="js/cache-buster.js?v=guest-w9" defer></script>
+  <script src="js/script.js?v=guest-w9" defer></script>
+  <script>
+    const API_URL = 'https://cls-proxy.s-garay.workers.dev';
+    const form = document.getElementById('guestForm');
+    const statusBox = document.getElementById('statusMessage');
+    const hpField = document.getElementById('hpField');
+
+    function setStatus(type, msg) {
+      statusBox.textContent = msg;
+      statusBox.className = type;
+      statusBox.style.display = 'block';
+    }
+
+    function formatSSN(value) {
+      const digits = value.replace(/\D/g, '').slice(0, 9);
+      if (digits.length >= 6) return `${digits.slice(0,3)}-${digits.slice(3,5)}-${digits.slice(5)}`;
+      if (digits.length >= 4) return `${digits.slice(0,3)}-${digits.slice(3)}`;
+      return digits;
+    }
+
+    document.getElementById('ssn').addEventListener('input', (e) => { e.target.value = formatSSN(e.target.value); });
+    document.getElementById('confirmSsn').addEventListener('input', (e) => { e.target.value = formatSSN(e.target.value); });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (hpField.value) { setStatus('success', 'Submitted.'); return; }
+
+      const legalName = document.getElementById('legalName').value.trim();
+      const businessName = document.getElementById('businessName').value.trim();
+      const taxClassification = document.getElementById('taxClassification').value;
+      const address = document.getElementById('address').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const state = document.getElementById('state').value;
+      const zip = document.getElementById('zip').value.trim();
+      const ssnRaw = document.getElementById('ssn').value.replace(/\D/g, '');
+      const confirmSsn = document.getElementById('confirmSsn').value.replace(/\D/g, '');
+      const backupWithholding = document.getElementById('backupWithholding').checked;
+      const signature = document.getElementById('signature').value.trim();
+      const contactEmail = document.getElementById('contactEmail').value.trim();
+
+      if (!legalName || !taxClassification || !address || !city || !state || !zip || !ssnRaw || !signature) {
+        setStatus('error', 'Please fill out all required fields.');
+        return;
+      }
+      if (ssnRaw.length !== 9) { setStatus('error', 'SSN must be 9 digits.'); return; }
+      if (ssnRaw !== confirmSsn) { setStatus('error', 'SSN entries do not match.'); return; }
+      if (signature.toLowerCase() !== legalName.toLowerCase()) { setStatus('error', 'Signature must match legal name.'); return; }
+      if (contactEmail && !/.+@.+\..+/.test(contactEmail)) { setStatus('error', 'Enter a valid email or leave blank.'); return; }
+
+      const deviceInfo = typeof getDeviceInfo === 'function' ? getDeviceInfo().displayString : 'Unknown';
+      const ssnFormatted = formatSSN(ssnRaw);
+      const params = new URLSearchParams({
+        action: 'submitW9Guest',
+        legalName,
+        businessName,
+        taxClassification,
+        address,
+        city,
+        state,
+        zip,
+        ssn: ssnFormatted,
+        backupWithholding,
+        signature,
+        contactEmail,
+        device: deviceInfo
+      });
+
+      try {
+        document.getElementById('submitBtn').disabled = true;
+        setStatus('success', 'Submitting...');
+        const res = await fetch(`${API_URL}?${params.toString()}`, { method: 'GET', headers: { 'Accept': 'application/json' } });
+        const data = await res.json();
+        if (data.ok) {
+          setStatus('success', data.message || 'Submitted successfully.');
+          form.reset();
+        } else {
+          setStatus('error', data.message || 'Submission failed.');
+        }
+      } catch (err) {
+        console.error('Guest W-9 error:', err);
+        setStatus('error', 'Network error. Please try again.');
+      } finally {
+        document.getElementById('submitBtn').disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

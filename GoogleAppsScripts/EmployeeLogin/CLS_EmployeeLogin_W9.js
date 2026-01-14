@@ -136,6 +136,72 @@ function submitW9Form(workerId, w9Data, device) {
 }
 
 /**
+ * Submit W-9 as a guest (no worker record)
+ * Stores PDF in Drive and emails admins; does not touch Sheets
+ * @param {Object} w9Data - W-9 form data
+ * @param {string} device - Device info for logging
+ * @returns {{ok:boolean,message:string}}
+ */
+function submitW9Guest(w9Data, device) {
+  try {
+    // Honeypot/anti-spam
+    if (w9Data.honeypot) {
+      return { ok: true, message: 'Received.' };
+    }
+
+    const validation = validateW9Data(w9Data);
+    if (!validation.valid) {
+      return { ok: false, message: validation.message };
+    }
+
+    // Simple cooldown per email to reduce spam (5 minutes)
+    const cache = CacheService.getDocumentCache();
+    const emailKey = (w9Data.contactEmail || 'guest').toLowerCase();
+    const cooldownKey = `w9guest:${emailKey}`;
+    if (cache && cache.get(cooldownKey)) {
+      return { ok: false, message: 'Please wait a few minutes before resubmitting.' };
+    }
+    if (cache) {
+      cache.put(cooldownKey, '1', 300);
+    }
+
+    const guestId = `GUEST-${new Date().getTime()}`;
+    const ssnLast4 = obfuscateSSN(w9Data.ssn);
+
+    const pdfResult = generateW9PDF(guestId, w9Data);
+    if (!pdfResult.ok) {
+      return { ok: false, message: pdfResult.message || 'Failed to generate W-9 PDF.' };
+    }
+
+    sendW9GuestNotification_(guestId, w9Data, ssnLast4, pdfResult.pdfUrl, device || 'Unknown');
+
+    // Optional: email confirmation to submitter
+    if (w9Data.contactEmail) {
+      try {
+        const subject = 'W-9 received - Carolina Lumpers Service';
+        const plainBody = `Hi ${w9Data.legalName},\n\nWe received your W-9. Our team will review it.\n\nThank you,\nCarolina Lumpers Service`;
+        const htmlBody = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h3>W-9 received</h3>
+            <p>Hi ${w9Data.legalName},</p>
+            <p>We received your W-9 submission. Our team will review it.</p>
+            <p style="font-size: 13px; color: #555;">Submission ID: ${guestId}</p>
+            <p>Thank you,<br>Carolina Lumpers Service</p>
+          </div>`;
+        sendEmailWithGmailAPI_(w9Data.contactEmail, subject, plainBody, htmlBody);
+      } catch (e) {
+        Logger.log(`⚠️ Guest confirmation email failed: ${e.message}`);
+      }
+    }
+
+    return { ok: true, message: 'Submitted. Our team will review your W-9 and follow up.' };
+  } catch (error) {
+    Logger.log(`❌ Error in submitW9Guest: ${error.message}`);
+    return { ok: false, message: 'An error occurred. Please try again.' };
+  }
+}
+
+/**
  * Get W-9 status for a worker
  * @param {string} workerId - Worker ID
  * @returns {Object} - { ok: boolean, status: string, submittedDate, approvedDate, last4, pdfUrl }
@@ -823,6 +889,42 @@ function getWorkerDisplayName_(workerId) {
 // ======================================================
 //  EMAIL NOTIFICATION FUNCTIONS
 // ======================================================
+
+/**
+ * Send notification for guest W-9 submission
+ */
+function sendW9GuestNotification_(guestId, w9Data, ssnLast4, pdfUrl, device) {
+  try {
+    const adminEmail = PROPS.getProperty("CC_EMAIL") || "info@carolinalumpers.com";
+    const subject = `🆕 Guest W-9 Submission - ${w9Data.legalName}`;
+
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
+        <div style="background:#111; color:#FFC107; padding:14px; border-radius:6px 6px 0 0;">
+          <h3 style="margin:0;">New Guest W-9 Submission</h3>
+        </div>
+        <div style="border:1px solid #eee; border-top:0; padding:20px;">
+          <p><strong>Submission ID:</strong> ${guestId}</p>
+          <p><strong>Name:</strong> ${w9Data.legalName}</p>
+          <p><strong>Business:</strong> ${w9Data.businessName || 'N/A'}</p>
+          <p><strong>Tax Classification:</strong> ${w9Data.taxClassification}</p>
+          <p><strong>Address:</strong> ${w9Data.address}, ${w9Data.city}, ${w9Data.state} ${w9Data.zip}</p>
+          <p><strong>SSN (last 4):</strong> ***-**-${ssnLast4 || 'XXXX'}</p>
+          <p><strong>Backup Withholding:</strong> ${w9Data.backupWithholding ? 'Yes' : 'No'}</p>
+          <p><strong>Device:</strong> ${device}</p>
+          <p><strong>Contact Email:</strong> ${w9Data.contactEmail || 'Not provided'}</p>
+          <p style="margin-top:16px;"><a href="${pdfUrl}" style="display:inline-block;padding:10px 16px;background:#2196F3;color:#fff;text-decoration:none;border-radius:4px;">View W-9 PDF</a></p>
+        </div>
+      </div>
+    `;
+
+    const plainBody = `New guest W-9 submission\n\nSubmission ID: ${guestId}\nName: ${w9Data.legalName}\nBusiness: ${w9Data.businessName || 'N/A'}\nTax Classification: ${w9Data.taxClassification}\nAddress: ${w9Data.address}, ${w9Data.city}, ${w9Data.state} ${w9Data.zip}\nSSN (last 4): ***-**-${ssnLast4 || 'XXXX'}\nBackup Withholding: ${w9Data.backupWithholding ? 'Yes' : 'No'}\nDevice: ${device}\nContact Email: ${w9Data.contactEmail || 'Not provided'}\nPDF: ${pdfUrl}`;
+
+    sendEmailWithGmailAPI_(adminEmail, subject, plainBody, htmlBody);
+  } catch (e) {
+    Logger.log(`⚠️ Failed to send guest W-9 notification: ${e.message}`);
+  }
+}
 
 /**
  * Send W-9 submission notification to admins

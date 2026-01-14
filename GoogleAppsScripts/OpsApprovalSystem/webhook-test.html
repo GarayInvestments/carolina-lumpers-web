@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpsApprovalSystem - Webhook Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        button {
+            background: #FFBF00;
+            color: #1a1a1a;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #e6a800;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .response {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .response.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .response.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .response h3 {
+            margin-top: 0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+            margin-top: 15px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 OpsApprovalSystem Webhook Test</h1>
+
+        <div class="form-group">
+            <label for="webhookUrl">Webhook URL:</label>
+            <input type="text" id="webhookUrl"
+                value="https://script.google.com/macros/s/AKfycbwMIanVPw1PXprSmXAV46YC87jiupSt1U9CIN2hkiEm2umlMljvRhwA__SmBgAkhoEspA/exec"
+                readonly>
+        </div>
+
+        <div class="form-group">
+            <label for="approvalId">Approval ID:</label>
+            <input type="text" id="approvalId" value="APR-TEST-20260112-001">
+        </div>
+
+        <div class="form-group">
+            <label for="approvalDate">Approval Date:</label>
+            <input type="text" id="approvalDate" value="2026-01-12">
+        </div>
+
+        <div class="form-group">
+            <label for="operationsManager">Operations Manager Email:</label>
+            <input type="email" id="operationsManager" value="s.garay@carolinalumpers.com">
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status:</label>
+            <input type="text" id="status" value="Pending">
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Notes:</label>
+            <textarea id="notes">Test webhook from browser</textarea>
+        </div>
+
+        <button onclick="sendWebhook()">Send Webhook Test</button>
+
+        <div class="loading" id="loading">
+            ⏳ Sending webhook... please wait...
+        </div>
+
+        <div class="response" id="response"></div>
+    </div>
+
+    <script>
+        async function sendWebhook() {
+            const webhookUrl = document.getElementById('webhookUrl').value;
+            const loading = document.getElementById('loading');
+            const response = document.getElementById('response');
+
+            const payload = {
+                ApprovalID: document.getElementById('approvalId').value,
+                ApprovalDate: document.getElementById('approvalDate').value,
+                OperationsManager: document.getElementById('operationsManager').value,
+                Status: document.getElementById('status').value,
+                Notes: document.getElementById('notes').value
+            };
+
+            loading.style.display = 'block';
+            response.style.display = 'none';
+
+            try {
+                const result = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload),
+                    mode: 'no-cors'
+                });
+
+                const text = await result.text();
+                loading.style.display = 'none';
+
+                // Try to parse as JSON
+                let data = {};
+                try {
+                    data = JSON.parse(text);
+
+                    if (data.status && data.status.includes('✅')) {
+                        response.className = 'response success';
+                        response.innerHTML = `
+                            <h3>✅ Success!</h3>
+                            <p><strong>Status:</strong> ${data.status}</p>
+                            <p><strong>Approval ID:</strong> ${data.approvalId}</p>
+                            <p><strong>Task Count:</strong> ${data.taskCount}</p>
+                            <p><strong>Email Sent:</strong> ${data.emailSent ? 'Yes' : 'No'}</p>
+                            <p style="margin-top: 15px; font-size: 12px; color: #666;">
+                                Check your email for the approval message!<br>
+                                Check the Log sheet in Google Sheets for details.
+                            </p>
+                        `;
+                    } else {
+                        response.className = 'response error';
+                        response.innerHTML = `
+                            <h3>❌ Error</h3>
+                            <p><strong>Status:</strong> ${data.status || 'Unknown'}</p>
+                            <p><strong>Message:</strong> ${data.message || 'No message'}</p>
+                            <pre style="background: #fff; padding: 10px; border-radius: 3px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                        `;
+                    }
+                } catch (parseErr) {
+                    // If JSON parsing fails, it might be successful (CORS with no-cors mode returns opaque response)
+                    response.className = 'response success';
+                    response.innerHTML = `
+                        <h3>✅ Webhook Sent</h3>
+                        <p>Response received (encrypted by browser CORS policy)</p>
+                        <p style="margin-top: 15px; font-size: 12px; color: #666;">
+                            <strong>Check these to verify:</strong><br>
+                            1. Your email inbox for the approval message<br>
+                            2. Google Sheets → CLS_Hub_Backend → Log sheet for webhook entry<br>
+                            3. The DailyOpsApprovals record for the update
+                        </p>
+                    `;
+                }
+
+            } catch (err) {
+                loading.style.display = 'none';
+                response.className = 'response error';
+                response.innerHTML = `
+                    <h3>❌ Network Error</h3>
+                    <p>${err.message}</p>
+                    <p style="font-size: 12px; color: #666;">
+                        This is usually a CORS issue. The webhook was likely sent successfully despite this error.
+                        Check your email and the Log sheet to verify.
+                    </p>
+                `;
+            }
+        }
+
+        // Allow Enter key to send
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                sendWebhook();
+            }
+        });
+    </script>
+</body>
+
+</html>

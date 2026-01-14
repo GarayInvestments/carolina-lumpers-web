@@ -253,6 +253,8 @@ function getCurrentTimestampET_() {
 
 function getCurrentWeekEndingSaturdayString_() {
   const now = new Date();
+  // Subtract 7 days to get last week
+  now.setDate(now.getDate() - 7);
   const weekEnd = getWeekEndingSaturday_(now);
   return formatDateYYYYMMDD(weekEnd);
 }
