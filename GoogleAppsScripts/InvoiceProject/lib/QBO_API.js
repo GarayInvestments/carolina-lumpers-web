@@ -11,8 +11,27 @@
 function sendInvoiceToQBO(invoiceNumber) {
     // Fetch invoice data, client data, and line items
     const invoiceData = fetchInvoice(invoiceNumber);
+    if (!invoiceData) {
+        logEvent("QBO Sync", invoiceNumber, "Error", "Invoice not found in sheets.");
+        return { success: false, error: 'Invoice not found' };
+    }
+
     const clientData = fetchClientData(invoiceData.customer);
+    if (!clientData) {
+        logEvent("QBO Sync", invoiceNumber, "Error", `Client not found for customer: ${invoiceData.customer}. Verify client exists in Clients sheet with correct Client ID.`);
+        return { success: false, error: 'Client not found' };
+    }
+
+    if (!clientData.qboId) {
+        logEvent("QBO Sync", invoiceNumber, "Error", `Missing QBO ID for customer: ${invoiceData.customer}. Update Clients sheet with QBO customer ID.`);
+        return { success: false, error: 'Missing QBO ID for customer' };
+    }
+
     const lineItems = fetchInvoiceLineItems(invoiceNumber);
+    if (!lineItems || lineItems.length === 0) {
+        logEvent("QBO Sync", invoiceNumber, "Error", "No line items found for invoice. Cannot create invoice without line items.");
+        return { success: false, error: 'No line items found' };
+    }
 
     const payload = buildInvoicePayload(invoiceData, clientData, lineItems);
     const url = CONFIG.QBO_BASE_URL + CONFIG.QBO_REALM_ID + "/invoice?minorversion=65";
@@ -71,21 +90,38 @@ function sendInvoiceToQBO(invoiceNumber) {
             accessToken = refreshAccessToken();
             if (!accessToken) {
                 logEvent("QBO Sync", invoiceNumber, "Error", "Could not retrieve new access token.");
-                return false;
+                return { success: false, error: 'Token refresh failed' };
             }
-        } else if (statusCode === 400 && jsonResponse && jsonResponse.Fault && jsonResponse.Fault.Error) {
-            const error = jsonResponse.Fault.Error[0];
-            if (error.Message === "Duplicate Document Number Error") {
-                logEvent("QBO Sync", invoiceNumber, "Error", `Duplicate Document Number Error: ${error.Detail}`);
-                // Re-query QBO to get the existing invoice details
-                existingInvoice = getInvoiceFromQBO(invoiceNumber, accessToken);
-                if (existingInvoice) {
-                    payload.Id = existingInvoice.Id;
-                    payload.SyncToken = existingInvoice.SyncToken;
-                    logEvent("QBO Sync", invoiceNumber, "Info", "Re-query successful. Preparing to update existing invoice.");
-                    continue; // Retry with the updated payload
+        } else if (statusCode === 400) {
+            // Log the full error response for debugging
+            if (jsonResponse && jsonResponse.Fault && jsonResponse.Fault.Error) {
+                const error = jsonResponse.Fault.Error[0];
+                const errorMsg = `QBO Error ${error.code}: ${error.Message} - ${error.Detail}`;
+                logEvent("QBO Sync", invoiceNumber, "Error", errorMsg);
+                
+                if (error.Message === "Duplicate Document Number Error") {
+                    // Re-query QBO to get the existing invoice details
+                    existingInvoice = getInvoiceFromQBO(invoiceNumber, accessToken);
+                    if (existingInvoice) {
+                        payload.Id = existingInvoice.Id;
+                        payload.SyncToken = existingInvoice.SyncToken;
+                        logEvent("QBO Sync", invoiceNumber, "Info", "Re-query successful. Preparing to update existing invoice.");
+                        continue; // Retry with the updated payload
+                    }
+                } else {
+                    // For other 400 errors, log and exit after all retries
+                    break;
                 }
+            } else {
+                logEvent("QBO Sync", invoiceNumber, "Error", `HTTP 400 Error: ${content}`);
+                break;
             }
+        } else if (statusCode >= 500) {
+            logEvent("QBO Sync", invoiceNumber, "Error", `QBO Server Error (HTTP ${statusCode}): ${content}`);
+            break;
+        } else if (statusCode !== 200) {
+            logEvent("QBO Sync", invoiceNumber, "Error", `Unexpected HTTP ${statusCode}: ${content}`);
+            break;
         } else {
             break;
         }
@@ -171,19 +207,29 @@ function buildInvoicePayload(invoiceData, clientData, lineItems) {
         };
     });
 
-    return {
+    const payload = {
         DocNumber: invoiceData.invoiceNumber,
         TxnDate: txnDate,
         DueDate: dueDate,
         CustomerRef: { value: clientData.qboId },
-        BillEmail: { Address: clientData.payablesEmail },
-        BillEmailCc: { Address: clientData.payablesEmailCc },
-        BillEmailBcc: { Address: clientData.payablesEmailBcc },
         PrivateNote: `Invoice # ${invoiceData.invoiceNumber}`,
         ShipAddr: {},
         SalesTermRef: {},
         Line: linePayload
     };
+
+    // Only add email fields if they exist
+    if (clientData.payablesEmail) {
+        payload.BillEmail = { Address: clientData.payablesEmail };
+    }
+    if (clientData.payablesEmailCc) {
+        payload.BillEmailCc = { Address: clientData.payablesEmailCc };
+    }
+    if (clientData.payablesEmailBcc) {
+        payload.BillEmailBcc = { Address: clientData.payablesEmailBcc };
+    }
+
+    return payload;
 }
 
 /**
