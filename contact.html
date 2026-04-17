@@ -402,13 +402,29 @@
         const API_BASE = "https://script.google.com/a/macros/carolinalumpers.com/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec";
         const res = await fetch(API_BASE, { method:'POST', body: fd });
         if (res.ok) {
+          if (typeof gtag === 'function') {
+            gtag('event', 'generate_lead', {
+              form_name: 'quote_request',
+              page_location: window.location.href,
+              page_path: window.location.pathname,
+              method: 'web_form'
+            });
+          }
           successMsg.classList.add('show');
           submitBtn.disabled = true;
           nextBtn.disabled = true;
           backBtn.disabled = true;
           localStorage.removeItem('CLS_QUOTE_DRAFT');
         } else throw new Error();
-      } catch {
+      } catch (err) {
+        if (typeof gtag === 'function') {
+          gtag('event', 'submit_error', {
+            form_name: 'quote_request',
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            error_message: err && err.message ? err.message : 'Submission failed'
+          });
+        }
         successMsg.textContent = '⚠️ Error submitting request. Please try again.';
         successMsg.classList.add('show');
       }

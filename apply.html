@@ -560,6 +560,15 @@
         if (!res.ok || !result.success) {
           throw new Error(result.message || 'Submission failed');
         }
+
+        if (typeof gtag === 'function') {
+          gtag('event', 'generate_lead', {
+            form_name: 'job_application',
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            method: 'web_form'
+          });
+        }
         
         // Show success message
         successMsg.innerHTML = '✅ <span data-en="Thanks! Your application has been submitted." data-es="¡Gracias! Su solicitud ha sido enviada." data-pt="Obrigado! Sua candidatura foi enviada.">Thanks! Your application has been submitted.</span>';
@@ -567,6 +576,14 @@
         backBtn.disabled = true;
 
       } catch (err) {
+        if (typeof gtag === 'function') {
+          gtag('event', 'submit_error', {
+            form_name: 'job_application',
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            error_message: err && err.message ? err.message : 'Submission failed'
+          });
+        }
         successMsg.innerHTML = '⚠️ <span data-en="Error submitting application. Please try again." data-es="Error al enviar la solicitud. Inténtelo de nuevo." data-pt="Erro ao enviar candidatura. Tente novamente.">Error submitting application. Please try again.</span>';
         submitBtn.disabled = false;
       }
