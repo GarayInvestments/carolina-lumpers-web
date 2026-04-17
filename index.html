@@ -17,6 +17,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Carolina Lumper Service (CLS)</title>
   <link rel="canonical" href="https://carolinalumpers.com/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="image" href="assets/CLS-Cover-01web.webp" type="image/webp">
   <link rel="stylesheet" href="css/style.css?v=2024-navigation-responsive-fix">
   <link rel="icon" type="image/png" href="assets/CLS-favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
@@ -93,7 +96,8 @@
 
       <!-- Hero Image and Blur Overlay -->
       <div class="hero-image">
-        <img src="assets/CLS-Cover-01web.webp" alt="Hero Banner" class="banner-image">
+        <img src="assets/CLS-Cover-01web.webp" alt="Hero Banner" class="banner-image" loading="eager" fetchpriority="high"
+          decoding="async">
         <div class="blur-overlay"></div> <!-- Gradient overlay for the image -->
       </div>
 
