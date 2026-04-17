@@ -592,6 +592,21 @@ body[data-page="apply"] .form-step {
   color: var(--text-secondary);
 }
 
+/* Contact page readability: ensure chip labels and checkboxes have strong contrast */
+body[data-page="contact"] .chip {
+  color: #1a1a1a;
+}
+
+body[data-page="contact"] .chip input[type="checkbox"],
+body[data-page="contact"] .chip input[type="radio"] {
+  accent-color: #1a1a1a;
+}
+
+body[data-page="contact"] .chip:hover,
+body[data-page="contact"] .chip:has(input:checked) {
+  color: #1a1a1a;
+}
+
 /* [COMPONENT: Form Summary] */
 .summary {
   background: var(--color-primary-light);
