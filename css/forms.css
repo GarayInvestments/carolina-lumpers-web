@@ -607,6 +607,48 @@ body[data-page="contact"] .chip:has(input:checked) {
   color: #1a1a1a;
 }
 
+/* Contact page: basic vs detailed quote mode toggle */
+body[data-page="contact"] .quote-mode-toggle {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin: var(--space-md) auto var(--space-lg);
+  max-width: 1000px;
+}
+
+body[data-page="contact"] .mode-btn {
+  padding: var(--space-sm) var(--space-lg);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+body[data-page="contact"] .mode-btn:hover {
+  background: rgba(255, 191, 0, 0.12);
+}
+
+body[data-page="contact"] .mode-btn.active {
+  background: var(--color-primary);
+  color: #1a1a1a;
+  box-shadow: 0 0 0 3px rgba(255, 191, 0, 0.25);
+}
+
+body[data-page="contact"] .quote-mode-panel {
+  display: none;
+}
+
+body[data-page="contact"] .quote-mode-panel.active {
+  display: block;
+}
+
+body[data-page="contact"] .basic-quote-form {
+  max-width: 1000px;
+}
+
 /* [COMPONENT: Form Summary] */
 .summary {
   background: var(--color-primary-light);

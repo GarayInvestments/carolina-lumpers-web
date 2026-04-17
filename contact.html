@@ -59,6 +59,92 @@
       <h2>Request a Quote</h2>
       <p>Fill out the quick form below, and our team will follow up with scheduling and pricing details.</p>
 
+      <div class="quote-mode-toggle" role="tablist" aria-label="Quote request mode">
+        <button type="button" id="modeBasic" class="mode-btn" role="tab" aria-selected="false">Basic Quote</button>
+        <button type="button" id="modeDetailed" class="mode-btn active" role="tab" aria-selected="true">Detailed Quote</button>
+      </div>
+
+      <div id="basicQuotePanel" class="quote-mode-panel" hidden>
+        <form id="basicQuoteForm" class="basic-quote-form" novalidate>
+          <div class="grid grid-2">
+            <div class="field">
+              <label class="required">Contact Name</label>
+              <input name="contactName" type="text" autocomplete="name" required>
+              <div class="error">Please enter your name.</div>
+            </div>
+            <div class="field">
+              <label>Company Name (optional)</label>
+              <input name="companyName" type="text" autocomplete="organization">
+            </div>
+            <div class="field">
+              <label class="required">Phone Number</label>
+              <input name="phone" type="tel" autocomplete="tel" required>
+              <div class="error">Please enter a phone number.</div>
+            </div>
+            <div class="field">
+              <label class="required">Email Address</label>
+              <input name="email" type="email" autocomplete="email" required>
+              <div class="error">Please enter a valid email.</div>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:12px;">
+            <label>Type of Service Needed (check all that apply)</label>
+            <div class="checklist">
+              <label class="chip"><input type="checkbox" name="services" value="Lumper">Lumper</label>
+              <label class="chip"><input type="checkbox" name="services" value="Unloading">Unloading</label>
+              <label class="chip"><input type="checkbox" name="services" value="Loading">Loading</label>
+              <label class="chip"><input type="checkbox" name="services" value="Pallet Breakdown">Pallet Breakdown</label>
+              <label class="chip"><input type="checkbox" name="services" value="Repacking">Repacking</label>
+              <label class="chip"><input type="checkbox" name="services" value="Cross-Docking">Cross-Docking</label>
+              <label class="chip"><input type="checkbox" name="services" value="Sorting">Sorting</label>
+              <label class="chip"><input type="checkbox" name="services" value="Other">Other</label>
+            </div>
+          </div>
+
+          <div class="grid grid-2" style="margin-top:12px;">
+            <div class="field">
+              <label class="required">Facility Name</label>
+              <input name="facility" type="text" required>
+              <div class="error">Facility name is required.</div>
+            </div>
+            <div class="field">
+              <label class="required">Facility Address</label>
+              <input name="address" type="text" required placeholder="Street, City, State, ZIP">
+              <div class="error">Address is required.</div>
+            </div>
+            <div class="field">
+              <label>Expected Start Date</label>
+              <input name="startDate" type="date">
+            </div>
+            <div class="field">
+              <label>Preferred Contact Method</label>
+              <select name="preferredContact">
+                <option value="">Select…</option>
+                <option>Phone</option>
+                <option>Email</option>
+                <option>Text</option>
+              </select>
+            </div>
+            <div class="field" style="grid-column: 1 / -1;">
+              <label>Notes</label>
+              <textarea name="notes" placeholder="Share any load details, schedule constraints, or special requirements."></textarea>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <div class="left"></div>
+            <div class="right">
+              <button type="submit" id="basicSubmitBtn" class="btn btn-primary">Submit Basic Quote</button>
+            </div>
+          </div>
+        </form>
+
+        <div id="basicSuccessMsg" class="success" style="display:none;">✅ Thanks! Your basic quote request has been submitted.</div>
+      </div>
+
+      <div id="detailedQuotePanel" class="quote-mode-panel active">
+
       <div class="progress" aria-live="polite">
         <div class="progress-top">
           <strong id="stepLabel">Step 1 of 7</strong>
@@ -293,6 +379,7 @@
       
       <!-- Success Message -->
       <div id="successMsg" class="success" style="display:none;">✅ Thanks! Your request has been submitted.</div>
+      </div>
     </section>
   </main>
 
@@ -308,6 +395,105 @@
   <!-- Form Logic -->
   <script>
   (function(){
+    const API_BASE = "https://script.google.com/a/macros/carolinalumpers.com/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec";
+    const modeBasicBtn = document.getElementById('modeBasic');
+    const modeDetailedBtn = document.getElementById('modeDetailed');
+    const basicPanel = document.getElementById('basicQuotePanel');
+    const detailedPanel = document.getElementById('detailedQuotePanel');
+
+    function setQuoteMode(mode){
+      const isBasic = mode === 'basic';
+      basicPanel.hidden = !isBasic;
+      detailedPanel.hidden = isBasic;
+      basicPanel.classList.toggle('active', isBasic);
+      detailedPanel.classList.toggle('active', !isBasic);
+      modeBasicBtn.classList.toggle('active', isBasic);
+      modeDetailedBtn.classList.toggle('active', !isBasic);
+      modeBasicBtn.setAttribute('aria-selected', isBasic ? 'true' : 'false');
+      modeDetailedBtn.setAttribute('aria-selected', isBasic ? 'false' : 'true');
+    }
+
+    modeBasicBtn.addEventListener('click', ()=> setQuoteMode('basic'));
+    modeDetailedBtn.addEventListener('click', ()=> setQuoteMode('detailed'));
+    setQuoteMode('detailed');
+
+    const basicForm = document.getElementById('basicQuoteForm');
+    const basicSuccessMsg = document.getElementById('basicSuccessMsg');
+    const basicSubmitBtn = document.getElementById('basicSubmitBtn');
+
+    function validateEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+    function markInvalid(field, invalid){
+      const parent = field && field.parentElement;
+      if (!parent || !parent.classList.contains('field')) return;
+      parent.classList.toggle('invalid', invalid);
+    }
+
+    function validateBasicForm(){
+      const requiredText = [
+        basicForm.querySelector('input[name="contactName"]'),
+        basicForm.querySelector('input[name="phone"]'),
+        basicForm.querySelector('input[name="facility"]'),
+        basicForm.querySelector('input[name="address"]')
+      ];
+      let ok = true;
+
+      requiredText.forEach((f)=>{
+        const invalid = !f.value.trim();
+        markInvalid(f, invalid);
+        if (invalid) ok = false;
+      });
+
+      const email = basicForm.querySelector('input[name="email"]');
+      const emailInvalid = !validateEmail(email.value);
+      markInvalid(email, emailInvalid);
+      if (emailInvalid) ok = false;
+
+      return ok;
+    }
+
+    basicForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      basicSuccessMsg.style.display = 'none';
+      if (!validateBasicForm()) return;
+
+      const fd = new FormData(basicForm);
+      const services = Array.from(basicForm.querySelectorAll('input[name="services"]:checked')).map(i=>i.value);
+      if (services.length) fd.set('services', services.join(', '));
+      fd.append('startedAt', Date.now());
+      fd.append('formType', 'quote-request-basic');
+
+      try {
+        const res = await fetch(API_BASE, { method:'POST', body: fd });
+        if (!res.ok) throw new Error('Submission failed');
+
+        if (typeof gtag === 'function') {
+          gtag('event', 'generate_lead', {
+            form_name: 'quote_request_basic',
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            method: 'web_form'
+          });
+        }
+
+        basicSuccessMsg.textContent = '✅ Thanks! Your basic quote request has been submitted.';
+        basicSuccessMsg.style.display = 'block';
+        basicSubmitBtn.disabled = true;
+      } catch (err) {
+        if (typeof gtag === 'function') {
+          gtag('event', 'submit_error', {
+            form_name: 'quote_request_basic',
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            error_message: err && err.message ? err.message : 'Submission failed'
+          });
+        }
+
+        basicSuccessMsg.textContent = '⚠️ Error submitting basic quote request. Please try again.';
+        basicSuccessMsg.style.display = 'block';
+      }
+    });
+
     const form = document.getElementById('quoteForm');
     const steps = Array.from(form.querySelectorAll('.form-step'));
     const stepLabel = document.getElementById('stepLabel');
@@ -361,7 +547,6 @@
     function next(){ go(current+1); }
     function back(){ go(current-1,true); }
 
-    function validateEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
     function validateStep(idx){
       const stepEl = steps[idx];
       const fields = stepEl.querySelectorAll('.field');
@@ -396,10 +581,9 @@
 
       const { fd } = getAllValues();
       fd.append('startedAt', Date.now());
-      fd.append('formType', 'quote-request');
+      fd.append('formType', 'quote-request-detailed');
 
       try {
-        const API_BASE = "https://script.google.com/a/macros/carolinalumpers.com/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec";
         const res = await fetch(API_BASE, { method:'POST', body: fd });
         if (res.ok) {
           if (typeof gtag === 'function') {
