@@ -3,6 +3,194 @@
  * Version: 1.0
  */
 
+// Cache for Service ID -> Rate Type lookups from Services sheet
+const SERVICE_RATE_TYPE_CACHE = { loaded: false, map: {} };
+
+/**
+ * Load Services sheet into cache keyed by Service ID
+ * @return {Object} - Map of serviceId -> rateType (lowercase)
+ */
+function loadServiceRateTypes() {
+  if (SERVICE_RATE_TYPE_CACHE.loaded) return SERVICE_RATE_TYPE_CACHE.map;
+
+  const map = {};
+  try {
+    const sheet = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID).getSheetByName(
+      CONFIG.SHEET_NAMES.SERVICES
+    );
+    if (!sheet) {
+      Logger.log("Services sheet not found for rate type lookup");
+      return map;
+    }
+
+    const values = sheet.getDataRange().getValues();
+    const headers = values.shift();
+    const serviceIdIdx = headers.indexOf(CONFIG.COLUMNS.SERVICES.SERVICE_ID);
+    const rateTypeIdx = headers.indexOf(CONFIG.COLUMNS.SERVICES.RATE_TYPE);
+
+    if (serviceIdIdx === -1 || rateTypeIdx === -1) {
+      Logger.log("Services sheet missing Service ID or Rate Type columns");
+      return map;
+    }
+
+    values.forEach((row) => {
+      const serviceId = row[serviceIdIdx];
+      const rateType = row[rateTypeIdx];
+      if (serviceId) {
+        map[String(serviceId).trim()] = String(rateType || "")
+          .trim()
+          .toLowerCase();
+      }
+    });
+
+    SERVICE_RATE_TYPE_CACHE.loaded = true;
+    SERVICE_RATE_TYPE_CACHE.map = map;
+  } catch (err) {
+    Logger.log(`loadServiceRateTypes error: ${err.message}`);
+  }
+
+  return map;
+}
+
+/**
+ * Get rate type for a given service ID from cache
+ * @param {string} serviceId
+ * @return {string} - rate type (lowercase) or empty string
+ */
+function getServiceRateType(serviceId) {
+  if (!serviceId) return "";
+  const map = loadServiceRateTypes();
+  return map[String(serviceId).trim()] || "";
+}
+
+/**
+ * Determine if a task is hourly/non-container based on Services rate type
+ * Falls back to task-level rate type column and finally empty-container heuristic
+ * @param {Object} task - Task object from Tasks table
+ * @return {boolean} - True if hourly task
+ */
+function isHourlyTask(task) {
+  // 1) Preferred: Services sheet lookup by Service ID
+  const serviceId = task[CONFIG.COLUMNS.TASKS.SERVICE_ID];
+  const serviceRateType = getServiceRateType(serviceId);
+  if (serviceRateType.includes("hourly")) return true;
+  if (serviceRateType.includes("fixed")) return false;
+
+  // 2) Fallback: rate type stored directly on task (with/without space after colon)
+  const rateTypeKeys = [
+    CONFIG.COLUMNS.TASKS.SERVICE_RATE_TYPE,
+    "Services: Rate Type",
+    "Rate Type",
+  ];
+
+  let rateType = "";
+  for (let i = 0; i < rateTypeKeys.length; i++) {
+    const val = task[rateTypeKeys[i]];
+    if (val !== undefined && val !== null && String(val).trim() !== "") {
+      rateType = String(val).trim().toLowerCase();
+      break;
+    }
+  }
+
+  if (rateType.includes("hourly")) return true;
+  if (rateType.includes("fixed")) return false;
+
+  // 3) Legacy heuristic when rate type is absent
+  const containerValue = task[CONFIG.COLUMNS.TASKS.CONTAINER_NUMBER];
+  return !containerValue || String(containerValue).trim() === "";
+}
+
+/**
+ * CSS Style Constants for Email Templates
+ * Centralized styling for consistency and maintainability
+ */
+const EMAIL_STYLES = {
+  tableCell: "padding: 8px;",
+  tableCellCenter: "padding: 8px; text-align: center;",
+  tableCellRight: "padding: 8px; text-align: right;",
+  tableRow: "border-bottom: 1px solid #ddd;",
+  tableHeader: "padding: 10px; text-align: left;",
+  tableHeaderCenter: "padding: 10px; text-align: center;",
+  tableHeaderRight: "padding: 10px; text-align: right;",
+  sectionTitle:
+    "color: #003366; border-bottom: 2px solid #003366; padding-bottom: 10px;",
+  table:
+    "width: 100%; border-collapse: collapse; background-color: white; margin-bottom: 20px;",
+  tableHeaderRow: "background-color: #f0f0f0; border-bottom: 2px solid #ddd;",
+};
+
+/**
+ * Build table rows for a list of tasks
+ * @param {Array} tasks - Task array to render
+ * @param {boolean} appendWorkerNames - Whether to append worker names in the description cell
+ * @return {string} - HTML table rows
+ */
+function buildTaskTableRows(tasks, appendWorkerNames) {
+  const workerLookup = getWorkerLookup();
+  return tasks
+    .map((task, idx) => {
+      const containerOrProject =
+        task[CONFIG.COLUMNS.TASKS.CONTAINER_NUMBER] || "N/A";
+      const startTime = formatTimeEST(task[CONFIG.COLUMNS.TASKS.START_TIME]);
+      const endTime = formatTimeEST(task[CONFIG.COLUMNS.TASKS.END_TIME]);
+      const duration = task[CONFIG.COLUMNS.TASKS.DURATION] || "0";
+      const workerListRaw = task[CONFIG.COLUMNS.TASKS.WORKER] || "";
+      const workerCount = countWorkers(workerListRaw);
+
+      // Append resolved worker names to the description cell only when requested
+      const workerNames = appendWorkerNames
+        ? resolveWorkerNames(workerListRaw, workerLookup)
+        : "";
+      const descriptionWithNames = appendWorkerNames && workerNames
+        ? `${containerOrProject} - ${workerNames}`
+        : containerOrProject;
+
+      return `
+      <tr style="${EMAIL_STYLES.tableRow}">
+        <td style="${EMAIL_STYLES.tableCellCenter}">${idx + 1}</td>
+        <td style="${EMAIL_STYLES.tableCell}">${descriptionWithNames}</td>
+        <td style="${EMAIL_STYLES.tableCell}">${startTime}</td>
+        <td style="${EMAIL_STYLES.tableCell}">${endTime}</td>
+        <td style="${EMAIL_STYLES.tableCellRight}">${parseFloat(
+        duration
+      ).toFixed(2)}</td>
+        <td style="${EMAIL_STYLES.tableCellCenter}">${workerCount}</td>
+      </tr>
+    `;
+    })
+    .join("");
+}
+
+/**
+ * Build task table HTML with title and header
+ * @param {string} title - Table section title
+ * @param {string} headerLabel - Label for container/project column
+ * @param {string} tableRows - Pre-built HTML rows
+ * @return {string} - Complete table HTML or empty string if no rows
+ */
+function buildTaskTable(title, headerLabel, tableRows) {
+  if (!tableRows) return "";
+
+  return `
+        <h2 style="${EMAIL_STYLES.sectionTitle}">${title}</h2>
+        <table style="${EMAIL_STYLES.table}">
+          <thead>
+            <tr style="${EMAIL_STYLES.tableHeaderRow}">
+              <th style="${EMAIL_STYLES.tableHeader}">#</th>
+              <th style="${EMAIL_STYLES.tableHeader}">${headerLabel}</th>
+              <th style="${EMAIL_STYLES.tableHeader}">Start</th>
+              <th style="${EMAIL_STYLES.tableHeader}">End</th>
+              <th style="${EMAIL_STYLES.tableHeaderRight}">Hours</th>
+              <th style="${EMAIL_STYLES.tableHeaderCenter}">Workers</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+  `;
+}
+
 /**
  * Format time value to HH:MM AM/PM format
  */
@@ -37,109 +225,6 @@ function formatTimeEST(timeInput) {
 }
 
 /**
- * Verify task data before building email
- * Checks if CONFIG column names match actual task data structure
- * Call: verifyTaskData() or verifyTaskData("APR-20260111-001")
- */
-function verifyTaskData(approvalId = "APR-20260111-001") {
-  Logger.log(
-    "\n╔════════════════════════════════════════════════════════════╗"
-  );
-  Logger.log("║           VERIFY TASK DATA STRUCTURE                       ║");
-  Logger.log("╚════════════════════════════════════════════════════════════╝");
-
-  Logger.log(`\n📋 Fetching tasks for: ${approvalId}`);
-  const tasks = fetchLinkedTasks(approvalId);
-
-  if (!tasks || tasks.length === 0) {
-    Logger.log("\n❌ NO TASKS FOUND - Check approval ID\n");
-    return false;
-  }
-
-  Logger.log(`✅ Found ${tasks.length} tasks\n`);
-
-  const task = tasks[0]; // Check first task
-  Logger.log("═ FIRST TASK DATA STRUCTURE ═\n");
-
-  // Check key columns
-  const columnsToCheck = [
-    { configKey: "CONTAINER_NUMBER", label: "Container" },
-    { configKey: "START_TIME", label: "Start Time" },
-    { configKey: "END_TIME", label: "End Time" },
-    { configKey: "DURATION", label: "Duration" },
-    { configKey: "WORKER", label: "Worker" },
-  ];
-
-  let allGood = true;
-  columnsToCheck.forEach((col) => {
-    const configName = CONFIG.COLUMNS.TASKS[col.configKey];
-    const value = task[configName];
-    const exists = value !== undefined && value !== null;
-    const status = exists ? "✅" : "❌";
-
-    Logger.log(`${status} ${col.label}`);
-    Logger.log(`   Config key: ${col.configKey}`);
-    Logger.log(`   Config name: "${configName}"`);
-    Logger.log(`   Value: ${value || "(empty)"}`);
-    Logger.log(`   Type: ${typeof value}`);
-    Logger.log("");
-
-    if (!exists) {
-      allGood = false;
-    }
-  });
-
-  // Show ALL columns in the task object
-  Logger.log("═ ALL COLUMNS IN TASK (Raw Data) ═\n");
-  Object.keys(task)
-    .sort()
-    .forEach((key) => {
-      Logger.log(`  "${key}": ${task[key]}`);
-    });
-
-  Logger.log(`\n${"═".repeat(60)}`);
-  Logger.log(
-    allGood
-      ? "✅ DATA STRUCTURE OK - All columns found"
-      : "❌ MISSING DATA - Check column names in Config"
-  );
-  Logger.log(`${"═".repeat(60)}\n`);
-
-  return allGood;
-}
-
-/**
- * Test worker extraction logic
- */
-function testWorkerExtraction(approvalId = "APR-20260111-001") {
-  Logger.log(
-    "\n╔════════════════════════════════════════════════════════════╗"
-  );
-  Logger.log("║           TEST WORKER EXTRACTION LOGIC                     ║");
-  Logger.log("╚════════════════════════════════════════════════════════════╝");
-
-  const tasks = fetchLinkedTasks(approvalId);
-  if (tasks.length === 0) {
-    Logger.log("\n❌ No tasks found");
-    return;
-  }
-
-  Logger.log(`\nTesting worker extraction on ${tasks.length} tasks:\n`);
-
-  tasks.forEach((task, idx) => {
-    const workerRaw = task[CONFIG.COLUMNS.TASKS.WORKER];
-    const worker =
-      typeof workerRaw === "string" ? workerRaw.split(",")[0].trim() : "N/A";
-
-    Logger.log(`Task ${idx + 1}:`);
-    Logger.log(`  Raw: ${workerRaw}`);
-    Logger.log(`  Type: ${typeof workerRaw}`);
-    Logger.log(`  Extracted: ${worker}`);
-    Logger.log("");
-  });
-}
-
-/**
  * Format date to clean EST format
  */
 function formatDateEST(dateInput) {
@@ -165,13 +250,7 @@ function formatDateEST(dateInput) {
     }
 
     // Format as "Mon Jan 12, 2026" in EST
-    const formatted = Utilities.formatDate(
-      date,
-      "America/New_York",
-      "EEE MMM dd, yyyy"
-    );
-    Logger.log(`formatDateEST: ${dateInput} → ${formatted}`);
-    return formatted;
+    return Utilities.formatDate(date, "America/New_York", "EEE MMM dd, yyyy");
   } catch (err) {
     Logger.log(`formatDateEST error: ${err.message} for input: ${dateInput}`);
     return String(dateInput);
@@ -189,32 +268,30 @@ function buildApprovalEmail(approvalId, approvalDate, tasks, approverEmail) {
     0
   );
 
+  // Split tasks into container and hourly groups
+  const containerTasks = tasks.filter((task) => !isHourlyTask(task));
+  const hourlyTasks = tasks.filter((task) => isHourlyTask(task));
+
   // Fetch and encode logo from Google Drive (same as PdfReportGenerator)
   const imageBlob = DriveApp.getFileById(CONFIG.EMAIL.LOGO_IMAGE_ID).getBlob();
   const imageBase64 = Utilities.base64Encode(imageBlob.getBytes());
   const imageDataUri = `data:${imageBlob.getContentType()};base64,${imageBase64}`;
 
-  let taskTableRows = "";
-  tasks.forEach((task, idx) => {
-    const container = task[CONFIG.COLUMNS.TASKS.CONTAINER_NUMBER] || "N/A";
-    const startTime = formatTimeEST(task[CONFIG.COLUMNS.TASKS.START_TIME]);
-    const endTime = formatTimeEST(task[CONFIG.COLUMNS.TASKS.END_TIME]);
-    const duration = task[CONFIG.COLUMNS.TASKS.DURATION] || "0";
-    const workerCount = countWorkers(task[CONFIG.COLUMNS.TASKS.WORKER] || "");
+  // Build table rows using helper function
+  const containerTableRows = buildTaskTableRows(containerTasks, false);
+  const hourlyTableRows = buildTaskTableRows(hourlyTasks, true);
 
-    taskTableRows += `
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="padding: 8px; text-align: center;">${idx + 1}</td>
-        <td style="padding: 8px;">${container}</td>
-        <td style="padding: 8px;">${startTime}</td>
-        <td style="padding: 8px;">${endTime}</td>
-        <td style="padding: 8px; text-align: right;">${parseFloat(
-          duration
-        ).toFixed(2)}</td>
-        <td style="padding: 8px; text-align: center;">${workerCount}</td>
-      </tr>
-    `;
-  });
+  // Build complete tables using helper function
+  const containerTable = buildTaskTable(
+    "Container Unload Operations",
+    "Container",
+    containerTableRows
+  );
+  const hourlyTable = buildTaskTable(
+    "Hourly / Non-Container Services",
+    "Project / Description",
+    hourlyTableRows
+  );
 
   const approvalLink = ScriptApp.getService().getUrl();
   const approveUrl = `${approvalLink}?action=approve&approvalId=${encodeURIComponent(
@@ -236,28 +313,17 @@ function buildApprovalEmail(approvalId, approvalDate, tasks, approverEmail) {
         <p>Hello,</p>
         <p>Please review and approve the completed container unload operations for <strong>${formattedDate}</strong>.</p>
 
-        <h2 style="color: #003366; border-bottom: 2px solid #003366; padding-bottom: 10px;">Summary</h2>
+        <h2 style="${EMAIL_STYLES.sectionTitle}">Summary</h2>
         <p>
-          <strong>Total Containers:</strong> ${taskCount}<br>
+          <strong>Total Tasks:</strong> ${taskCount} (${
+    containerTasks.length
+  } containers, ${hourlyTasks.length} hourly)<br>
           <strong>Total Hours:</strong> ${totalHours.toFixed(2)}
         </p>
 
-        <h2 style="color: #003366; border-bottom: 2px solid #003366; padding-bottom: 10px;">Task Details</h2>
-        <table style="width: 100%; border-collapse: collapse; background-color: white; margin-bottom: 20px;">
-          <thead>
-            <tr style="background-color: #f0f0f0; border-bottom: 2px solid #ddd;">
-              <th style="padding: 10px; text-align: left;">#</th>
-              <th style="padding: 10px; text-align: left;">Container</th>
-              <th style="padding: 10px; text-align: left;">Start</th>
-              <th style="padding: 10px; text-align: left;">End</th>
-              <th style="padding: 10px; text-align: right;">Hours</th>
-              <th style="padding: 10px; text-align: center;">Workers</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${taskTableRows}
-          </tbody>
-        </table>
+        ${containerTable}
+
+        ${hourlyTable}
 
         <h2 style="color: #003366; border-bottom: 2px solid #003366; padding-bottom: 10px;">Actions</h2>
         <div style="margin: 20px 0;">
@@ -291,146 +357,4 @@ function sendApprovalEmail(recipientEmail, subject, htmlBody) {
     Logger.log(`❌ Email send failed: ${err.message}`);
     return false;
   }
-}
-
-/**
- * Verify dates and times in approval data
- * Call this to debug date/time issues before sending emails
- */
-function verifyApprovalDatesAndTimes(approvalDate, tasks) {
-  Logger.log("╔════════════════════════════════════════════════════════════╗");
-  Logger.log("║        DATE & TIME VERIFICATION FUNCTION                   ║");
-  Logger.log("╚════════════════════════════════════════════════════════════╝");
-
-  // Verify approval date
-  Logger.log("\n📅 APPROVAL DATE VERIFICATION:");
-  Logger.log(`  Raw input: ${approvalDate}`);
-  Logger.log(`  Type: ${typeof approvalDate}`);
-  Logger.log(`  Is Date object: ${approvalDate instanceof Date}`);
-
-  const formattedApprovalDate = formatDateEST(approvalDate);
-  Logger.log(`  Formatted: "${formattedApprovalDate}"`);
-
-  // Check if date is valid (not epoch)
-  const dateObj = new Date(approvalDate);
-  const isEpoch =
-    dateObj.getFullYear() === 1899 || dateObj.getFullYear() === 1970;
-  Logger.log(
-    `  ⚠️  Is Epoch Date (1899/1970): ${
-      isEpoch ? "YES - DATA ERROR!" : "NO - OK"
-    }`
-  );
-
-  // Verify each task's times
-  Logger.log("\n⏰ TASK TIME VERIFICATION:");
-  Logger.log(`  Total tasks: ${tasks.length}`);
-
-  tasks.forEach((task, idx) => {
-    Logger.log(`\n  Task ${idx + 1}:`);
-
-    const startTimeRaw = task[CONFIG.COLUMNS.TASKS.START_TIME];
-    const endTimeRaw = task[CONFIG.COLUMNS.TASKS.END_TIME];
-    const workerRaw =
-      task[CONFIG.COLUMNS.TASKS.WORKER_NAME] ||
-      task[CONFIG.COLUMNS.TASKS.WORKER_ID];
-
-    Logger.log(`    Start Time Raw: ${startTimeRaw}`);
-    Logger.log(`    Start Type: ${typeof startTimeRaw}`);
-    Logger.log(`    Start Is Date: ${startTimeRaw instanceof Date}`);
-
-    if (startTimeRaw instanceof Date) {
-      Logger.log(`    Start Year: ${startTimeRaw.getFullYear()}`);
-      Logger.log(
-        `    ⚠️  Is Epoch: ${
-          startTimeRaw.getFullYear() === 1899 ? "YES - DATA ERROR!" : "NO - OK"
-        }`
-      );
-    }
-
-    const formattedStart = formatTimeEST(startTimeRaw);
-    Logger.log(`    Formatted Start: "${formattedStart}"`);
-
-    Logger.log(`    End Time Raw: ${endTimeRaw}`);
-    Logger.log(`    End Type: ${typeof endTimeRaw}`);
-    const formattedEnd = formatTimeEST(endTimeRaw);
-    Logger.log(`    Formatted End: "${formattedEnd}"`);
-
-    Logger.log(`    Worker Raw: ${workerRaw}`);
-    Logger.log(`    Worker Type: ${typeof workerRaw}`);
-  });
-
-  Logger.log(
-    "\n╔════════════════════════════════════════════════════════════╗"
-  );
-  Logger.log("║ If you see 'Is Epoch: YES' above, the source data has     ║");
-  Logger.log("║ dates in 1899 format. Check your Tasks table in AppSheet. ║");
-  Logger.log("║ Dates should be actual dates, not formulas.               ║");
-  Logger.log("╚════════════════════════════════════════════════════════════╝");
-}
-
-/**
- * Test formatDateEST function with various input types
- */
-function TEST_formatDateEST() {
-  Logger.log("╔════════════════════════════════════════════════════════════╗");
-  Logger.log("║           Testing formatDateEST() Function                 ║");
-  Logger.log("╚════════════════════════════════════════════════════════════╝");
-
-  // Test 1: Date object from Google Sheets
-  Logger.log("\nTest 1: Date object (Jan 12, 2026)");
-  const sheetDate = new Date(2026, 0, 12);
-  const result1 = formatDateEST(sheetDate);
-  Logger.log(`  Input:  ${sheetDate}`);
-  Logger.log(`  Output: "${result1}"`);
-  Logger.log(`  Expected: "Mon Jan 12, 2026"`);
-  Logger.log(`  ✓ PASS: ${result1 === "Mon Jan 12, 2026" ? "YES" : "NO"}`);
-
-  // Test 2: String with timezone (the problematic one from emails)
-  Logger.log("\nTest 2: String with timezone");
-  const verboseString =
-    "Mon Jan 12 2026 00:00:00 GMT-0500 (Eastern Standard Time)";
-  const result2 = formatDateEST(verboseString);
-  Logger.log(`  Input:  "${verboseString}"`);
-  Logger.log(`  Output: "${result2}"`);
-  Logger.log(`  Expected: "Mon Jan 12, 2026"`);
-  Logger.log(`  ✓ PASS: ${result2 === "Mon Jan 12, 2026" ? "YES" : "NO"}`);
-
-  // Test 3: ISO string
-  Logger.log("\nTest 3: ISO string");
-  const isoString = "2026-01-12T00:00:00Z";
-  const result3 = formatDateEST(isoString);
-  Logger.log(`  Input:  "${isoString}"`);
-  Logger.log(`  Output: "${result3}"`);
-  Logger.log(`  Expected: "Mon Jan 12, 2026"`);
-  Logger.log(`  ✓ PASS: ${result3 === "Mon Jan 12, 2026" ? "YES" : "NO"}`);
-
-  // Test 4: Simple date string
-  Logger.log("\nTest 4: Simple date string");
-  const simpleString = "Mon Jan 12 2026";
-  const result4 = formatDateEST(simpleString);
-  Logger.log(`  Input:  "${simpleString}"`);
-  Logger.log(`  Output: "${result4}"`);
-  Logger.log(`  Expected: "Mon Jan 12, 2026"`);
-  Logger.log(`  ✓ PASS: ${result4 === "Mon Jan 12, 2026" ? "YES" : "NO"}`);
-
-  // Test 5: Today's date
-  Logger.log("\nTest 5: Today's date");
-  const today = new Date();
-  const result5 = formatDateEST(today);
-  const todayExpected = Utilities.formatDate(
-    today,
-    "America/New_York",
-    "EEE MMM dd, yyyy"
-  );
-  Logger.log(`  Input:  ${today}`);
-  Logger.log(`  Output: "${result5}"`);
-  Logger.log(`  Expected: "${todayExpected}"`);
-  Logger.log(`  ✓ PASS: ${result5 === todayExpected ? "YES" : "NO"}`);
-
-  Logger.log(
-    "\n╔════════════════════════════════════════════════════════════╗"
-  );
-  Logger.log("║ All tests completed! Check results above.                  ║");
-  Logger.log("║ If all show PASS: YES, date formatting is working!         ║");
-  Logger.log("╚════════════════════════════════════════════════════════════╝");
 }

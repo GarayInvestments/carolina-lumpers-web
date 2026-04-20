@@ -5,6 +5,30 @@
  */
 
 /**
+ * Resolve worker IDs to display names using lookup map
+ * @param {string} workerListRaw - comma-separated worker IDs
+ * @param {Object} lookup - map of workerId -> { displayName }
+ * @return {string} comma-separated names or empty string
+ */
+function resolveWorkerNames(workerListRaw, lookup) {
+  if (!workerListRaw) return "";
+  const map = lookup || {};
+
+  try {
+    const ids = String(workerListRaw)
+      .split(",")
+      .map((w) => w.trim())
+      .filter((w) => w.length > 0);
+
+    const names = ids.map((id) => (map[id] && map[id].displayName) || id);
+    return names.join(", ");
+  } catch (err) {
+    Logger.log(`Error resolving worker names: ${err.message}`);
+    return "";
+  }
+}
+
+/**
  * Count unique workers in a comma-separated worker list
  * Example: "AG-025-b1197429 , MNC-026-1f2641df , HH-043-eb90ce66" -> 3
  */

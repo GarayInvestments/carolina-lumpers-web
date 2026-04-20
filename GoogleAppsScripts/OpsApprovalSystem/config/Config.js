@@ -24,6 +24,8 @@ const CONFIG = {
   SHEET_NAMES: {
     DAILY_OPS_APPROVALS: "DailyOpsApprovals",
     TASKS: "Tasks",
+    SERVICES: "Services",
+    WORKERS: "Workers",
     LOG: "Log",
   },
 
@@ -46,6 +48,8 @@ const CONFIG = {
       DATE: "Date",
       CONTAINER_NUMBER: "Container # / Project",
       CLIENT: "Client ID",
+      SERVICE_ID: "Service ID",
+      SERVICE_RATE_TYPE: "Services:Rate Type",
       START_TIME: "Start Time",
       END_TIME: "End Time",
       DURATION: "Task Duration (Hours)",
@@ -55,6 +59,17 @@ const CONFIG = {
       CATEGORIES: "Categories",
       OPS_APPROVAL_REF: "OpsApprovalRef",
       STATUS: "Status",
+    },
+    SERVICES: {
+      SERVICE_ID: "Service ID",
+      RATE_TYPE: "Rate Type",
+    },
+    WORKERS: {
+      WORKER_ID: "WorkerID",
+      FIRST_NAME: "First Name",
+      LAST_NAME: "Last Name",
+      EMAIL: "Email",
+      ROLE: "Role",
     },
   },
 
