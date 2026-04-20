@@ -23,6 +23,14 @@ const CONFIG = {
   QBO_REFRESH_TOKEN: PropertiesService.getScriptProperties().getProperty("QBO_REFRESH_TOKEN"),
 
   /**
+   * QBO Item Category Mapping by Rate Type
+   */
+  QBO_ITEM_CATEGORY_BY_RATE_TYPE: {
+    Fixed: { id: "1010000021", name: "Fixed" },
+    Hourly: { id: "1010000001", name: "Hourly" }
+  },
+
+  /**
    * OAuth Configuration
    */
   OAUTH_REDIRECT_URI: "https://script.google.com/macros/d/1CRk3Bb98FDqs0AfT7f09cJGQfjsxWW8PmpGyouPl_KtxhyYqtFYlCGwi/usercallback",
@@ -37,7 +45,8 @@ const CONFIG = {
     INVOICES: "Invoices",
     LINE_ITEMS: "Invoice LineItems",
     LOG: "Log",
-    CLIENTS: "Clients"
+    CLIENTS: "Clients",
+    SERVICES: "Services"
   },
 
     /**
@@ -90,6 +99,20 @@ const CONFIG = {
       K_NICKNAME: "Knickname",
       QBO_ID: "QBOID",
       PORTAL_ACCESS: "Portal Access"
+    },
+    SERVICES: {
+      SERVICE_ID: "Service ID",
+      SERVICE_NAME: "Service Name",
+      CLIENT_ID: "ClientID",
+      RATE_TYPE: "Rate Type",
+      SERVICE_INVOICE_RATE: "Service Invoice Rate",
+      SERVICE_PAYOUT_RATE: "Service Payout Rate",
+      SERVICE_GROUP_ID: "ServiceGroupID",
+      SORTING_ORDER: "Sorting Order",
+      DESCRIPTION: "Description",
+      IMAGE: "Image",
+      ACTIVE: "Active",
+      QBO_ID: "QBO_ID"
     }
   },
   

@@ -109,19 +109,41 @@ function fetchInvoiceLineItems(invoiceNumber) {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEET_NAMES.LINE_ITEMS);
     const data = sheet.getDataRange().getValues();
     const headers = data[0];
+    const servicesMap = loadServicesMap();
     const lineItems = [];
+
+    const unitPriceHeader = CONFIG.COLUMNS.LINE_ITEMS.UNIT_PRICE;
+    const unitPriceIdx = unitPriceHeader ? headers.indexOf(unitPriceHeader) : -1;
 
     for (let i = 1; i < data.length; i++) {
         if (data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.INVOICE_NUMBER)] === invoiceNumber) {
+            const serviceId = data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.SERVICE_ID)];
+            const serviceInfo = servicesMap[serviceId];
+            const quantity = data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.QUANTITY)];
+            const amount = data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.AMOUNT)];
+            const unitPrice = unitPriceIdx >= 0 ? data[i][unitPriceIdx] : (quantity ? amount / quantity : null);
+
             lineItems.push({
-                itemName: data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.ITEM_NAME)],
+                itemName: data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.ITEM)] || "",
                 date: data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.DATE)],
-                serviceId: data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.SERVICE_ID)],
-                quantity: data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.QUANTITY)],
-                unitPrice: data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.UNIT_PRICE)],
-                amount: data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.AMOUNT)],
+                serviceId: serviceId,
+                serviceQboId: serviceInfo ? serviceInfo.qboId : null,
+                serviceName: serviceInfo ? serviceInfo.serviceName : null,
+                serviceDescription: serviceInfo ? serviceInfo.description : null,
+                serviceInvoiceRate: serviceInfo ? serviceInfo.serviceInvoiceRate : null,
+                rateType: serviceInfo ? serviceInfo.rateType : null,
+                serviceRowIndex: serviceInfo ? serviceInfo.rowIndex : null,
+                quantity: quantity,
+                unitPrice: unitPrice,
+                amount: amount,
                 description: data[i][headers.indexOf(CONFIG.COLUMNS.LINE_ITEMS.DETAIL)]
             });
+
+            if (!serviceInfo) {
+                logEvent("Fetch Line Items", invoiceNumber, "Error", `Service not found for Service ID: ${serviceId}`);
+            } else if (!serviceInfo.qboId) {
+                logEvent("Fetch Line Items", invoiceNumber, "Info", `Service missing QBO_ID, will attempt auto-create: ${serviceId}`);
+            }
         }
     }
 
@@ -135,6 +157,76 @@ function fetchInvoiceLineItems(invoiceNumber) {
     lineItems.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     return lineItems;
+}
+
+/**
+ * Loads Services sheet into a map keyed by Service ID for fast lookups.
+ * @returns {Object} - Map of serviceId -> service info.
+ */
+function loadServicesMap() {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEET_NAMES.SERVICES);
+    if (!sheet) {
+        logEvent("Services Lookup", "SYSTEM", "Error", "Services sheet not found.");
+        return {};
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+
+    const idx = {
+        serviceId: headers.indexOf(CONFIG.COLUMNS.SERVICES.SERVICE_ID),
+        serviceName: headers.indexOf(CONFIG.COLUMNS.SERVICES.SERVICE_NAME),
+        rateType: headers.indexOf(CONFIG.COLUMNS.SERVICES.RATE_TYPE),
+        serviceInvoiceRate: headers.indexOf(CONFIG.COLUMNS.SERVICES.SERVICE_INVOICE_RATE),
+        description: headers.indexOf(CONFIG.COLUMNS.SERVICES.DESCRIPTION),
+        qboId: headers.indexOf(CONFIG.COLUMNS.SERVICES.QBO_ID)
+    };
+
+    const map = {};
+    for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        const serviceId = row[idx.serviceId];
+        if (!serviceId) continue;
+        map[serviceId] = {
+            serviceName: row[idx.serviceName],
+            rateType: row[idx.rateType],
+            serviceInvoiceRate: row[idx.serviceInvoiceRate],
+            description: row[idx.description],
+            qboId: row[idx.qboId],
+            rowIndex: i + 1
+        };
+    }
+
+    return map;
+}
+
+/**
+ * Updates the QBO_ID for a service row in the Services sheet.
+ * @param {string} serviceId - Service identifier.
+ * @param {string} qboId - QuickBooks Item ID to persist.
+ */
+function updateServiceQboId(serviceId, qboId) {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEET_NAMES.SERVICES);
+    if (!sheet) {
+        logEvent("Services Update", serviceId, "Error", "Services sheet not found; cannot persist QBO_ID.");
+        return;
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const serviceIdIdx = headers.indexOf(CONFIG.COLUMNS.SERVICES.SERVICE_ID);
+    const qboIdIdx = headers.indexOf(CONFIG.COLUMNS.SERVICES.QBO_ID);
+
+    for (let i = 1; i < data.length; i++) {
+        if (data[i][serviceIdIdx] === serviceId) {
+            data[i][qboIdIdx] = qboId;
+            sheet.getRange(1, 1, data.length, headers.length).setValues(data);
+            logEvent("Services Update", serviceId, "Success", `Persisted QBO_ID ${qboId} for service.`);
+            return;
+        }
+    }
+
+    logEvent("Services Update", serviceId, "Error", "Service not found; QBO_ID not persisted.");
 }
 
 /**
@@ -173,15 +265,19 @@ function fetchClientData(clientId) {
     const headers = data[0];
 
     const clientIdIndex = headers.indexOf(CONFIG.COLUMNS.CLIENTS.CLIENT_ID);
+    const clientNameIndex = headers.indexOf(CONFIG.COLUMNS.CLIENTS.CLIENT_NAME);
     const qboIdIndex = headers.indexOf(CONFIG.COLUMNS.CLIENTS.QBO_ID);
     const payablesEmailIndex = headers.indexOf(CONFIG.COLUMNS.CLIENTS.PAYABLES_EMAIL);
     const payablesEmailCcIndex = headers.indexOf(CONFIG.COLUMNS.CLIENTS.PAYABLES_EMAIL_CC);
     const payablesEmailBccIndex = headers.indexOf(CONFIG.COLUMNS.CLIENTS.PAYABLES_EMAIL_BCC);
+    const jobAddressIndex = headers.indexOf("JobAddress");
 
     for (let i = 1; i < data.length; i++) {
         if (data[i][clientIdIndex] === clientId) {
             const clientData = {
                 qboId: data[i][qboIdIndex],
+                clientName: data[i][clientNameIndex] || "",
+                jobAddress: data[i][jobAddressIndex] || "",
                 payablesEmail: data[i][payablesEmailIndex],
                 payablesEmailCc: data[i][payablesEmailCcIndex],
                 payablesEmailBcc: data[i][payablesEmailBccIndex]
