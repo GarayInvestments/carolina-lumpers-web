@@ -24,17 +24,17 @@ main,
 }
 
 /* Ensure all content sections have dark backgrounds */
-main .section,
-main .section-container,
-.content-area .section,
-.content-area .section-container {
+body:not(.home-modern) main .section,
+body:not(.home-modern) main .section-container,
+body:not(.home-modern) .content-area .section,
+body:not(.home-modern) .content-area .section-container {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
 }
 
 /* [LAYOUT: Section] */
-.section,
-.section-container {
+body:not(.home-modern) .section,
+body:not(.home-modern) .section-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,8 +51,8 @@ main .section-container,
   transition: var(--transition-base);
 }
 
-.section:hover,
-.section-container:hover {
+body:not(.home-modern) .section:hover,
+body:not(.home-modern) .section-container:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
@@ -65,21 +65,21 @@ main .section-container,
 }
 
 /* Ensure text in dark containers is white */
-.section p,
-.section-container p,
-.section ul,
-.section-container ul,
-.section li,
-.section-container li {
+body:not(.home-modern) .section p,
+body:not(.home-modern) .section-container p,
+body:not(.home-modern) .section ul,
+body:not(.home-modern) .section-container ul,
+body:not(.home-modern) .section li,
+body:not(.home-modern) .section-container li {
   color: var(--text-primary);
 }
 
-.section h2,
-.section-container h2,
-.section h3,
-.section-container h3,
-.section h4,
-.section-container h4 {
+body:not(.home-modern) .section h2,
+body:not(.home-modern) .section-container h2,
+body:not(.home-modern) .section h3,
+body:not(.home-modern) .section-container h3,
+body:not(.home-modern) .section h4,
+body:not(.home-modern) .section-container h4 {
   color: var(--color-primary);
 }
 
@@ -382,7 +382,11 @@ main .section-container,
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, var(--bg-secondary) 20%, rgba(26, 26, 26, 0) 80%);
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary) 20%,
+    rgba(26, 26, 26, 0) 80%
+  );
   z-index: 2;
   pointer-events: none;
 }
@@ -465,8 +469,18 @@ footer *,
 }
 
 /* Override for links and headings */
-footer h1, footer h2, footer h3, footer h4, footer h5, footer h6,
-.footer h1, .footer h2, .footer h3, .footer h4, .footer h5, .footer h6 {
+footer h1,
+footer h2,
+footer h3,
+footer h4,
+footer h5,
+footer h6,
+.footer h1,
+.footer h2,
+.footer h3,
+.footer h4,
+.footer h5,
+.footer h6 {
   color: var(--color-primary);
 }
 
@@ -642,7 +656,7 @@ footer .language-toggle button.active,
     justify-content: center !important;
     max-width: 100% !important;
   }
-  
+
   .nav-links a {
     font-size: 16px !important;
     padding: 3px 6px !important;
@@ -699,7 +713,7 @@ footer .language-toggle button.active,
   }
 
   /* Show hamburger menu on mobile (already defined above, no need for !important) */
-  
+
   /* Logo container mobile styles */
   .logo-container {
     display: flex;

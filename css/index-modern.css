@@ -1,314 +1,583 @@
-/* Phase A variant: light, basic shadcn-like styling for homepage only. */
+/* Fresh homepage stylesheet with full scope isolation for index only. */
 
 .home-modern {
-  font-family: "Space Grotesk", "Roboto", Arial, sans-serif;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  color: #0f172a;
+  --home-bg: #f6f8fb;
+  --home-surface: #ffffff;
+  --home-surface-soft: #f3f7fc;
+  --home-text: #0f172a;
+  --home-text-muted: #334155;
+  --home-border: #d4deea;
+  --home-border-strong: #bcc8d8;
+  --home-accent: #f4b400;
+  --home-accent-ink: #1f2937;
+  --home-ring: #f59e0b;
+  --home-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+  --home-radius-lg: 18px;
+  --home-radius-md: 12px;
+
+  font-family: "Source Sans 3", "Segoe UI", Tahoma, sans-serif;
+  background: radial-gradient(
+    circle at top right,
+    #ffffff 0%,
+    #f6f8fb 45%,
+    #eef3f9 100%
+  );
+  color: var(--home-text);
 }
 
-.home-modern .home-hero-shell {
-  margin-top: 1rem;
+/* Desktop-only nav sizing refinement for homepage. */
+@media (min-width: 941px) {
+  .home-modern .nav-links a {
+    font-size: 17px !important;
+  }
 }
 
-.home-modern .hero {
-  border: 1px solid #dbe4ee;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #ffffff;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+/* Prevent legacy shared stylesheet from forcing dark panels on homepage sections. */
+.home-modern main,
+.home-modern .home-page,
+.home-modern #overview,
+.home-modern #services,
+.home-modern #workflow,
+.home-modern #contact {
+  background: transparent;
+  color: var(--home-text);
 }
 
-.home-modern .hero-content {
-  padding: 1.6rem;
+.home-modern #overview,
+.home-modern #services,
+.home-modern #workflow,
+.home-modern #contact {
+  display: grid;
+  align-items: stretch;
+  justify-content: initial;
+  text-align: left;
+  margin: 0;
+  max-width: none;
+  width: 100%;
+  box-shadow: 0 2px 14px rgba(15, 23, 42, 0.05);
 }
 
-.home-modern .hero-kicker {
+.home-modern .home-page {
+  min-height: auto;
+  padding: 1.35rem 0 2rem;
+}
+
+.home-modern .home-shell {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.home-modern h1,
+.home-modern h2,
+.home-modern h3,
+.home-modern h4 {
+  font-family: "Sora", "Segoe UI", Tahoma, sans-serif;
+  color: var(--home-text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.home-modern p {
+  color: var(--home-text-muted);
+  margin: 0;
+}
+
+/* Ensure legacy ID rules cannot force low-contrast text on overview block. */
+.home-modern #overview h2,
+.home-modern #overview h3,
+.home-modern #overview h4 {
+  color: var(--home-text);
+}
+
+.home-modern #overview p,
+.home-modern #overview li,
+.home-modern #overview .section-lead,
+.home-modern #overview .feature-card p {
+  color: #2f3f56;
+}
+
+.home-modern .fresh-hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+  border: 1px solid var(--home-border);
+  border-radius: var(--home-radius-lg);
+  background: linear-gradient(160deg, #ffffff 0%, #fafcff 100%);
+  box-shadow: var(--home-shadow);
+  padding: 1.1rem;
+}
+
+.home-modern .fresh-hero__content {
+  display: grid;
+  gap: 0.95rem;
+  align-content: center;
+  padding: 0.45rem;
+}
+
+.home-modern .eyebrow {
   display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.74rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #92400e;
-  background: #fef3c7;
-  border: 1px solid #fde68a;
-  padding: 0.35rem 0.62rem;
+  width: fit-content;
+  padding: 0.24rem 0.62rem;
+  border: 1px solid #f6d47a;
   border-radius: 999px;
-  margin-bottom: 0.9rem;
+  background: #fff8e5;
+  color: #7c5b10;
+  font-family: "Sora", "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.home-modern .hero h1 {
-  margin-bottom: 0.75rem;
-  line-height: 1.08;
-  color: #0f172a;
+.home-modern .fresh-hero h1 {
+  font-size: clamp(1.85rem, 4.4vw, 3.15rem);
+  line-height: 1.06;
   max-width: 18ch;
 }
 
-.home-modern .hero p {
-  max-width: 64ch;
-  color: #334155;
+.home-modern .hero-copy {
+  max-width: 62ch;
+  font-size: 1.05rem;
 }
 
-.home-modern .cta-container {
+.home-modern .fresh-hero__media {
+  margin: 0;
+  border-radius: calc(var(--home-radius-lg) - 6px);
+  overflow: hidden;
+  min-height: 310px;
+  border: 1px solid var(--home-border);
+}
+
+.home-modern .fresh-hero__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-modern .hero-actions,
+.home-modern .contact-actions,
+.home-modern .section-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.9rem;
+  gap: 0.65rem;
 }
 
-.home-modern .cta-button {
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #111827;
-  color: #f8fafc;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
+.home-modern .btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 42px;
+  padding: 0.58rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--home-border-strong);
+  background: var(--home-surface);
+  color: var(--home-text);
+  text-decoration: none;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.2;
   transition:
-    background-color 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease,
-    box-shadow 0.18s ease;
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.home-modern .cta-button:hover,
-.home-modern .cta-button:focus {
-  background: #1f2937;
-  color: #ffffff;
+.home-modern .btn--primary {
+  background: var(--home-accent);
+  border-color: #d79a00;
+  color: var(--home-accent-ink);
 }
 
-.home-modern .cta-button-secondary {
+.home-modern .btn--primary:hover,
+.home-modern .btn--primary:focus-visible {
+  background: #f6bf2e;
+}
+
+.home-modern .btn--secondary:hover,
+.home-modern .btn--secondary:focus-visible {
+  border-color: #9aa8ba;
   background: #f8fafc;
-  color: #0f172a;
-  border: 1px solid #d1d5db;
 }
 
-.home-modern .cta-button-secondary:hover,
-.home-modern .cta-button-secondary:focus {
-  background: #f8fafc;
-  color: #0f172a;
-}
-
-.home-modern .hero-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-top: 1.35rem;
-}
-
-.home-modern .metric-chip {
-  display: grid;
-  gap: 0.2rem;
-  padding: 0.72rem;
-  border-radius: 10px;
-  border: 1px solid #dbe4ee;
-  background: #ffffff;
-}
-
-.home-modern .metric-chip-value {
-  color: #0f172a;
-  font-size: 0.96rem;
-  font-weight: 700;
-}
-
-.home-modern .metric-chip-label {
-  font-size: 0.79rem;
-  color: #475569;
-}
-
-.home-main {
-  display: grid;
-  gap: 1.25rem;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-}
-
-.home-modern .section-container {
-  border-radius: 14px;
-  border: 1px solid #dbe4ee;
-  background: #ffffff;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
-}
-
-.home-modern .section-header-modern {
-  margin-bottom: 0.75rem;
-}
-
-.home-modern .section-kicker {
-  margin: 0;
-  color: #64748b;
-  font-size: 0.72rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
-.home-modern .section-header-modern h2 {
-  margin-top: 0.38rem;
-  color: #0f172a;
-}
-
-.home-modern .overview-copy {
-  margin-top: 0;
-  color: #334155;
-}
-
-.home-modern .overview-points {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.home-modern .overview-point-card {
-  padding: 0.92rem;
-  border-radius: 10px;
-  border: 1px solid #dbe4ee;
-  background: #ffffff;
-}
-
-.home-modern .overview-point-card h3 {
-  margin: 0;
-  font-size: 0.97rem;
-  color: #0f172a;
-}
-
-.home-modern .overview-point-card p {
-  margin-top: 0.55rem;
-  margin-bottom: 0;
-  font-size: 0.91rem;
-  line-height: 1.5;
-  color: #475569;
-}
-
-.home-modern .services-brief-modern .brief-item {
-  border-width: 1px;
-  border-color: #dbe4ee;
-  background: #ffffff;
-  transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease;
-}
-
-.home-modern .services-brief-modern .brief-item:hover,
-.home-modern .services-brief-modern .brief-item:focus-within {
-  border-color: #cbd5e1;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
-}
-
-.home-modern .services-brief-modern .brief-item h4 {
-  color: #0f172a;
-}
-
-.home-modern .services-brief-modern .brief-item p {
-  color: #475569;
-}
-
-.home-modern .service-tag {
-  display: inline-block;
-  margin-bottom: 0.5rem;
-  padding: 0.18rem 0.5rem;
-  border-radius: 999px;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
-  font-size: 0.7rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.home-modern .section-workflow-modern {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
-
-.home-modern .workflow-grid {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.82rem;
-  margin: 0;
-  padding: 0;
-}
-
-.home-modern .workflow-step {
-  border-radius: 10px;
-  border: 1px solid #dbe4ee;
-  background: #ffffff;
-  padding: 0.92rem;
-}
-
-.home-modern .workflow-step-index {
-  display: inline-block;
-  margin-bottom: 0.35rem;
-  font-size: 0.78rem;
-  color: #64748b;
-  letter-spacing: 0.07em;
-}
-
-.home-modern .workflow-step h3 {
-  margin-top: 0;
-  margin-bottom: 0.35rem;
-  color: #0f172a;
-}
-
-.home-modern .workflow-step p {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.52;
-  color: #475569;
-}
-
-.home-modern .contact-lead {
-  margin-top: 0;
-  color: #334155;
-}
-
-.home-modern .contact-buttons-modern {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.home-modern .contact-buttons-modern .action-button {
-  text-align: center;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #0f172a;
-  box-shadow: none;
-  transition:
-    background-color 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease;
-}
-
-.home-modern .contact-buttons-modern .action-button:hover,
-.home-modern .contact-buttons-modern .action-button:focus {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-.home-modern .cta-button:focus-visible,
-.home-modern .contact-buttons-modern .action-button:focus-visible,
-.home-modern .services-brief-modern .brief-item:focus-visible {
-  outline: 2px solid #f59e0b;
+.home-modern .btn:focus-visible,
+.home-modern .service-card:focus-visible {
+  outline: 2px solid var(--home-ring);
   outline-offset: 2px;
 }
 
-@media (max-width: 980px) {
-  .home-modern .hero {
-    border-radius: 12px;
-  }
+.home-modern .hero-stats {
+  list-style: none;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.62rem;
+}
 
-  .home-modern .hero-content {
-    padding: 1.2rem;
-  }
+.home-modern .hero-stats li {
+  padding: 0.62rem 0.7rem;
+  border: 1px solid var(--home-border);
+  border-radius: 10px;
+  background: var(--home-surface-soft);
+  display: grid;
+  gap: 0.14rem;
+}
 
-  .home-modern .hero-metrics,
-  .home-modern .overview-points,
-  .home-modern .workflow-grid,
-  .home-modern .contact-buttons-modern {
+.home-modern .hero-stats strong {
+  font-family: "Sora", "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.95rem;
+  color: var(--home-text);
+}
+
+.home-modern .hero-stats span {
+  font-size: 0.81rem;
+  color: var(--home-text-muted);
+}
+
+.home-modern .home-section {
+  display: grid;
+  gap: 0.8rem;
+  border: 1px solid var(--home-border);
+  border-radius: var(--home-radius-lg);
+  background: var(--home-surface);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  padding: 1.1rem;
+  margin: 0;
+  max-width: none;
+}
+
+.home-modern .home-section:first-of-type {
+  padding-top: 0.85rem;
+}
+
+.home-modern #overview .section-heading {
+  margin-top: -0.05rem;
+}
+
+.home-modern .home-section--accent {
+  background: linear-gradient(180deg, #fffef9 0%, #fffaf0 100%);
+  border-color: #efdca3;
+}
+
+.home-modern .section-heading {
+  display: grid;
+  gap: 0.36rem;
+}
+
+.home-modern .section-heading h2 {
+  font-size: clamp(1.36rem, 2.8vw, 2rem);
+  line-height: 1.14;
+}
+
+.home-modern .section-lead {
+  max-width: 78ch;
+  font-size: 1.02rem;
+}
+
+.home-modern .feature-grid,
+.home-modern .service-grid,
+.home-modern .process-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.home-modern .feature-grid,
+.home-modern .service-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.home-modern .process-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.home-modern .feature-card,
+.home-modern .service-card,
+.home-modern .process-list li {
+  border: 1px solid var(--home-border-strong);
+  border-radius: var(--home-radius-md);
+  background: var(--home-surface-soft);
+  padding: 0.88rem;
+}
+
+.home-modern .service-card {
+  text-decoration: none;
+  color: inherit;
+  display: grid;
+  gap: 0.5rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.home-modern .service-card:hover,
+.home-modern .service-card:focus-visible {
+  border-color: #9fb0c4;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.home-modern .service-label {
+  width: fit-content;
+  padding: 0.16rem 0.48rem;
+  border-radius: 999px;
+  border: 1px solid var(--home-border-strong);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.home-modern .feature-card h3,
+.home-modern .service-card h3,
+.home-modern .process-list h3 {
+  font-size: 1.04rem;
+  margin-bottom: 0.35rem;
+}
+
+.home-modern .feature-card p,
+.home-modern .service-card p,
+.home-modern .process-list p {
+  color: #2f3f56;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.home-modern .process-list li {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.home-modern .process-list span {
+  width: fit-content;
+  font-family: "Sora", "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.74rem;
+  color: #64748b;
+  padding: 0.16rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid var(--home-border);
+  background: #ffffff;
+}
+
+.home-modern .contact-actions {
+  margin-top: 0.3rem;
+}
+
+.home-modern #footer-container {
+  margin-top: 0.85rem;
+}
+
+.home-modern footer {
+  margin-top: 0;
+  padding: 1.4rem 1rem 1.1rem;
+  border-top: 1px solid #222c39;
+  background: linear-gradient(180deg, #121821 0%, #0c1119 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.home-modern footer .footer-content {
+  display: grid;
+  gap: 0.38rem;
+  margin: 0;
+}
+
+.home-modern footer .footer-content h3,
+.home-modern footer .footer-icons h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  letter-spacing: 0.01em;
+  color: #f2bf33;
+}
+
+.home-modern footer .footer-content p {
+  margin: 0;
+  color: #d9e2ef;
+}
+
+.home-modern footer .footer-content strong {
+  color: #f3f6fb;
+}
+
+.home-modern footer .footer-content a,
+.home-modern footer .footer-icons a {
+  color: #f2bf33;
+}
+
+.home-modern footer .footer-content a:hover,
+.home-modern footer .footer-icons a:hover {
+  color: #ffd86b;
+}
+
+.home-modern footer .footer-icons {
+  margin: 0.78rem 0 0.6rem;
+  gap: 0.5rem;
+}
+
+.home-modern footer .footer-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #2b3546;
+  border-radius: 999px;
+  background: #151d29;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.home-modern footer .footer-icons a:hover,
+.home-modern footer .footer-icons a:focus-visible {
+  border-color: #f2bf33;
+  background: #1b2533;
+  transform: translateY(-1px);
+}
+
+.home-modern footer .footer-icons img {
+  width: 19px;
+  height: 19px;
+}
+
+.home-modern footer .footer-text {
+  margin: 0.1rem 0 0.5rem;
+}
+
+.home-modern footer .footer-text p {
+  color: #a8b4c7;
+}
+
+.home-modern footer .language-toggle {
+  margin-top: 0.25rem;
+}
+
+.home-modern footer .language-toggle button {
+  background: #1b2533;
+  border: 1px solid #2f3e54;
+  color: #f2bf33;
+  min-width: 84px;
+}
+
+.home-modern footer .language-toggle button:hover,
+.home-modern footer .language-toggle button.active {
+  background: #f2bf33;
+  border-color: #f2bf33;
+  color: #111827;
+}
+
+@media (max-width: 1020px) {
+  .home-modern .fresh-hero {
     grid-template-columns: 1fr;
   }
 
-  .home-main {
-    gap: 0.9rem;
+  .home-modern .fresh-hero__media {
+    min-height: 240px;
+  }
+
+  .home-modern .feature-grid,
+  .home-modern .service-grid,
+  .home-modern .process-list,
+  .home-modern .hero-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-modern .navbar {
+    padding: 0.62rem 0.8rem;
+  }
+
+  .home-modern .logo-container {
+    gap: 0.5rem;
+  }
+
+  .home-modern .logo {
+    height: 38px;
+    min-height: 34px;
+    max-width: 104px;
+  }
+
+  .home-modern .company-name {
+    font-size: 0.88rem;
+    line-height: 1.05;
+    letter-spacing: 0.06em;
+  }
+
+  .home-modern .hamburger {
+    width: 32px;
+    height: 32px;
+  }
+
+  .home-modern .home-page {
+    padding-top: 0.75rem;
+  }
+
+  .home-modern .home-section,
+  .home-modern .fresh-hero {
+    border-radius: 14px;
+    padding: 0.82rem;
+  }
+
+  .home-modern .fresh-hero__content {
+    gap: 0.7rem;
+    padding: 0.2rem;
+  }
+
+  .home-modern .fresh-hero h1 {
+    font-size: clamp(1.28rem, 8vw, 1.92rem);
+    line-height: 1.08;
+  }
+
+  .home-modern .hero-copy {
+    font-size: 0.97rem;
+    line-height: 1.45;
+  }
+
+  .home-modern .hero-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+    margin-top: 0;
+  }
+
+  .home-modern .hero-stats li {
+    padding: 0.52rem 0.5rem;
+  }
+
+  .home-modern .hero-stats strong {
+    font-size: 0.88rem;
+  }
+
+  .home-modern .hero-stats span {
+    font-size: 0.73rem;
+    line-height: 1.2;
+  }
+
+  .home-modern .fresh-hero__media {
+    min-height: 170px;
+  }
+
+  .home-modern .btn {
+    width: 100%;
+  }
+
+  .home-modern footer {
+    padding: 1.25rem 1rem 1.1rem;
+  }
+
+  .home-modern footer .footer-icons {
+    gap: 0.45rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-modern .btn,
+  .home-modern .service-card {
+    transition: none;
   }
 }

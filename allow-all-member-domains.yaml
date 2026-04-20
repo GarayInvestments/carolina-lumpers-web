@@ -1,0 +1,5 @@
+name: projects/cls-modern-staging-20260417/policies/iam.allowedPolicyMemberDomains
+spec:
+  inheritFromParent: false
+  rules:
+  - allowAll: true
