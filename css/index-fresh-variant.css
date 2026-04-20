@@ -1,0 +1,223 @@
+:root {
+  --ink: #1f1914;
+  --paper: #f3ede5;
+  --accent: #b4462f;
+  --muted: #6f655d;
+  --panel: #ffffff;
+}
+* {
+  box-sizing: border-box;
+}
+body.variant-a {
+  margin: 0;
+  font-family: "Archivo Narrow", sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.5;
+}
+img {
+  width: 100%;
+  display: block;
+}
+.ribbon {
+  background: var(--ink);
+  color: #f7f2ec;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+.topline {
+  padding: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  border-bottom: 1px solid #d8cec3;
+}
+.brand {
+  color: var(--ink);
+  text-decoration: none;
+  font-family: "Merriweather", serif;
+  font-weight: 900;
+  font-size: 1.25rem;
+}
+.chip-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.chip-nav a {
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid #c8b9aa;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+}
+.hero {
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+.hero-image img {
+  border-radius: 0.2rem;
+  min-height: 300px;
+  object-fit: cover;
+}
+.hero-copy {
+  background: var(--panel);
+  padding: 1rem;
+  border-left: 6px solid var(--accent);
+}
+.kicker {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+}
+h1,
+h2,
+h3 {
+  font-family: "Merriweather", serif;
+  line-height: 1.15;
+}
+h1 {
+  margin: 0.5rem 0 1rem;
+  font-size: clamp(2rem, 8vw, 4rem);
+}
+.hero-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.btn {
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.btn.primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn.ghost {
+  border: 1px solid var(--ink);
+  color: var(--ink);
+}
+.editorial-panel {
+  margin: 1rem;
+  padding: 1.2rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(31, 25, 20, 0.08);
+}
+.editorial-panel p {
+  color: #413932;
+}
+.editorial-panel ul {
+  margin: 1rem 0 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+.service-articles {
+  margin: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+.service-articles article {
+  background: #fff;
+  border: 1px solid #dfd2c5;
+}
+.service-articles div {
+  padding: 1rem;
+}
+.tag {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  margin: 0 0 0.4rem;
+}
+.method {
+  margin: 1rem;
+  padding: 1rem;
+  background: #fff;
+  border-top: 6px solid var(--ink);
+}
+.method ol {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 1rem;
+}
+.method li {
+  border: 1px dashed #b9ac9f;
+  padding: 1rem;
+}
+.method span {
+  font-size: 2rem;
+  color: var(--accent);
+  font-family: "Merriweather", serif;
+  font-weight: 900;
+}
+footer {
+  margin-top: 2rem;
+  padding: 2rem 1rem;
+  background: var(--ink);
+  color: #f7f3ee;
+}
+footer h2 {
+  margin-top: 0;
+  font-size: clamp(1.6rem, 6vw, 2.3rem);
+}
+.footer-actions {
+  display: grid;
+  gap: 0.6rem;
+  margin: 1rem 0;
+}
+.footer-actions a {
+  color: #f7f3ee;
+  text-decoration: none;
+  border: 1px solid rgba(247, 243, 238, 0.35);
+  padding: 0.7rem 0.9rem;
+  text-align: center;
+}
+small {
+  color: #cabfb4;
+}
+
+@media (min-width: 860px) {
+  .topline {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 1rem 2rem;
+  }
+  .hero {
+    grid-template-columns: 1.1fr 0.9fr;
+    padding: 2rem;
+    gap: 2rem;
+    align-items: start;
+  }
+  .hero-image img {
+    min-height: 640px;
+  }
+  .hero-copy {
+    margin-top: 3.5rem;
+  }
+  .service-articles article:nth-child(even) {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+  }
+  .service-articles article:nth-child(odd) {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+  .method ol {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .footer-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
