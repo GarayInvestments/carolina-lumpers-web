@@ -39,3 +39,20 @@ config/token.json
 # Testing
 coverage/
 .vercel
+
+# Local diagnostics and temp artifacts
+.adc_refresh_gmb_check.py
+.direct_gbp_test.ps1
+.ga_list.py
+.gbp_accounts_error_probe.py
+.gbp_fresh_test.py
+.gbp_test_default.py
+.gbp_test_scoped.py
+.gmb_accounts_check.py
+.gmb_quota_project_test.py
+.prod_schema_check.py
+.verify_prod.py
+.image_refs_report.txt
+.tmp_carolinalumpers_home.html
+social_card_check.html
+react-portal/docs/.~lock.*
