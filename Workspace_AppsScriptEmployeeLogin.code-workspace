@@ -2,16 +2,25 @@
   "folders": [
     {
       "name": "🏠 Carolina Lumpers Web (Root)",
-      "path": "."
+      "path": ".",
     },
     {
       "name": "⚛️ React Portal",
-      "path": "react-portal"
+      "path": "react-portal",
     },
     {
       "name": "🔧 Google Apps Scripts",
-      "path": "GoogleAppsScripts"
-    }
+      "path": "GoogleAppsScripts",
+    },
+    {
+      "path": "../carolina-lumpers-web-variant-a",
+    },
+    {
+      "path": "../carolina-lumpers-web-variant-b",
+    },
+    {
+      "path": "../carolina-lumpers-web-variant-c",
+    },
   ],
   "settings": {
     // File exclusions (keep explorer clean)
@@ -21,7 +30,7 @@
       "**/.DS_Store": true,
       "**/Thumbs.db": true,
       "**/__pycache__": true,
-      "**/*.pyc": true
+      "**/*.pyc": true,
     },
 
     // Search exclusions (faster searches)
@@ -31,28 +40,28 @@
       "**/build": true,
       "**/.git": true,
       "**/package-lock.json": true,
-      "**/cdk.out": true
+      "**/cdk.out": true,
     },
 
     // Editor settings
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
+      "source.fixAll.eslint": "explicit",
     },
 
     // Language-specific formatting
     "[javascript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
     "[typescript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
     "[json]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
     },
     "[markdown]": {
-      "editor.wordWrap": "on"
+      "editor.wordWrap": "on",
     },
 
     // Git settings
@@ -65,7 +74,7 @@
 
     // Tailwind CSS IntelliSense
     "tailwindCSS.experimental.classRegex": [
-      ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+      ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
     ],
     "chat.tools.terminal.autoApprove": {
       "python": true,
@@ -155,8 +164,8 @@
       "xargs": false,
       "eval": false,
       "Invoke-Expression": false,
-      "iex": false
-    }
+      "iex": false,
+    },
   },
   "extensions": {
     "recommendations": [
@@ -166,7 +175,7 @@
       "github.copilot",
       "github.copilot-chat",
       "eamodio.gitlens",
-      "wakatime.vscode-wakatime"
-    ]
-  }
+      "wakatime.vscode-wakatime",
+    ],
+  },
 }

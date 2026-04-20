@@ -1,0 +1,32 @@
+Google Ads API Tool Design Documentation (Standard)
+
+Company Name: Carolina Lumpers Service
+Website: https://carolinalumpers.com
+API Contact Email: s.garay@carolinalumpers.com
+Date: April 20, 2026
+
+1) Business Model
+Carolina Lumpers Service is a labor services company focused on warehouse and logistics operations. We use Google Ads to promote our own services and generate inbound leads for our business website. We do not provide a public advertising platform and do not resell Google Ads API access.
+
+2) Tool Access and Intended Use
+This tool is for internal use by authorized employees involved in marketing operations and reporting. It is used to monitor campaign performance, review spend, and support optimization decisions for company-owned or authorized Google Ads accounts. External users do not receive direct access to the tool.
+
+3) Tool Design and Data Flow
+The application uses OAuth 2.0 and Google Ads API requests to retrieve account and campaign performance data.
+Workflow:
+- Authorized user authenticates via OAuth 2.0.
+- The tool calls Google Ads API endpoints for approved account data.
+- Internal processing summarizes metrics for business reporting.
+- Internal dashboards and reports are used for operational decisions.
+
+4) API Services Called
+The tool uses Google Ads API services and resources required for:
+- Account and campaign visibility
+- Performance reporting and KPI analysis
+- Internal campaign management support
+
+5) Security and Compliance
+Security controls include restricted credential access, least-privilege user permissions, and controlled internal environments. Credentials are not exposed publicly. Usage is limited to legitimate internal business operations and follows Google Ads API Terms and Policies.
+
+6) Statement for Basic Access Review
+This tool is an internal operational integration for Carolina Lumpers Service. It supports policy-compliant access to Google Ads data for reporting and optimization of our own marketing activity. It is not a third-party ad platform and is not used to resell API capabilities.
