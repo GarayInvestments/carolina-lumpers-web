@@ -3,8 +3,8 @@
    ================================ */
 
 /* [COMPONENT: Form Container] - Uses .form-section from layout.css */
-.form-container, 
-.login-container, 
+.form-container,
+.login-container,
 .signup-container {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
@@ -32,8 +32,6 @@ body[data-page="apply"] .section-container {
   width: 95%;
 }
 
-
-
 /* For login/signup pages, use the centered flex layout */
 body[data-page="login"] .form-container,
 body[data-page="signup"] .form-container {
@@ -45,13 +43,16 @@ body[data-page="signup"] .form-container {
   max-width: 400px;
 }
 
-.login-container, .signup-container {
+.login-container,
+.signup-container {
   max-width: 400px;
 }
 
 /* [COMPONENT: Form Headings] */
-.form-container h1, .form-container h2,
-.login-container h1, .signup-container h1 {
+.form-container h1,
+.form-container h2,
+.login-container h1,
+.signup-container h1 {
   color: var(--color-primary);
   font-family: var(--font-heading);
   font-size: var(--font-size-3xl);
@@ -73,8 +74,8 @@ form {
 }
 
 /* Dark theme form fields for better contrast */
-form input, 
-form select, 
+form input,
+form select,
 form textarea {
   background-color: var(--color-dark);
   color: var(--text-primary);
@@ -88,8 +89,8 @@ form textarea {
 }
 
 /* Focus states for better accessibility */
-form input:focus, 
-form select:focus, 
+form input:focus,
+form select:focus,
 form textarea:focus {
   border-color: var(--color-primary);
   outline: none;
@@ -239,8 +240,14 @@ body[data-page="apply"] .form-step {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* [COMPONENT: Form Progress] - Multi-step form progress bars */
@@ -408,7 +415,11 @@ body[data-page="apply"] .form-step {
 }
 
 .form-progress .progress-bar {
-  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
 }
 
 /* [COMPONENT: Input Validation] */
@@ -691,7 +702,7 @@ body[data-page="contact"] .basic-quote-form {
 }
 
 .form-steps::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 0;
@@ -735,7 +746,7 @@ body[data-page="contact"] .basic-quote-form {
 }
 
 .step.completed .step-number::before {
-  content: '✓';
+  content: "✓";
 }
 
 .step-label {
@@ -899,6 +910,3 @@ body[data-page="contact"] .basic-quote-form {
     font-size: 16px;
   }
 }
-
-
-
