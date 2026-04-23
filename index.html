@@ -4,35 +4,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carolina Lumper Service | Variant C Minimal</title>
+  <title>Carolina Lumper Service | Variant A Minimal</title>
   <meta name="description" content="Reliable freight handling built for real operations." />
   <link rel="icon" href="assets/CLS-favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Cormorant+Garamond:wght@400;600;700&family=Oswald:wght@400;500;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/index-fresh-variant.css" />
+  <link rel="stylesheet" href="css/index-fresh-variant.css?v=20260423-a2">
+  <link rel="stylesheet" href="css/variant-a-priority1-modules.css?v=20260423-p1mods-a47" />
 </head>
 
-<body class="variant-c">
-  <header>
-    <a class="wordmark" href="#">Carolina Lumper Service</a>
-    <nav aria-label="Primary">
-      <a href="#overview">Overview</a>
-      <a href="#services">Services</a>
-      <a href="#process">Process</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </header>
+<body class="variant-a" data-page="home">
+  <div id="navbar-container"></div>
 
   <main>
     <section class="hero">
-      <p class="meta">Carolina warehouse labor</p>
-      <h1>Reliable Freight Handling Built for Real Operations</h1>
-      <p class="intro">Carolina Lumper Service helps warehouses across North Carolina and South Carolina move faster
-        with dependable unloading, sorting, staging, and shift-ready labor support.</p>
-      <img src="assets/meeting.webp" alt="Warehouse team collaboration" />
+      <div class="hero-content">
+        <p class="meta">Serving the Carolinas</p>
+        <div class="hero-headline-lockup">
+          <h1>
+            <span class="h1-line">DEPENDABLE WAREHOUSE LABOR</span>
+          </h1>
+          <p class="hero-label">
+            <span class="kicker-line">No Delays.</span>
+            <span class="kicker-line">No Excuses.</span>
+          </p>
+        </div>
+        <p class="hero-subtitle">Reliable crews that keep freight moving from start to finish.</p>
+        <p class="hero-trust-badges" aria-label="Coverage and response highlights">
+          <span>NC + SC coverage</span>
+          <span>Fast response</span>
+          <span>Fully insured</span>
+        </p>
+        <div class="hero-cta-group">
+          <a class="btn btn-primary" href="contact.html">Request a Quote >></a>
+          <div class="hero-secondary-actions">
+            <a class="btn btn-secondary" href="tel:+18287810002">Call Now >></a>
+            <a class="btn btn-secondary" href="mailto:info@carolinalumpers.com">Email Us >></a>
+          </div>
+        </div>
+      </div>
+      <picture>
+        <source media="(max-width: 1000px)" srcset="assets/CLS-003 (1) dark.webp" />
+        <img src="assets/CLS-003 (1) dark.webp" alt="Carolina Lumper Service hero image" />
+      </picture>
     </section>
 
     <section id="overview" class="overview">
@@ -58,21 +75,21 @@
     <section id="services" class="services">
       <h2>What We Handle</h2>
       <article>
-        <img src="assets/receiving.webp" alt="Inbound services" />
+        <img src="assets/dartUnload.png" alt="Inbound services" />
         <div>
           <h3>Inbound Services</h3>
           <p>Unload, receive, sort, and stage freight with clean handoffs into storage.</p>
         </div>
       </article>
       <article>
-        <img src="assets/orderFulfillment.webp" alt="Outbound services" />
+        <img src="assets/work_CLS_DockUnload_PalletizedTissue_BlurredLabels_01.png" alt="Outbound services" />
         <div>
           <h3>Outbound Services</h3>
           <p>Load planning, pallet preparation, and dock-ready execution for fast departures.</p>
         </div>
       </article>
       <article>
-        <img src="assets/putaway.jpg" alt="Additional support" />
+        <img src="assets/work_warehouse_orders.png" alt="Additional support" />
         <div>
           <h3>Additional Support</h3>
           <p>Sanitation, pallet handling, and customized labor support for special workflows.</p>
@@ -99,15 +116,8 @@
     </section>
   </main>
 
-  <footer id="contact">
-    <h2>Ready for Reliable Labor Support?</h2>
-    <p>Tell us your shift needs and site requirements. We will respond quickly with a practical plan.</p>
-    <div>
-      <a href="mailto:info@carolinalumpers.com">Email Us</a>
-      <a href="tel:+18287810002">Call +1 (828) 781-0002</a>
-      <a href="apply.html">Join Our Team</a>
-    </div>
-  </footer>
+  <div id="footer-container"></div>
+  <script src="js/script.js?v=20260422-modular-a2" defer></script>
 </body>
 
 </html>

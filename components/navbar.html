@@ -1,43 +1,20 @@
-<!-- Global Navbar Component -->
-<nav class="navbar" id="navbar">
-  <div class="logo-container">
-    <a href="index.html" class="logo-link">
-      <img src="assets/CLS_logo_black-BG.png" alt="CLS Logo" class="logo logo-dark">
-      <img src="assets/CLS_logo_white-BG.png" alt="CLS Logo" class="logo logo-light">
-    </a>
-    <a href="index.html" class="company-name">Carolina Lumper Service</a>
-  </div>
-  
-  <!-- PWA Status Icon (left of hamburger menu) -->
-  <span id="pwaStatusIcon" class="pwa-status-icon" style="display: none;" title="App Status"></span>
-  
-  <!-- Mobile hamburger menu -->
-  <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
+<header class="site-header">
+  <a class="wordmark" href="index.html" aria-label="Carolina Lumper Service home">
+    <img src="assets/CLS-icon-192.png" alt="Carolina Lumper Service logo" />
+    <span>Carolina Lumper Service</span>
+  </a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav"
+    aria-label="Open navigation">
+    <span></span>
+    <span></span>
+    <span></span>
   </button>
-  
-  <ul class="nav-links" id="navLinks">
-    <li><a href="index.html" data-en="Home" data-es="Inicio" data-pt="Início">Home</a></li>
-    <li><a href="about.html" data-en="About Us" data-es="Sobre Nosotros" data-pt="Sobre Nós">About Us</a></li>
-    <li><a href="services.html" data-en="Services" data-es="Servicios" data-pt="Serviços">Services</a></li>
-    <li><a href="contact.html" data-en="Contact" data-es="Contacto" data-pt="Contato">Contact</a></li>
-    <li><a href="apply.html" data-en="Apply" data-es="Postularse" data-pt="Candidatar">Apply</a></li>
-    <li><a href="employeeSignup.html" data-en="Sign Up" data-es="Regístrate" data-pt="Cadastre-se">Sign Up</a></li>
-    <li><a href="employeelogin.html" data-en="Login" data-es="Iniciar Sesión" data-pt="Entrar">Login</a></li>
-    <li><a href="employeeDashboard.html" data-en="Dashboard" data-es="Panel" data-pt="Painel">Dashboard</a></li>
-  </ul>
-  
-  <!-- Language Dropdown - Separate from nav-links for mobile bottom positioning -->
-  <div class="nav-language-container">
-    <select id="languageSelect" onchange="switchLanguage(this.value)" aria-label="Select Language">
-      <option value="en">English</option>
-      <option value="es">Español</option>
-      <option value="pt">Português</option>
-    </select>
-  </div>
-</nav>
-
-<!-- Mobile menu overlay -->
-<div class="nav-overlay" id="navOverlay"></div>
+  <nav id="primary-nav" aria-label="Primary">
+    <a href="index.html" data-en="Home" data-es="Inicio" data-pt="Início">Home</a>
+    <a href="about.html" data-en="About Us" data-es="Sobre Nosotros" data-pt="Sobre Nós">About Us</a>
+    <a href="services.html" data-en="Services" data-es="Servicios" data-pt="Serviços">Services</a>
+    <a href="contact.html" data-en="Contact" data-es="Contacto" data-pt="Contato">Contact</a>
+    <a href="apply.html" data-en="Careers" data-es="Carreras" data-pt="Carreiras">Careers</a>
+    <a href="employeelogin.html" data-en="Login" data-es="Iniciar Sesión" data-pt="Entrar">Login</a>
+  </nav>
+</header>
