@@ -476,7 +476,7 @@
   <!-- Form Logic -->
   <script>
     (function () {
-      const API_BASE = "https://script.google.com/a/macros/carolinalumpers.com/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec";
+      const API_BASE = "https://script.google.com/macros/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec";
       const modeBasicBtn = document.getElementById('modeBasic');
       const modeDetailedBtn = document.getElementById('modeDetailed');
       const basicPanel = document.getElementById('basicQuotePanel');
@@ -557,9 +557,10 @@
             });
           }
 
-          basicSuccessMsg.textContent = '✅ Thanks! Your basic quote request has been submitted.';
+          basicSuccessMsg.textContent = '✅ Thanks! Your quote request has been submitted. We\'ll be in touch soon.';
           basicSuccessMsg.style.display = 'block';
           basicSubmitBtn.disabled = true;
+          basicForm.reset();
         } catch (err) {
           if (typeof gtag === 'function') {
             gtag('event', 'submit_error', {
@@ -570,8 +571,9 @@
             });
           }
 
-          basicSuccessMsg.textContent = '⚠️ Error submitting basic quote request. Please try again.';
+          basicSuccessMsg.textContent = '⚠️ Unable to submit right now. Please try again.';
           basicSuccessMsg.style.display = 'block';
+          basicSubmitBtn.disabled = false;
         }
       });
 
@@ -690,8 +692,11 @@
               error_message: err && err.message ? err.message : 'Submission failed'
             });
           }
-          successMsg.textContent = '⚠️ Error submitting request. Please try again.';
+          successMsg.textContent = '⚠️ Unable to submit right now. Please try again.';
           successMsg.classList.add('show');
+          submitBtn.disabled = false;
+          nextBtn.disabled = false;
+          backBtn.disabled = false;
         }
       }
 
