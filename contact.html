@@ -540,13 +540,16 @@
 
         const fd = new FormData(basicForm);
         const services = Array.from(basicForm.querySelectorAll('input[name="services"]:checked')).map(i => i.value);
-        if (services.length) fd.set('services', services.join(', '));
-        fd.append('startedAt', Date.now());
-        fd.append('formType', 'quote-request-basic');
+        const payload = {};
+        fd.forEach((v, k) => { payload[k] = v; });
+        if (services.length) payload.services = services.join(', ');
+        payload.startedAt = Date.now();
+        payload.formType = 'quote-request-basic';
 
         try {
-          const res = await fetch(API_BASE, { method: 'POST', body: fd });
-          if (!res.ok) throw new Error('Submission failed');
+          const res = await fetch(API_BASE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) throw new Error(data.error || 'Submission failed');
 
           if (typeof gtag === 'function') {
             gtag('event', 'generate_lead', {
@@ -663,12 +666,15 @@
         if (!validateStep(current)) return;
 
         const { fd } = getAllValues();
-        fd.append('startedAt', Date.now());
-        fd.append('formType', 'quote-request-detailed');
+        const dpayload = {};
+        fd.forEach((v, k) => { dpayload[k] = v; });
+        dpayload.startedAt = Date.now();
+        dpayload.formType = 'quote-request-detailed';
 
         try {
-          const res = await fetch(API_BASE, { method: 'POST', body: fd });
-          if (res.ok) {
+          const res = await fetch(API_BASE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dpayload) });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.ok) {
             if (typeof gtag === 'function') {
               gtag('event', 'generate_lead', {
                 form_name: 'quote_request',
