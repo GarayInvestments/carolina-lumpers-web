@@ -2,7 +2,8 @@
 <html lang="en">
 
 <head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3032955456184358" crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3032955456184358"
+    crossorigin="anonymous"></script>
   <!-- Cache Version Control - Update this timestamp when deploying -->
   <script>
     const CACHE_VERSION = '20251222-1230'; // Format: YYYYMMDD-HHMM
@@ -612,7 +613,7 @@
   <script>
     function handleW9Cancel() {
       sessionStorage.setItem('CLS_W9BypassOnce', 'true');
-      window.location.href = 'employeeDashboard.html';
+      window.location.href = 'employeelogin.html';
     }
 
     // W-9 Form Submission Logic
@@ -733,7 +734,7 @@
 
           // Redirect to dashboard after 2 seconds
           setTimeout(() => {
-            window.location.href = 'employeeDashboard.html';
+            window.location.href = 'employeelogin.html';
           }, 2000);
         } else {
           // Check if error is due to already having an approved W-9
@@ -743,7 +744,7 @@
             showStatus('info', result.message, result.message, result.message);
 
             setTimeout(() => {
-              window.location.href = 'employeeDashboard.html';
+              window.location.href = 'employeelogin.html';
             }, 2000);
           } else {
             showStatus('error', result.message || 'Failed to submit W-9. Please try again.',
@@ -828,7 +829,7 @@
       if (w9Status === 'approved') {
         // User already has approved W-9, redirect to dashboard
         alert('You already have an approved W-9 on file.');
-        window.location.href = 'employeeDashboard.html';
+        window.location.href = 'employeelogin.html';
         return;
       }
 
@@ -844,7 +845,7 @@
           // If approved, redirect to dashboard
           if (result.status === 'approved') {
             alert('You already have an approved W-9 on file.');
-            window.location.href = 'employeeDashboard.html';
+            window.location.href = 'employeelogin.html';
             return;
           }
         }
