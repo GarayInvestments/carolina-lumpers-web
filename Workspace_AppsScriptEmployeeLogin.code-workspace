@@ -15,12 +15,6 @@
     {
       "path": "../carolina-lumpers-web-variant-a",
     },
-    {
-      "path": "../carolina-lumpers-web-variant-b",
-    },
-    {
-      "path": "../carolina-lumpers-web-variant-c",
-    },
   ],
   "settings": {
     // File exclusions (keep explorer clean)
