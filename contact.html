@@ -120,14 +120,8 @@
       <h2>Request a Quote</h2>
       <p>Fill out the quick form below, and our team will follow up with scheduling and pricing details.</p>
 
-      <div class="quote-mode-toggle" role="tablist" aria-label="Quote request mode">
-        <button type="button" id="modeBasic" class="mode-btn" role="tab" aria-selected="false">Basic Quote</button>
-        <button type="button" id="modeDetailed" class="mode-btn active" role="tab" aria-selected="true">Detailed
-          Quote</button>
-      </div>
-
-      <div id="basicQuotePanel" class="quote-mode-panel" hidden>
-        <form id="basicQuoteForm" class="basic-quote-form" novalidate>
+      <div id="quotePanel">
+        <form id="quoteRequestForm" class="basic-quote-form" novalidate>
           <div class="grid grid-2">
             <div class="field">
               <label class="required">Contact Name</label>
@@ -199,258 +193,12 @@
           <div class="form-nav">
             <div class="left"></div>
             <div class="right">
-              <button type="submit" id="basicSubmitBtn" class="btn btn-primary">Submit Basic Quote</button>
+              <button type="submit" id="quoteSubmitBtn" class="btn btn-primary">Submit Quote Request</button>
             </div>
           </div>
         </form>
 
-        <div id="basicSuccessMsg" class="success" style="display:none;">✅ Thanks! Your basic quote request has been
-          submitted.</div>
-      </div>
-
-      <div id="detailedQuotePanel" class="quote-mode-panel active">
-
-        <div class="progress" aria-live="polite">
-          <div class="progress-top">
-            <strong id="stepLabel">Step 1 of 7</strong>
-            <span id="stepName">Contact Information</span>
-          </div>
-          <div class="bar">
-            <div class="bar-fill" id="barFill"></div>
-          </div>
-          <div class="steps" id="stepsDots"></div>
-        </div>
-
-        <form id="quoteForm" novalidate>
-          <!-- 1. Contact Information -->
-          <section class="form-step active" data-title="Contact Information">
-            <div class="grid grid-2">
-              <div class="field">
-                <label>Company Name (if applicable)</label>
-                <input name="companyName" type="text" autocomplete="organization">
-              </div>
-              <div class="field">
-                <label>Contact Person / Title</label>
-                <input name="contactName" type="text" autocomplete="name">
-              </div>
-              <div class="field">
-                <label class="required">Phone Number</label>
-                <input name="phone" type="tel" autocomplete="tel" required>
-                <div class="error">Please enter a phone number.</div>
-              </div>
-              <div class="field">
-                <label class="required">Email Address</label>
-                <input name="email" type="email" autocomplete="email" required>
-                <div class="error">Please enter a valid email.</div>
-              </div>
-              <div class="field">
-                <label>Preferred Contact Method</label>
-                <select name="preferredContact">
-                  <option value="">Select…</option>
-                  <option>Phone</option>
-                  <option>Email</option>
-                  <option>Text</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>How did you hear about us? (optional)</label>
-                <input name="referral" type="text" placeholder="Google, referral, carrier rep, etc.">
-              </div>
-            </div>
-          </section>
-
-          <!-- 2. Service Details -->
-          <section class="form-step" data-title="Service Details">
-            <div class="mb8"><label>Type of Service Needed (check all that apply)</label></div>
-            <div class="checklist">
-              <label class="chip"><input type="checkbox" name="services" value="Lumper">Lumper</label>
-              <label class="chip"><input type="checkbox" name="services" value="Unloading">Unloading</label>
-              <label class="chip"><input type="checkbox" name="services" value="Loading">Loading</label>
-              <label class="chip"><input type="checkbox" name="services" value="Pallet Breakdown">Pallet
-                Breakdown</label>
-              <label class="chip"><input type="checkbox" name="services" value="Repacking">Repacking</label>
-              <label class="chip"><input type="checkbox" name="services" value="Cross-Docking">Cross-Docking</label>
-              <label class="chip"><input type="checkbox" name="services" value="Sorting">Sorting</label>
-              <label class="chip"><input type="checkbox" name="services" value="Other">Other</label>
-            </div>
-
-            <div class="grid grid-2" style="margin-top:12px">
-              <div class="field">
-                <label>Frequency of Service</label>
-                <select name="frequency">
-                  <option value="">Select…</option>
-                  <option>One-time</option>
-                  <option>Daily</option>
-                  <option>Weekly</option>
-                  <option>Monthly</option>
-                  <option>Seasonal</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Expected Start Date</label>
-                <input name="startDate" type="date">
-              </div>
-              <div class="field">
-                <label>Shift or Time Window</label>
-                <select name="shift">
-                  <option value="">Select…</option>
-                  <option>Morning</option>
-                  <option>Afternoon</option>
-                  <option>Night</option>
-                  <option>Flexible</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Estimated Duration (optional)</label>
-                <input name="duration" type="text" placeholder="e.g., 4 hours, all shift">
-              </div>
-              <div class="field">
-                <label>Ongoing Account or Trial Job? (optional)</label>
-                <input name="ongoingOrTrial" type="text" placeholder="Ongoing, pilot, or one-off" />
-              </div>
-            </div>
-          </section>
-
-          <!-- 3. Location Details -->
-          <section class="form-step" data-title="Location Details">
-            <div class="grid grid-2">
-              <div class="field">
-                <label class="required">Facility Name / Warehouse</label>
-                <input name="facility" type="text" required>
-                <div class="error">Facility name is required.</div>
-              </div>
-              <div class="field">
-                <label class="required">Address</label>
-                <input name="address" type="text" required placeholder="Street, City, State, ZIP">
-                <div class="error">Address is required.</div>
-              </div>
-              <div class="field">
-                <label>Dock or Bay Number (if known)</label>
-                <input name="dock" type="text">
-              </div>
-              <div class="field">
-                <label>Entry or Safety Requirements</label>
-                <input name="entryRequirements" type="text" placeholder="Badges, PPE, safety videos, etc.">
-              </div>
-              <div class="field">
-                <label>On-Site Contact Name & Phone</label>
-                <input name="onsiteContact" type="text" placeholder="Name, phone">
-              </div>
-            </div>
-          </section>
-
-          <!-- 4. Volume & Workforce -->
-          <section class="form-step" data-title="Volume & Workforce">
-            <div class="grid grid-2">
-              <div class="field">
-                <label>Average Number of Loads</label>
-                <input name="avgLoads" type="text" placeholder="per Day / Week">
-              </div>
-              <div class="field">
-                <label>Type of Freight</label>
-                <select name="freight">
-                  <option value="">Select…</option>
-                  <option>Palletized</option>
-                  <option>Floor-Loaded</option>
-                  <option>Mixed</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Estimated Number of Workers Needed (if known)</label>
-                <input name="workersNeeded" type="number" min="1" step="1" placeholder="e.g., 4">
-              </div>
-              <div class="field">
-                <label>Special Equipment Required</label>
-                <input name="equipment" type="text" placeholder="Pallet Jack, Forklift, PPE, Other">
-              </div>
-              <div class="field">
-                <label>Average Load Weight or Container Size (optional)</label>
-                <input name="avgWeight" type="text" placeholder="e.g., 40' HC, 20k lbs">
-              </div>
-            </div>
-          </section>
-
-          <!-- 5. Billing Information -->
-          <section class="form-step" data-title="Billing Information">
-            <div class="grid grid-2">
-              <div class="field">
-                <label>Billing Contact Name & Email</label>
-                <input name="billingContact" type="text" placeholder="Name, email">
-              </div>
-              <div class="field">
-                <label>Preferred Billing Method</label>
-                <select name="billingMethod">
-                  <option value="">Select…</option>
-                  <option>Email</option>
-                  <option>Portal</option>
-                  <option>Paper</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Payment Terms or Requirements</label>
-                <input name="paymentTerms" type="text" placeholder="Net 15, Net 30, ACH preferred">
-              </div>
-              <div class="field">
-                <label>Accounts Payable Address (if different)</label>
-                <input name="apAddress" type="text">
-              </div>
-              <div class="field">
-                <label>Tax Exemption Certificate (if applicable)</label>
-                <input name="taxExempt" type="text" placeholder="Number / note">
-              </div>
-              <div class="field">
-                <label>Require W9 or insurance certificate before service?</label>
-                <select name="requireDocs">
-                  <option value="">Select…</option>
-                  <option>Yes</option>
-                  <option>No</option>
-                  <option>Maybe</option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <!-- 6. Additional Notes -->
-          <section class="form-step" data-title="Additional Notes">
-            <div class="field">
-              <label>Special Instructions or Comments</label>
-              <textarea name="notes"
-                placeholder="Include shift overlap, badge requirements, truck staging details…"></textarea>
-            </div>
-            <div class="grid grid-2" style="margin-top:12px">
-              <label class="chip"><input type="checkbox" name="sendRateSheet" value="Yes">Please send me a standard rate
-                sheet</label>
-              <label class="chip"><input type="checkbox" name="siteVisit" value="Yes">Request a site visit before
-                quoting</label>
-            </div>
-          </section>
-
-          <!-- 7. Confirmation & Authorization -->
-          <section class="form-step" data-title="Confirmation">
-            <div class="grid grid-2" style="margin-top:12px">
-              <div class="field">
-                <label>Signature / Name</label>
-                <input name="signature" type="text" placeholder="Type your full name">
-              </div>
-              <div class="field">
-                <label>Date</label>
-                <input name="signatureDate" type="date">
-              </div>
-            </div>
-            <p class="helper">By submitting, you authorize Carolina Lumper Service to contact you for scheduling and
-              provide a written quote.</p>
-          </section>
-
-          <!-- Form Navigation -->
-          <div class="form-nav">
-            <button type="button" id="backBtn" class="btn btn-secondary" style="display:none;">← Back</button>
-            <button type="button" id="nextBtn" class="btn btn-primary">Next →</button>
-            <button type="submit" id="submitBtn" class="btn btn-primary" style="display:none;">Submit Request</button>
-          </div>
-        </form>
-
-        <!-- Success Message -->
-        <div id="successMsg" class="success" style="display:none;">✅ Thanks! Your request has been submitted.</div>
+        <div id="quoteSuccessMsg" class="success" style="display:none;">✅ Thanks! Your quote request has been submitted. We'll be in touch soon.</div>
       </div>
     </section>
 
@@ -467,8 +215,7 @@
   <footer>
     <p>© 2024 Carolina Lumper Service. All rights reserved.</p>
     <div class="footer-icons">
-      <a href="https://www.facebook.com/profile.php?id=61569872795390"><img src="assets/facebook-icon.png"
-          alt="Facebook"></a>
+      <a href="https://www.facebook.com/profile.php?id=61569872795390"><img src="assets/facebook-icon.png" alt="Facebook"></a>
       <a href="#"><img src="assets/linkedin-icon.png" alt="LinkedIn"></a>
     </div>
   </footer>
@@ -476,31 +223,10 @@
   <!-- Form Logic -->
   <script>
     (function () {
-      const API_BASE = "https://script.google.com/macros/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec";
-      const modeBasicBtn = document.getElementById('modeBasic');
-      const modeDetailedBtn = document.getElementById('modeDetailed');
-      const basicPanel = document.getElementById('basicQuotePanel');
-      const detailedPanel = document.getElementById('detailedQuotePanel');
-
-      function setQuoteMode(mode) {
-        const isBasic = mode === 'basic';
-        basicPanel.hidden = !isBasic;
-        detailedPanel.hidden = isBasic;
-        basicPanel.classList.toggle('active', isBasic);
-        detailedPanel.classList.toggle('active', !isBasic);
-        modeBasicBtn.classList.toggle('active', isBasic);
-        modeDetailedBtn.classList.toggle('active', !isBasic);
-        modeBasicBtn.setAttribute('aria-selected', isBasic ? 'true' : 'false');
-        modeDetailedBtn.setAttribute('aria-selected', isBasic ? 'false' : 'true');
-      }
-
-      modeBasicBtn.addEventListener('click', () => setQuoteMode('basic'));
-      modeDetailedBtn.addEventListener('click', () => setQuoteMode('detailed'));
-      setQuoteMode('detailed');
-
-      const basicForm = document.getElementById('basicQuoteForm');
-      const basicSuccessMsg = document.getElementById('basicSuccessMsg');
-      const basicSubmitBtn = document.getElementById('basicSubmitBtn');
+      const API_BASE = 'https://script.google.com/macros/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec';
+      const form = document.getElementById('quoteRequestForm');
+      const successMsg = document.getElementById('quoteSuccessMsg');
+      const submitBtn = document.getElementById('quoteSubmitBtn');
 
       function validateEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
@@ -510,208 +236,61 @@
         parent.classList.toggle('invalid', invalid);
       }
 
-      function validateBasicForm() {
-        const requiredText = [
-          basicForm.querySelector('input[name="contactName"]'),
-          basicForm.querySelector('input[name="phone"]'),
-          basicForm.querySelector('input[name="facility"]'),
-          basicForm.querySelector('input[name="address"]')
+      function validateForm() {
+        const required = [
+          form.querySelector('input[name="contactName"]'),
+          form.querySelector('input[name="phone"]'),
+          form.querySelector('input[name="facility"]'),
+          form.querySelector('input[name="address"]')
         ];
         let ok = true;
-
-        requiredText.forEach((f) => {
+        required.forEach(f => {
           const invalid = !f.value.trim();
           markInvalid(f, invalid);
           if (invalid) ok = false;
         });
-
-        const email = basicForm.querySelector('input[name="email"]');
+        const email = form.querySelector('input[name="email"]');
         const emailInvalid = !validateEmail(email.value);
         markInvalid(email, emailInvalid);
         if (emailInvalid) ok = false;
-
         return ok;
       }
 
-      basicForm.addEventListener('submit', async (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        basicSuccessMsg.style.display = 'none';
-        if (!validateBasicForm()) return;
+        successMsg.style.display = 'none';
+        if (!validateForm()) return;
 
-        const fd = new FormData(basicForm);
-        const services = Array.from(basicForm.querySelectorAll('input[name="services"]:checked')).map(i => i.value);
+        const fd = new FormData(form);
+        const services = Array.from(form.querySelectorAll('input[name="services"]:checked')).map(i => i.value);
         const payload = {};
         fd.forEach((v, k) => { payload[k] = v; });
         if (services.length) payload.services = services.join(', ');
         payload.startedAt = Date.now();
-        payload.formType = 'quote-request-basic';
+        payload.formType = 'quote-request';
 
-        try {
-          const res = await fetch(API_BASE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || !data.ok) throw new Error(data.error || 'Submission failed');
+        // Google Apps Script cannot return CORS headers on browser POST responses.
+        // Use no-cors (fire-and-forget) to avoid the browser blocking the request.
+        fetch(API_BASE, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).catch(() => {});
 
-          if (typeof gtag === 'function') {
-            gtag('event', 'generate_lead', {
-              form_name: 'quote_request_basic',
-              page_location: window.location.href,
-              page_path: window.location.pathname,
-              method: 'web_form'
-            });
-          }
-
-          basicSuccessMsg.textContent = '✅ Thanks! Your quote request has been submitted. We\'ll be in touch soon.';
-          basicSuccessMsg.style.display = 'block';
-          basicSubmitBtn.disabled = true;
-          basicForm.reset();
-        } catch (err) {
-          if (typeof gtag === 'function') {
-            gtag('event', 'submit_error', {
-              form_name: 'quote_request_basic',
-              page_location: window.location.href,
-              page_path: window.location.pathname,
-              error_message: err && err.message ? err.message : 'Submission failed'
-            });
-          }
-
-          basicSuccessMsg.textContent = '⚠️ Unable to submit right now. Please try again.';
-          basicSuccessMsg.style.display = 'block';
-          basicSubmitBtn.disabled = false;
+        if (typeof gtag === 'function') {
+          gtag('event', 'generate_lead', {
+            form_name: 'quote_request',
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+            method: 'web_form'
+          });
         }
+
+        successMsg.style.display = 'block';
+        submitBtn.disabled = true;
+        form.reset();
       });
-
-      const form = document.getElementById('quoteForm');
-      const steps = Array.from(form.querySelectorAll('.form-step'));
-      const stepLabel = document.getElementById('stepLabel');
-      const stepName = document.getElementById('stepName');
-      const barFill = document.getElementById('barFill');
-      const backBtn = document.getElementById('backBtn');
-      const nextBtn = document.getElementById('nextBtn');
-      const submitBtn = document.getElementById('submitBtn');
-      const successMsg = document.getElementById('successMsg');
-      const summaryList = document.getElementById('summaryList');
-      const stepsDots = document.getElementById('stepsDots');
-      const saveDraftBtn = document.getElementById('saveDraftBtn');
-
-      let current = 0;
-      const total = steps.length;
-
-      const titles = steps.map(s => s.dataset.title || 'Step');
-      titles.forEach((t, i) => {
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'step-dot';
-        dot.textContent = (i + 1);
-        dot.title = t;
-        dot.addEventListener('click', () => go(i, true));
-        stepsDots.appendChild(dot);
-      });
-
-      function updateProgress() {
-        stepLabel.textContent = `Step ${current + 1} of ${total}`;
-        stepName.textContent = titles[current];
-        barFill.style.transform = `scaleX(${(current + 1) / total})`;
-        stepsDots.querySelectorAll('.step-dot').forEach((d, i) => {
-          d.setAttribute('aria-current', i === current ? 'step' : 'false');
-          d.classList.toggle('done', i < current);
-        });
-        backBtn.style.visibility = current === 0 ? 'hidden' : 'visible';
-        nextBtn.style.display = current === total - 1 ? 'none' : 'inline-flex';
-        submitBtn.style.display = current === total - 1 ? 'inline-flex' : 'none';
-      }
-
-      function go(n, skip = false) {
-        if (!skip && n > current && !validateStep(current)) return;
-        steps[current].classList.remove('active');
-        current = Math.max(0, Math.min(total - 1, n));
-        steps[current].classList.add('active');
-        if (current === total - 1) buildSummary();
-        updateProgress();
-        document.getElementById('quote-request').scrollIntoView({ behavior: 'smooth' });
-      }
-
-      function next() { go(current + 1); }
-      function back() { go(current - 1, true); }
-
-      function validateStep(idx) {
-        const stepEl = steps[idx];
-        const fields = stepEl.querySelectorAll('.field');
-        fields.forEach(f => f.classList.remove('invalid'));
-        let ok = true;
-
-        if (idx === 0) {
-          const phone = stepEl.querySelector('input[name="phone"]');
-          const email = stepEl.querySelector('input[name="email"]');
-          if (!phone.value.trim()) { phone.parentElement.classList.add('invalid'); ok = false; }
-          if (!validateEmail(email.value)) { email.parentElement.classList.add('invalid'); ok = false; }
-        }
-        if (idx === 2) {
-          const facility = stepEl.querySelector('input[name="facility"]');
-          const address = stepEl.querySelector('input[name="address"]');
-          if (!facility.value.trim()) { facility.parentElement.classList.add('invalid'); ok = false; }
-          if (!address.value.trim()) { address.parentElement.classList.add('invalid'); ok = false; }
-        }
-        return ok;
-      }
-
-      function getAllValues() {
-        const fd = new FormData(form);
-        const services = Array.from(form.querySelectorAll('input[name="services"]:checked')).map(i => i.value);
-        if (services.length) fd.set('services', services.join(', '));
-        return { fd };
-      }
-
-      async function submitForm(e) {
-        e.preventDefault();
-        if (!validateStep(current)) return;
-
-        const { fd } = getAllValues();
-        const dpayload = {};
-        fd.forEach((v, k) => { dpayload[k] = v; });
-        dpayload.startedAt = Date.now();
-        dpayload.formType = 'quote-request-detailed';
-
-        try {
-          const res = await fetch(API_BASE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dpayload) });
-          const data = await res.json().catch(() => ({}));
-          if (res.ok && data.ok) {
-            if (typeof gtag === 'function') {
-              gtag('event', 'generate_lead', {
-                form_name: 'quote_request',
-                page_location: window.location.href,
-                page_path: window.location.pathname,
-                method: 'web_form'
-              });
-            }
-            successMsg.classList.add('show');
-            submitBtn.disabled = true;
-            nextBtn.disabled = true;
-            backBtn.disabled = true;
-            localStorage.removeItem('CLS_QUOTE_DRAFT');
-          } else throw new Error();
-        } catch (err) {
-          if (typeof gtag === 'function') {
-            gtag('event', 'submit_error', {
-              form_name: 'quote_request',
-              page_location: window.location.href,
-              page_path: window.location.pathname,
-              error_message: err && err.message ? err.message : 'Submission failed'
-            });
-          }
-          successMsg.textContent = '⚠️ Unable to submit right now. Please try again.';
-          successMsg.classList.add('show');
-          submitBtn.disabled = false;
-          nextBtn.disabled = false;
-          backBtn.disabled = false;
-        }
-      }
-
-      document.getElementById('nextBtn').addEventListener('click', next);
-      document.getElementById('backBtn').addEventListener('click', back);
-      document.getElementById('quoteForm').addEventListener('submit', submitForm);
-
-      steps[0].classList.add('active');
-      updateProgress();
     })();
   </script>
 </body>
