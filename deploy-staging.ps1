@@ -45,6 +45,39 @@ foreach ($d in $dirs) {
   }
 }
 
+Write-Host "Ensuring public readability for uploaded objects..."
+& $gcloud storage buckets update $bucket --clear-pap --project=$project 2>$null
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "WARN: Could not clear public access prevention. Continuing with object ACL updates."
+}
+
+& $gcloud storage objects update "$bucket/**" --add-acl-grant=entity=AllUsers,role=READER --project=$project --quiet
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "WARN: Public object ACL update returned non-zero exit code ($LASTEXITCODE)."
+} else {
+  Write-Host "Public object ACL update completed."
+}
+
+$healthUrls = @(
+  "https://storage.googleapis.com/cls-modern-variant-a-20260420-web/index.html",
+  "https://storage.googleapis.com/cls-modern-variant-a-20260420-web/css/index-fresh-variant.css",
+  "https://storage.googleapis.com/cls-modern-variant-a-20260420-web/assets/CLS-003%20(1)%20dark.webp"
+)
+
+Write-Host "Public URL health checks:"
+foreach ($url in $healthUrls) {
+  try {
+    $res = Invoke-WebRequest -Uri $url -Method Head -TimeoutSec 30 -ErrorAction Stop
+    Write-Host "  OK $($res.StatusCode) $url"
+  } catch {
+    if ($_.Exception.Response) {
+      Write-Host "  ERR $([int]$_.Exception.Response.StatusCode) $url"
+    } else {
+      Write-Host "  ERR unknown $url"
+    }
+  }
+}
+
 Write-Host "Staging URLs:"
 Write-Host "  https://storage.googleapis.com/cls-modern-variant-a-20260420-web/index.html"
 Write-Host "  https://storage.googleapis.com/cls-modern-variant-a-20260420-web/services.html"
