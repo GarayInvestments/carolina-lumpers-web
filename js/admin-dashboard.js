@@ -3,19 +3,19 @@
  * Manages sidebar navigation and initializes all admin sub-modules
  */
 
-import { ClockInManager } from './admin/clockin-manager.js';
-import { TimeEditRequests } from './admin/time-edit-requests.js';
-import { RunPayroll } from './admin/run-payroll.js';
-import { QuickBooksSync } from './admin/quickbooks-sync.js';
-import { InvoiceManagement } from './admin/invoice-management.js';
-import { W9Management } from './admin/w9-management.js';
-import { ViewAs } from './admin/view-as.js';
+import { ClockInManager } from "./admin/clockin-manager.js";
+import { TimeEditRequests } from "./admin/time-edit-requests.js";
+import { RunPayroll } from "./admin/run-payroll.js";
+import { QuickBooksSync } from "./admin/quickbooks-sync.js";
+import { InvoiceManagement } from "./admin/invoice-management.js";
+import { W9Management } from "./admin/w9-management.js";
+import { ViewAs } from "./admin/view-as.js";
 
 export class AdminDashboard {
   constructor() {
-    this.apiUrl = 'https://cls-proxy.s-garay.workers.dev';
+    this.apiUrl = "https://cls-proxy.s-garay.workers.dev";
     this.modules = {};
-    this.currentSection = 'overview';
+    this.currentSection = "overview";
   }
 
   /**
@@ -24,7 +24,7 @@ export class AdminDashboard {
   async init() {
     // Check authentication
     if (!this.checkAuth()) {
-      window.location.href = 'employeelogin.html';
+      window.location.href = "employeelogin.html";
       return;
     }
 
@@ -32,41 +32,41 @@ export class AdminDashboard {
     this.setupNavigation();
     this.setupUserInfo();
     this.setupLogout();
-    
+
     // Handle initial hash navigation FIRST (before loading stats)
     this.handleInitialHash();
-    
+
     // Show loading spinners immediately
     this.showStatLoadingSpinners();
-    
+
     // Initialize admin modules
     await this.initModules();
-    
+
     // Load overview stats (in background, doesn't affect navigation)
     await this.loadOverviewStats();
 
-    console.log('✅ Admin Dashboard initialized');
+    console.log("✅ Admin Dashboard initialized");
   }
 
   /**
    * Handle initial hash on page load (for refresh preservation)
    */
   handleInitialHash() {
-    const hash = window.location.hash.replace('#', '');
-    
-    if (hash && hash !== 'overview') {
+    const hash = window.location.hash.replace("#", "");
+
+    if (hash && hash !== "overview") {
       // Check if section exists
       const sectionExists = document.getElementById(hash);
-      
+
       if (sectionExists) {
         this.navigateToSection(hash);
       } else {
         // Invalid hash, go to overview
-        this.navigateToSection('overview');
+        this.navigateToSection("overview");
       }
     } else {
       // No hash or overview, ensure overview is shown
-      this.navigateToSection('overview');
+      this.navigateToSection("overview");
     }
   }
 
@@ -74,28 +74,34 @@ export class AdminDashboard {
    * Show loading spinners in stat cards immediately
    */
   showStatLoadingSpinners() {
-    document.getElementById('statPendingEdits').innerHTML = '<div class="stat-spinner"></div>';
-    document.getElementById('statActiveWorkers').innerHTML = '<div class="stat-spinner"></div>';
-    document.getElementById('statWeekHours').innerHTML = '<div class="stat-spinner"></div>';
-    document.getElementById('statWeekRevenue').innerHTML = '<div class="stat-spinner"></div>';
+    document.getElementById("statPendingEdits").innerHTML =
+      '<div class="stat-spinner"></div>';
+    document.getElementById("statActiveWorkers").innerHTML =
+      '<div class="stat-spinner"></div>';
+    document.getElementById("statWeekHours").innerHTML =
+      '<div class="stat-spinner"></div>';
+    document.getElementById("statWeekRevenue").innerHTML =
+      '<div class="stat-spinner"></div>';
   }
 
   /**
    * Check if user is authenticated and is admin
    */
   checkAuth() {
-    const workerId = localStorage.getItem('CLS_WorkerID');
-    const role = localStorage.getItem('CLS_Role');
+    const workerId = localStorage.getItem("CLS_WorkerID");
+    const role = localStorage.getItem("CLS_Role");
 
     if (!workerId) {
-      console.warn('No user session found');
+      console.warn("No user session found");
       return false;
     }
 
-    if (role !== 'Admin') {
-      console.warn('User is not admin - redirecting to employee dashboard');
-      alert('Access denied. This admin panel is for administrators only.\n\nSupervisors and workers should use the employee dashboard.');
-      window.location.href = 'employeeDashboard.html';
+    if (role !== "Admin") {
+      console.warn("User is not admin - redirecting to employee dashboard");
+      alert(
+        "Access denied. This admin panel is for administrators only.\n\nSupervisors and workers should use the employee dashboard.",
+      );
+      window.location.href = "employeelogin.html";
       return false;
     }
 
@@ -107,9 +113,9 @@ export class AdminDashboard {
    */
   setupNavigation() {
     // Desktop navigation
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
+    const navLinks = document.querySelectorAll(".nav-link");
+    navLinks.forEach((link) => {
+      link.addEventListener("click", (e) => {
         e.preventDefault();
         const section = link.dataset.section;
         this.navigateToSection(section);
@@ -117,45 +123,48 @@ export class AdminDashboard {
     });
 
     // Bottom navigation (mobile)
-    const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
-    bottomNavItems.forEach(item => {
-      item.addEventListener('click', (e) => {
+    const bottomNavItems = document.querySelectorAll(".bottom-nav-item");
+    bottomNavItems.forEach((item) => {
+      item.addEventListener("click", (e) => {
         const section = item.dataset.section;
         this.navigateToSection(section);
       });
     });
 
     // Quick action buttons
-    const quickActionBtns = document.querySelectorAll('[data-navigate]');
-    quickActionBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
+    const quickActionBtns = document.querySelectorAll("[data-navigate]");
+    quickActionBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
         const section = btn.dataset.navigate;
         this.navigateToSection(section);
       });
     });
 
     // Mobile menu toggle
-    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
+    const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
 
     if (mobileMenuToggle) {
-      mobileMenuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
+      mobileMenuToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
       });
     }
 
     if (sidebarToggle) {
-      sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.remove('open');
+      sidebarToggle.addEventListener("click", () => {
+        sidebar.classList.remove("open");
       });
     }
 
     // Close sidebar on mobile when clicking outside
-    document.addEventListener('click', (e) => {
+    document.addEventListener("click", (e) => {
       if (window.innerWidth <= 1024) {
-        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-          sidebar.classList.remove('open');
+        if (
+          !sidebar.contains(e.target) &&
+          !mobileMenuToggle.contains(e.target)
+        ) {
+          sidebar.classList.remove("open");
         }
       }
     });
@@ -166,41 +175,41 @@ export class AdminDashboard {
    */
   navigateToSection(section) {
     // Update active nav link (desktop)
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.classList.remove('active');
+    document.querySelectorAll(".nav-link").forEach((link) => {
+      link.classList.remove("active");
       if (link.dataset.section === section) {
-        link.classList.add('active');
+        link.classList.add("active");
       }
     });
 
     // Update active bottom nav item (mobile)
-    document.querySelectorAll('.bottom-nav-item').forEach(item => {
-      item.classList.remove('active');
+    document.querySelectorAll(".bottom-nav-item").forEach((item) => {
+      item.classList.remove("active");
       if (item.dataset.section === section) {
-        item.classList.add('active');
+        item.classList.add("active");
       }
     });
 
     // Show/hide sections
-    document.querySelectorAll('.content-section').forEach(sec => {
-      sec.classList.remove('active');
+    document.querySelectorAll(".content-section").forEach((sec) => {
+      sec.classList.remove("active");
       if (sec.id === section) {
-        sec.classList.add('active');
+        sec.classList.add("active");
       }
     });
 
     // Close mobile sidebar
     if (window.innerWidth <= 1024) {
-      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById("sidebar").classList.remove("open");
     }
 
     this.currentSection = section;
 
     // Update URL hash
     window.location.hash = section;
-    
+
     // Scroll to top of main content area
-    const mainContent = document.querySelector('.main-content');
+    const mainContent = document.querySelector(".main-content");
     if (mainContent) {
       mainContent.scrollTop = 0;
     }
@@ -210,33 +219,34 @@ export class AdminDashboard {
    * Setup user info display
    */
   setupUserInfo() {
-    const workerName = localStorage.getItem('CLS_WorkerName') || 'Admin User';
-    const role = localStorage.getItem('CLS_Role') || 'Administrator';
+    const workerName = localStorage.getItem("CLS_WorkerName") || "Admin User";
+    const role = localStorage.getItem("CLS_Role") || "Administrator";
 
     // Get initials
-    const nameParts = workerName.split(' ');
-    const initials = nameParts.length > 1 
-      ? `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
-      : nameParts[0].substring(0, 2).toUpperCase();
+    const nameParts = workerName.split(" ");
+    const initials =
+      nameParts.length > 1
+        ? `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
+        : nameParts[0].substring(0, 2).toUpperCase();
 
-    document.getElementById('userInitials').textContent = initials;
-    document.getElementById('userName').textContent = workerName;
-    document.getElementById('userRole').textContent = role;
+    document.getElementById("userInitials").textContent = initials;
+    document.getElementById("userName").textContent = workerName;
+    document.getElementById("userRole").textContent = role;
   }
 
   /**
    * Setup logout functionality
    */
   setupLogout() {
-    const btnLogout = document.getElementById('btnLogout');
+    const btnLogout = document.getElementById("btnLogout");
     if (btnLogout) {
-      btnLogout.addEventListener('click', () => {
-        if (confirm('Are you sure you want to logout?')) {
-          localStorage.removeItem('CLS_WorkerID');
-          localStorage.removeItem('CLS_WorkerName');
-          localStorage.removeItem('CLS_Email');
-          localStorage.removeItem('CLS_Role');
-          window.location.href = 'employeelogin.html';
+      btnLogout.addEventListener("click", () => {
+        if (confirm("Are you sure you want to logout?")) {
+          localStorage.removeItem("CLS_WorkerID");
+          localStorage.removeItem("CLS_WorkerName");
+          localStorage.removeItem("CLS_Email");
+          localStorage.removeItem("CLS_Role");
+          window.location.href = "employeelogin.html";
         }
       });
     }
@@ -277,13 +287,11 @@ export class AdminDashboard {
 
       // Initialize View As
       this.modules.viewAs = new ViewAs(this.apiUrl);
-      await this.modules.viewAs.init().catch(err => {
-        console.warn('View As module failed to initialize:', err);
+      await this.modules.viewAs.init().catch((err) => {
+        console.warn("View As module failed to initialize:", err);
       });
-
-
     } catch (error) {
-      console.error('Error initializing modules:', error);
+      console.error("Error initializing modules:", error);
     }
   }
 
@@ -292,29 +300,34 @@ export class AdminDashboard {
    */
   async loadOverviewStats() {
     try {
-      const workerId = localStorage.getItem('CLS_WorkerID');
+      const workerId = localStorage.getItem("CLS_WorkerID");
 
       // Load all stats in parallel (spinners already showing)
-      const [editRequests, workers, weekHours, weekRevenue] = await Promise.all([
-        this.fetchTimeEditRequests(),
-        this.fetchAllWorkers(),
-        this.calculateWeekHours(),
-        this.calculateWeekRevenue()
-      ]);
+      const [editRequests, workers, weekHours, weekRevenue] = await Promise.all(
+        [
+          this.fetchTimeEditRequests(),
+          this.fetchAllWorkers(),
+          this.calculateWeekHours(),
+          this.calculateWeekRevenue(),
+        ],
+      );
 
       // Update stats
-      const pendingEdits = editRequests.filter(req => req.status === 'pending').length;
-      document.getElementById('statPendingEdits').textContent = pendingEdits;
-      document.getElementById('statActiveWorkers').textContent = workers.length;
-      document.getElementById('statWeekHours').textContent = weekHours.toFixed(1);
-      document.getElementById('statWeekRevenue').textContent = `$${weekRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
+      const pendingEdits = editRequests.filter(
+        (req) => req.status === "pending",
+      ).length;
+      document.getElementById("statPendingEdits").textContent = pendingEdits;
+      document.getElementById("statActiveWorkers").textContent = workers.length;
+      document.getElementById("statWeekHours").textContent =
+        weekHours.toFixed(1);
+      document.getElementById("statWeekRevenue").textContent =
+        `$${weekRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     } catch (error) {
-      console.error('Error loading overview stats:', error);
-      document.getElementById('statPendingEdits').textContent = '0';
-      document.getElementById('statActiveWorkers').textContent = '0';
-      document.getElementById('statWeekHours').textContent = '0';
-      document.getElementById('statWeekRevenue').textContent = '$0.00';
+      console.error("Error loading overview stats:", error);
+      document.getElementById("statPendingEdits").textContent = "0";
+      document.getElementById("statActiveWorkers").textContent = "0";
+      document.getElementById("statWeekHours").textContent = "0";
+      document.getElementById("statWeekRevenue").textContent = "$0.00";
     }
   }
 
@@ -323,13 +336,13 @@ export class AdminDashboard {
    */
   async fetchTimeEditRequests() {
     try {
-      const workerId = localStorage.getItem('CLS_WorkerID');
+      const workerId = localStorage.getItem("CLS_WorkerID");
       const url = `${this.apiUrl}?action=getTimeEditRequests&requesterId=${encodeURIComponent(workerId)}`;
       const response = await fetch(url);
       const data = await response.json();
       return data.requests || [];
     } catch (error) {
-      console.error('Error fetching time edit requests:', error);
+      console.error("Error fetching time edit requests:", error);
       return [];
     }
   }
@@ -340,57 +353,58 @@ export class AdminDashboard {
    */
   async fetchAllWorkers() {
     try {
-      const sheetsProxyUrl = 'https://sheets-direct-proxy.steve-3d1.workers.dev';
-      const spreadsheetId = '1U8hSNREN5fEhskp0UM-Z80iiW39beaOj3oIsaLZyFzk';
-      const range = 'ClockIn!A:C'; // ClockinID, WorkerID, Date
-      
+      const sheetsProxyUrl =
+        "https://sheets-direct-proxy.steve-3d1.workers.dev";
+      const spreadsheetId = "1U8hSNREN5fEhskp0UM-Z80iiW39beaOj3oIsaLZyFzk";
+      const range = "ClockIn!A:C"; // ClockinID, WorkerID, Date
+
       const url = `${sheetsProxyUrl}/api/sheets/${spreadsheetId}/values/${encodeURIComponent(range)}`;
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`Sheets API error: ${response.status}`);
       }
-      
+
       const result = await response.json();
       const rows = result.data?.values || [];
-      
+
       if (rows.length === 0) return [];
-      
+
       // Get today's date in M/D/YYYY format (EST timezone)
       const now = new Date();
-      const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'America/New_York',
-        month: 'numeric',
-        day: 'numeric',
-        year: 'numeric'
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        month: "numeric",
+        day: "numeric",
+        year: "numeric",
       });
       const today = formatter.format(now);
-      
+
       // Parse headers (first row)
       const headers = rows[0];
-      const workerIdIdx = headers.indexOf('WorkerID');
-      const dateIdx = headers.indexOf('Date');
-      
+      const workerIdIdx = headers.indexOf("WorkerID");
+      const dateIdx = headers.indexOf("Date");
+
       if (workerIdIdx === -1 || dateIdx === -1) {
-        console.error('Required columns not found in ClockIn sheet');
+        console.error("Required columns not found in ClockIn sheet");
         return [];
       }
-      
+
       // Extract unique worker IDs for today
       const uniqueWorkers = new Set();
-      
-      rows.slice(1).forEach(row => {
+
+      rows.slice(1).forEach((row) => {
         const workerId = row[workerIdIdx];
         const dateStr = row[dateIdx];
-        
+
         if (workerId && dateStr === today) {
           uniqueWorkers.add(workerId);
         }
       });
-      
+
       return Array.from(uniqueWorkers);
     } catch (error) {
-      console.error('Error fetching workers:', error);
+      console.error("Error fetching workers:", error);
       return [];
     }
   }
@@ -401,64 +415,69 @@ export class AdminDashboard {
    */
   async calculateWeekHours() {
     try {
-      const sheetsProxyUrl = 'https://sheets-direct-proxy.steve-3d1.workers.dev';
-      const spreadsheetId = '1U8hSNREN5fEhskp0UM-Z80iiW39beaOj3oIsaLZyFzk';
-      const range = 'Payroll LineItems!A:I'; // Through Qty column
-      
+      const sheetsProxyUrl =
+        "https://sheets-direct-proxy.steve-3d1.workers.dev";
+      const spreadsheetId = "1U8hSNREN5fEhskp0UM-Z80iiW39beaOj3oIsaLZyFzk";
+      const range = "Payroll LineItems!A:I"; // Through Qty column
+
       const url = `${sheetsProxyUrl}/api/sheets/${spreadsheetId}/values/${encodeURIComponent(range)}`;
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`Sheets API error: ${response.status}`);
       }
-      
+
       const result = await response.json();
       const rows = result.data?.values || [];
-      
+
       if (rows.length === 0) return 0;
-      
+
       // Get current week's Sunday-Saturday range
       const now = new Date();
       const dayOfWeek = now.getDay();
       const sunday = new Date(now);
       sunday.setDate(now.getDate() - dayOfWeek);
       sunday.setHours(0, 0, 0, 0);
-      
+
       const saturday = new Date(sunday);
       saturday.setDate(sunday.getDate() + 6);
       saturday.setHours(23, 59, 59, 999);
-      
+
       // Parse headers (first row)
       const headers = rows[0];
-      const dateIdx = headers.indexOf('Date');
-      const qtyIdx = headers.indexOf('Qty'); // Column I
-      
+      const dateIdx = headers.indexOf("Date");
+      const qtyIdx = headers.indexOf("Qty"); // Column I
+
       if (dateIdx === -1 || qtyIdx === -1) {
-        console.error('Required columns not found in Payroll LineItems');
+        console.error("Required columns not found in Payroll LineItems");
         return 0;
       }
-      
+
       // Sum Qty for this week's date range
       let totalHours = 0;
-      
-      rows.slice(1).forEach(row => {
+
+      rows.slice(1).forEach((row) => {
         const dateStr = row[dateIdx];
         const qtyStr = row[qtyIdx];
-        
+
         if (!dateStr || !qtyStr) return;
-        
+
         // Parse date (handles M/D/YYYY format from Sheets)
         const recordDate = new Date(dateStr);
-        
-        if (!isNaN(recordDate.getTime()) && recordDate >= sunday && recordDate <= saturday) {
+
+        if (
+          !isNaN(recordDate.getTime()) &&
+          recordDate >= sunday &&
+          recordDate <= saturday
+        ) {
           const hours = parseFloat(qtyStr) || 0;
           totalHours += hours;
         }
       });
-      
+
       return totalHours;
     } catch (error) {
-      console.error('Error calculating week hours:', error);
+      console.error("Error calculating week hours:", error);
       return 0;
     }
   }
@@ -469,55 +488,60 @@ export class AdminDashboard {
    */
   async calculateWeekRevenue() {
     try {
-      const sheetsProxyUrl = 'https://sheets-direct-proxy.steve-3d1.workers.dev';
-      const spreadsheetId = '1U8hSNREN5fEhskp0UM-Z80iiW39beaOj3oIsaLZyFzk';
-      const range = 'Invoices!A2:E'; // InvoiceNumber, Customer, Date, DueDate, Amount
-      
+      const sheetsProxyUrl =
+        "https://sheets-direct-proxy.steve-3d1.workers.dev";
+      const spreadsheetId = "1U8hSNREN5fEhskp0UM-Z80iiW39beaOj3oIsaLZyFzk";
+      const range = "Invoices!A2:E"; // InvoiceNumber, Customer, Date, DueDate, Amount
+
       const url = `${sheetsProxyUrl}/api/sheets/${spreadsheetId}/values/${encodeURIComponent(range)}`;
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`Sheets API error: ${response.status}`);
       }
-      
+
       const result = await response.json();
       const rows = result.data?.values || [];
-      
+
       if (rows.length === 0) return 0;
-      
+
       // Get current week's Sunday-Saturday range
       const now = new Date();
       const dayOfWeek = now.getDay();
       const sunday = new Date(now);
       sunday.setDate(now.getDate() - dayOfWeek);
       sunday.setHours(0, 0, 0, 0);
-      
+
       const saturday = new Date(sunday);
       saturday.setDate(sunday.getDate() + 6);
       saturday.setHours(23, 59, 59, 999);
-      
+
       // Sum amounts for this week's invoices
       let totalRevenue = 0;
-      
-      rows.forEach(row => {
+
+      rows.forEach((row) => {
         const dateStr = row[2]; // Date column (index 2)
         const amountStr = row[4]; // Amount column (index 4)
-        
+
         if (!dateStr || !amountStr) return;
-        
+
         // Parse date
         const invoiceDate = new Date(dateStr);
-        
-        if (!isNaN(invoiceDate.getTime()) && invoiceDate >= sunday && invoiceDate <= saturday) {
+
+        if (
+          !isNaN(invoiceDate.getTime()) &&
+          invoiceDate >= sunday &&
+          invoiceDate <= saturday
+        ) {
           // Parse amount (strip $ and commas)
-          const amount = parseFloat(amountStr.replace(/[$,]/g, '')) || 0;
+          const amount = parseFloat(amountStr.replace(/[$,]/g, "")) || 0;
           totalRevenue += amount;
         }
       });
-      
+
       return totalRevenue;
     } catch (error) {
-      console.error('Error calculating week revenue:', error);
+      console.error("Error calculating week revenue:", error);
       return 0;
     }
   }
