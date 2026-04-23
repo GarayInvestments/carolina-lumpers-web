@@ -270,12 +270,13 @@
         payload.formType = 'quote-request';
 
         // Google Apps Script cannot return CORS headers on browser POST responses.
-        // Use no-cors (fire-and-forget) to avoid the browser blocking the request.
+        // Use no-cors + URLSearchParams (urlencoded) — the only content-type allowed
+        // in a no-cors simple request. Backend parseFormUrlEncoded_() handles it.
+        const params = new URLSearchParams(payload);
         fetch(API_BASE, {
           method: 'POST',
           mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: params
         }).catch(() => {});
 
         if (typeof gtag === 'function') {
