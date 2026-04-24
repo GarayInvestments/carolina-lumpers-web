@@ -105,6 +105,31 @@ cd GoogleAppsScripts\EmployeeLogin
 clasp push
 ```
 
+### CLI Session Reconnect (CLS)
+
+Run this once at the start of each new terminal session:
+
+```powershell
+cd carolina-lumpers-web
+.\scripts\check-cli-auth.ps1
+```
+
+What this check validates:
+
+- GitHub (`gh`)
+- Vercel (`npx vercel`)
+- Fly.io (`flyctl`)
+- Supabase (`npx supabase`)
+- Cloudflare (`npx wrangler`)
+- Google Cloud (`gcloud`)
+- Google Apps Script (`npx clasp`)
+
+Notes:
+
+- Cloudflare uses `CLOUDFLARE_API_TOKEN` (user environment variable) for no-browser auth.
+- `gcloud` availability is restored via PowerShell profile PATH shim.
+- If a check fails, use the re-auth command printed by the script.
+
 ## 📁 Project Structure
 
 ```
@@ -254,8 +279,8 @@ const deviceInfo = getDeviceInfo(); // Always include device tracking
 // Example: Clock-in with device
 fetch(
   `${API_URL}?action=clockin&workerId=${id}&lat=${lat}&lng=${lng}&device=${encodeURIComponent(
-    deviceInfo.displayString
-  )}`
+    deviceInfo.displayString,
+  )}`,
 );
 ```
 
@@ -495,8 +520,8 @@ fetch(`${API_URL}?action=login&email=${email}`);
 const deviceInfo = getDeviceInfo();
 fetch(
   `${API_URL}?action=login&email=${email}&device=${encodeURIComponent(
-    deviceInfo.displayString
-  )}`
+    deviceInfo.displayString,
+  )}`,
 );
 ```
 

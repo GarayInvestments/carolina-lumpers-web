@@ -526,6 +526,7 @@ function sendConfirmationEmail_(p) {
     from: "CLS Client Services <info@carolinalumpers.com>",
     to: [to],
     cc: ["s.garay@carolinalumpers.com"],
+    bcc: ["d.molina@carolinalumpers.com"],
     reply_to: "info@carolinalumpers.com",
     subject: "We received your quote request — Carolina Lumpers Service",
     html: html,

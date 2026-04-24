@@ -13,6 +13,7 @@
       "path": "GoogleAppsScripts",
     },
     {
+      "name": "carolina-lumpers-web-variant-a",
       "path": "../carolina-lumpers-web-variant-a",
     },
   ],
