@@ -499,12 +499,16 @@
             const displayName = localStorage.getItem('CLS_WorkerName') || workerId;
             console.log(`✅ Valid session found for ${displayName}`);
 
-            // Show friendly message
+            // Show friendly message then redirect
             const statusEl = document.getElementById('status');
             if (statusEl) {
-              statusEl.textContent = `✅ Welcome back, ${displayName}!`;
+              statusEl.textContent = `✅ Welcome back, ${displayName}! Redirecting...`;
               statusEl.style.color = '#4CAF50';
             }
+
+            setTimeout(() => {
+              window.location.href = 'employeeDashboard.html';
+            }, 800);
 
             return true; // Session valid
           } else {
