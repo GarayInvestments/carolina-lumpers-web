@@ -1,9 +1,8 @@
 // 📦 Cache version matches deployment timestamp in HTML files (CACHE_VERSION)
 // Update this when deploying to force cache refresh
-const CACHE_NAME = "cls-employee-20260420-1217";
+const CACHE_NAME = "cls-employee-20260423-2015";
 const ASSETS = [
   "./employeelogin.html",
-  "./employeeDashboard.html",
   "./employeeSignup.html",
   "./css/style.css",
   "./css/variables.css",
@@ -103,7 +102,7 @@ async function syncClockData() {
       try {
         // Reconstruct the URL with parameters
         const url = `${API_URL}?action=clockin&workerId=${encodeURIComponent(
-          record.workerId
+          record.workerId,
         )}&lat=${record.lat}&lng=${record.lng}&lang=${
           record.lang || "en"
         }&email=${encodeURIComponent(record.email || "")}`;
@@ -205,7 +204,7 @@ self.addEventListener("install", (e) => {
     caches.open(CACHE_NAME).then((cache) => {
       console.log("[Service Worker] Caching", ASSETS.length, "assets");
       return cache.addAll(ASSETS);
-    })
+    }),
   );
 });
 
@@ -222,8 +221,8 @@ self.addEventListener("activate", (e) => {
           console.log("[Service Worker] Deleting old caches:", oldCaches);
         }
         return Promise.all(oldCaches.map((k) => caches.delete(k)));
-      })
-    ])
+      }),
+    ]),
   );
 });
 
@@ -232,10 +231,31 @@ self.addEventListener("fetch", (e) => {
   // Skip non-GET requests to avoid breaking JSONP
   if (e.request.method !== "GET") return;
 
+  // Keep shared layout components fresh to avoid stale/broken navbar/footer UI.
+  const requestUrl = new URL(e.request.url);
+  const isSharedComponent =
+    requestUrl.pathname.endsWith("/components/navbar.html") ||
+    requestUrl.pathname.endsWith("/components/footer.html");
+
+  if (isSharedComponent) {
+    e.respondWith(
+      fetch(e.request)
+        .then((networkResponse) => {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseClone);
+          });
+          return networkResponse;
+        })
+        .catch(() => caches.match(e.request, { ignoreSearch: true })),
+    );
+    return;
+  }
+
   e.respondWith(
     caches
       .match(e.request, { ignoreSearch: true })
-      .then((res) => res || fetch(e.request))
+      .then((res) => res || fetch(e.request)),
   );
 });
 

@@ -4,12 +4,12 @@
 
 :root {
   /* Brand Colors */
-  --cls-amber: #FFBF00;
-  --cls-amber-hover: #E8A317;
-  --cls-amber-light: #FFF8E1;
-  --cls-orange: #FBB040;
-  --cls-charcoal: #1A1A1A;
-  --cls-charcoal-light: #2E2E2E;
+  --cls-amber: #ffbf00;
+  --cls-amber-hover: #e8a317;
+  --cls-amber-light: #fff8e1;
+  --cls-orange: #fbb040;
+  --cls-charcoal: #1a1a1a;
+  --cls-charcoal-light: #2e2e2e;
   --cls-charcoal-lighter: #333333;
 
   /* Semantic Colors */
@@ -17,41 +17,43 @@
   --color-primary-hover: var(--cls-amber-hover);
   --color-primary-light: var(--cls-amber-light);
   --color-secondary: var(--cls-orange);
-  --color-success: #4CAF50;
+  --color-success: #4caf50;
   --color-success-hover: #45a049;
   --color-danger: #f44336;
   --color-danger-hover: #da190b;
   --color-warning: #ff9800;
-  --color-info: #2196F3;
+  --color-info: #2196f3;
   --color-dark: var(--cls-charcoal);
   --color-dark-light: var(--cls-charcoal-light);
   --color-dark-lighter: var(--cls-charcoal-lighter);
 
   /* Background Colors */
   --bg-primary: #bdbdbd;
-  --bg-secondary: var(--cls-charcoal);
+  --bg-secondary: #000000;
   --bg-card: var(--cls-orange);
-  --bg-service: var(--cls-charcoal-light);
+  --bg-service: #000000;
   --bg-overlay: rgba(26, 26, 26, 0.8);
 
   /* Text Colors */
-  --text-primary: #FFFFFF;
-  --text-secondary: #FFFFFF;
-  --text-muted: #CCCCCC;
-  --text-light-muted: #B3B3B3;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #cccccc;
+  --text-light-muted: #b3b3b3;
   --text-very-muted: #999999;
 
   /* Border & Shadow */
   --border-color: var(--cls-charcoal-lighter);
-  --border-light: #E1E5E9;
+  --border-light: #e1e5e9;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(255, 191, 0, 0.1);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35), 0 4px 8px rgba(255, 191, 0, 0.15);
-  --shadow-accent: 0 0 20px rgba(255, 191, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2);
+  --shadow-lg:
+    0 8px 24px rgba(0, 0, 0, 0.35), 0 4px 8px rgba(255, 191, 0, 0.15);
+  --shadow-accent:
+    0 0 20px rgba(255, 191, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2);
 
   /* Typography */
-  --font-heading: 'Anton', sans-serif;
-  --font-body: 'Roboto', Arial, sans-serif;
+  --font-heading: "Anton", sans-serif;
+  --font-body: "Roboto", Arial, sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -62,13 +64,13 @@
   --font-size-4xl: 2.5rem;
 
   /* Spacing */
-  --space-xs: 0.25rem;  /* 4px */
-  --space-sm: 0.5rem;   /* 8px */
-  --space-md: 1rem;     /* 16px */
-  --space-lg: 1.5rem;   /* 24px */
-  --space-xl: 2rem;     /* 32px */
-  --space-2xl: 3rem;    /* 48px */
-  --space-3xl: 4rem;    /* 64px */
+  --space-xs: 0.25rem; /* 4px */
+  --space-sm: 0.5rem; /* 8px */
+  --space-md: 1rem; /* 16px */
+  --space-lg: 1.5rem; /* 24px */
+  --space-xl: 2rem; /* 32px */
+  --space-2xl: 3rem; /* 48px */
+  --space-3xl: 4rem; /* 64px */
 
   /* Border Radius */
   --radius-sm: 4px;
@@ -140,15 +142,18 @@
   /* Brand Colors (darker for better contrast) */
   --color-primary: #d4a017; /* Darker amber/gold */
   --color-primary-hover: #b8860b;
-  --color-primary-light: #FFF8E1;
+  --color-primary-light: #fff8e1;
 
   /* Border & Shadow */
   --border-color: #e0e0e0;
   --border-light: #f0f0f0;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(212, 160, 23, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16), 0 4px 8px rgba(212, 160, 23, 0.12);
-  --shadow-accent: 0 0 20px rgba(212, 160, 23, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-md:
+    0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(212, 160, 23, 0.08);
+  --shadow-lg:
+    0 8px 24px rgba(0, 0, 0, 0.16), 0 4px 8px rgba(212, 160, 23, 0.12);
+  --shadow-accent:
+    0 0 20px rgba(212, 160, 23, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15);
 
   /* Dark variants for light theme */
   --color-dark: #2e2e2e;

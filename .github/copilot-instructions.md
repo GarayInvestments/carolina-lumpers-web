@@ -8,7 +8,6 @@
 - [React Portal](#react-portal-quick-reference)
 - [Common Pitfalls & Solutions](#common-pitfalls--solutions)
 - [Testing & Debugging](#testing--debugging)
-- [CLI Session Reconnect](#cli-session-reconnect)
 - [Quick Reference](#quick-reference)
 - [Documentation Locations](#documentation-locations)
 
@@ -628,24 +627,6 @@ gcloud iam service-accounts create account-name --display-name="Display Name"
 # Generate service account keys
 gcloud iam service-accounts keys create key.json --iam-account=account@project.iam.gserviceaccount.com
 ```
-
-## CLI Session Reconnect
-
-At the start of a new terminal session, run:
-
-```powershell
-cd carolina-lumpers-web
-.\scripts\check-cli-auth.ps1
-```
-
-Expected behavior:
-- Script returns pass/fail for `gh`, `vercel`, `flyctl`, `supabase`, `wrangler`, `gcloud`, and `clasp`
-- If any tool fails, run the suggested re-auth command printed by the script
-
-Project conventions for stable CLI access:
-- Cloudflare should use `CLOUDFLARE_API_TOKEN` (user env var) for persistent non-OAuth CLI auth
-- `gcloud` is restored per-terminal via PowerShell profile PATH shim
-- `npx supabase projects list` may show a `supabase link` message while still authenticated; treat table output as authenticated
 
 ## React Portal Quick Reference
 

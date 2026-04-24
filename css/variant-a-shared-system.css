@@ -1,0 +1,75 @@
+:root {
+  --cls-bg: #ecebe7;
+  --cls-surface: #ffffff;
+  --cls-surface-muted: #f4f3f0;
+  --cls-text: #171717;
+  --cls-text-muted: #4b4b4b;
+  --cls-charcoal: #2a2a2a;
+  --cls-charcoal-strong: #1f1f1f;
+  --cls-line: #d8d7d1;
+  --cls-accent: #d8ab24;
+  --cls-accent-strong: #b68813;
+  --cls-danger: #b42318;
+  --cls-radius: 16px;
+  --cls-container: 1180px;
+  --cls-shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.1);
+  --cls-shadow-strong: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+/*
+  Shared utility layer for Variant A pages.
+  This file is intentionally not auto-imported yet.
+  Use gradually to consolidate page-specific CSS.
+*/
+
+.cls-shell {
+  width: min(var(--cls-container), calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.cls-card {
+  border-radius: var(--cls-radius);
+  border: 1px solid var(--cls-line);
+  background: var(--cls-surface);
+  box-shadow: var(--cls-shadow-soft);
+}
+
+.cls-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--cls-accent);
+  color: #191919;
+  font-weight: 700;
+  padding: 0.68rem 1.1rem;
+  text-decoration: none;
+}
+
+.cls-btn-primary:hover,
+.cls-btn-primary:focus-visible {
+  background: var(--cls-accent-strong);
+}
+
+.cls-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid #2a2a2a33;
+  background: #ffffff;
+  color: #1f1f1f;
+  font-weight: 600;
+  padding: 0.68rem 1.1rem;
+  text-decoration: none;
+}
+
+.cls-meta {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--cls-accent);
+}

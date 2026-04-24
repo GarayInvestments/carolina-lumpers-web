@@ -73,226 +73,221 @@
     }
   </script>
 
-  <!-- Core styles -->
-  <link rel="stylesheet" href="css/style.css?v=2024-navigation-responsive-fix">
-  <link rel="stylesheet" href="css/forms.css?v=2024-form-layout-fix-v3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Cormorant+Garamond:wght@400;600;700&family=Oswald:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/contact-variant-a.css?v=20260422-contact-a2">
+  <link rel="stylesheet" href="css/variant-a-priority1-modules.css?v=20260423-p1mods-a47">
   <link rel="icon" type="image/png" href="assets/CLS-favicon.png">
-  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-  <script src="js/script.js" defer></script>
 </head>
 
-<body data-page="contact">
-  <!-- Navbar -->
+<body class="variant-a-contact" data-page="contact">
   <div id="navbar-container"></div>
 
-  <!-- Hero -->
-  <div class="container">
-    <header class="hero">
+  <main>
+    <section class="hero">
       <div class="hero-content">
-        <h1>Request a Quote or Contact CLS</h1>
-        <p>We're ready to support your freight operation — request a quote today or reach out to our team.</p>
+        <p class="meta">Fast quote request</p>
+        <h1>Request a Basic Freight Handling Quote</h1>
+        <p class="hero-subtitle">Share your operation details and our team will follow up with scheduling and pricing
+          guidance.
+        </p>
       </div>
-      <div class="hero-image">
-        <img src="assets/CLS-Cover-01web.webp" alt="Carolina Lumper Service contact and quote request banner"
-          class="banner-image">
-        <div class="blur-overlay"></div>
-      </div>
-    </header>
-  </div>
+      <article class="form-card hero-form" id="quote-request">
+        <h2>Basic Quote Form</h2>
+        <p>Complete the fields below and we will respond as quickly as possible.</p>
 
-  <!-- Main -->
-  <main class="container">
-    <!-- Contact Info -->
-    <section id="contact-info" class="section-container">
-      <h2>Get in Touch</h2>
-      <p>Email us at <a href="mailto:info@carolinalumpers.com">info@carolinalumpers.com</a> or call <a
-          href="tel:+18287810002">(828) 781-0002</a>.</p>
-      <p><strong>Business Hours:</strong></p>
-      <ul>
-        <li>Mon–Fri: 8:00 AM – 6:00 PM</li>
-        <li>Sat: 9:00 AM – 3:00 PM</li>
-        <li>Sun: Closed</li>
-      </ul>
-    </section>
-
-    <!-- Quote Request Form -->
-    <section id="quote-request" class="section-container">
-      <h2>Request a Quote</h2>
-      <p>Fill out the quick form below, and our team will follow up with scheduling and pricing details.</p>
-
-      <div id="quotePanel">
-        <form id="quoteRequestForm" class="basic-quote-form" novalidate>
+        <form id="basicQuoteForm" novalidate>
           <div class="grid grid-2">
             <div class="field">
-              <label class="required">Contact Name</label>
-              <input name="contactName" type="text" autocomplete="name" required>
+              <label for="contactName" class="required">Contact Name</label>
+              <input id="contactName" name="contactName" type="text" autocomplete="name" required>
               <div class="error">Please enter your name.</div>
             </div>
+
             <div class="field">
-              <label>Company Name (optional)</label>
-              <input name="companyName" type="text" autocomplete="organization">
+              <label for="companyName">Company Name</label>
+              <input id="companyName" name="companyName" type="text" autocomplete="organization">
             </div>
+
             <div class="field">
-              <label class="required">Phone Number</label>
-              <input name="phone" type="tel" autocomplete="tel" required>
+              <label for="phone" class="required">Phone Number</label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" required>
               <div class="error">Please enter a phone number.</div>
             </div>
+
             <div class="field">
-              <label class="required">Email Address</label>
-              <input name="email" type="email" autocomplete="email" required>
+              <label for="email" class="required">Email Address</label>
+              <input id="email" name="email" type="email" autocomplete="email" required>
               <div class="error">Please enter a valid email.</div>
             </div>
-          </div>
 
-          <div class="field" style="margin-top:12px;">
-            <label>Type of Service Needed (check all that apply)</label>
-            <div class="checklist">
-              <label class="chip"><input type="checkbox" name="services" value="Lumper">Lumper</label>
-              <label class="chip"><input type="checkbox" name="services" value="Unloading">Unloading</label>
-              <label class="chip"><input type="checkbox" name="services" value="Loading">Loading</label>
-              <label class="chip"><input type="checkbox" name="services" value="Pallet Breakdown">Pallet
-                Breakdown</label>
-              <label class="chip"><input type="checkbox" name="services" value="Repacking">Repacking</label>
-              <label class="chip"><input type="checkbox" name="services" value="Cross-Docking">Cross-Docking</label>
-              <label class="chip"><input type="checkbox" name="services" value="Sorting">Sorting</label>
-              <label class="chip"><input type="checkbox" name="services" value="Other">Other</label>
+            <div class="field">
+              <label for="facilityLocation" class="required">Facility Location</label>
+              <input id="facilityLocation" name="facilityLocation" type="text" required
+                placeholder="City, State or full address">
+              <div class="error">Please enter facility location.</div>
             </div>
-          </div>
 
-          <div class="grid grid-2" style="margin-top:12px;">
             <div class="field">
-              <label class="required">Facility Name</label>
-              <input name="facility" type="text" required>
-              <div class="error">Facility name is required.</div>
-            </div>
-            <div class="field">
-              <label class="required">Facility Address</label>
-              <input name="address" type="text" required placeholder="Street, City, State, ZIP">
-              <div class="error">Address is required.</div>
-            </div>
-            <div class="field">
-              <label>Expected Start Date</label>
-              <input name="startDate" type="date">
-            </div>
-            <div class="field">
-              <label>Preferred Contact Method</label>
-              <select name="preferredContact">
-                <option value="">Select…</option>
-                <option>Phone</option>
-                <option>Email</option>
-                <option>Text</option>
+              <label for="serviceType" class="required">Service Type</label>
+              <select id="serviceType" name="serviceType" required>
+                <option value="">Select service type...</option>
+                <option value="Inbound Services">Inbound Services</option>
+                <option value="Outbound Services">Outbound Services</option>
+                <option value="Floor-Loaded Freight">Floor-Loaded Freight</option>
+                <option value="Additional Support">Additional Support</option>
               </select>
+              <div class="error">Please select a service type.</div>
             </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label>Notes</label>
-              <textarea name="notes"
-                placeholder="Share any load details, schedule constraints, or special requirements."></textarea>
+
+            <div class="field full">
+              <label for="details">Brief Details</label>
+              <textarea id="details" name="details"
+                placeholder="Volume, shift timing, start date, and any special requirements."></textarea>
             </div>
           </div>
 
-          <div class="form-nav">
-            <div class="left"></div>
-            <div class="right">
-              <button type="submit" id="quoteSubmitBtn" class="btn btn-primary">Submit Quote Request</button>
-            </div>
+          <div class="form-actions">
+            <button type="submit" id="basicSubmitBtn" class="btn btn-primary">Request Quote</button>
           </div>
         </form>
 
-        <div id="quoteSuccessMsg" class="success" style="display:none;">✅ Thanks! Your quote request has been submitted.
-          We'll be in touch soon.</div>
-      </div>
+        <div id="basicSuccessMsg" class="success" style="display:none;"></div>
+      </article>
     </section>
 
-    <section id="related-pages" class="section-container">
-      <h2>Related Pages</h2>
-      <ul>
-        <li><a href="services.html">Explore Our Warehouse Freight Handling Services</a></li>
-        <li><a href="apply.html">Apply for Warehouse Job Opportunities with CLS</a></li>
-      </ul>
+    <section class="contact-layout">
+      <article class="contact-card">
+        <h2>Direct Contact</h2>
+        <p>Email or call if you need immediate support.</p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:info@carolinalumpers.com">info@carolinalumpers.com</a></li>
+          <li><strong>Phone:</strong> <a href="tel:+18287810002">(828) 781-0002</a></li>
+          <li><strong>Hours:</strong> Mon-Fri 8:00 AM - 6:00 PM</li>
+        </ul>
+      </article>
     </section>
   </main>
 
-  <!-- Footer -->
-  <footer>
-    <p>© 2024 Carolina Lumper Service. All rights reserved.</p>
-    <div class="footer-icons">
-      <a href="https://www.facebook.com/profile.php?id=61569872795390"><img src="assets/facebook-icon.png"
-          alt="Facebook"></a>
-      <a href="#"><img src="assets/linkedin-icon.png" alt="LinkedIn"></a>
-    </div>
-  </footer>
+  <div id="footer-container"></div>
 
-  <!-- Form Logic -->
+  <script src="js/script.js?v=20260422-modular-a2" defer></script>
+
   <script>
     (function () {
-      const API_BASE = 'https://script.google.com/macros/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec';
-      const form = document.getElementById('quoteRequestForm');
-      const successMsg = document.getElementById('quoteSuccessMsg');
-      const submitBtn = document.getElementById('quoteSubmitBtn');
+      var API_BASE = 'https://script.google.com/macros/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec';
+      var header = document.querySelector('.site-header');
+      var toggle = document.querySelector('.nav-toggle');
+      var nav = document.getElementById('primary-nav');
 
-      function validateEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+      function setOpen(isOpen) {
+        header.classList.toggle('menu-open', isOpen);
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        toggle.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
+      }
 
-      function markInvalid(field, invalid) {
-        const parent = field && field.parentElement;
-        if (!parent || !parent.classList.contains('field')) return;
-        parent.classList.toggle('invalid', invalid);
+      if (toggle && nav) {
+        toggle.addEventListener('click', function () {
+          setOpen(!header.classList.contains('menu-open'));
+        });
+
+        nav.querySelectorAll('a').forEach(function (link) {
+          link.addEventListener('click', function () {
+            setOpen(false);
+          });
+        });
+
+        window.addEventListener('resize', function () {
+          if (window.innerWidth > 900) {
+            setOpen(false);
+          }
+        });
+      }
+
+      var form = document.getElementById('basicQuoteForm');
+      var successMsg = document.getElementById('basicSuccessMsg');
+      var submitBtn = document.getElementById('basicSubmitBtn');
+
+      function validateEmail(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      }
+
+      function markInvalid(input, invalid) {
+        var field = input && input.closest('.field');
+        if (!field) return;
+        field.classList.toggle('invalid', invalid);
       }
 
       function validateForm() {
-        const required = [
-          form.querySelector('input[name="contactName"]'),
-          form.querySelector('input[name="phone"]'),
-          form.querySelector('input[name="facility"]'),
-          form.querySelector('input[name="address"]')
-        ];
-        let ok = true;
-        required.forEach(f => {
-          const invalid = !f.value.trim();
+        var contactName = form.querySelector('input[name="contactName"]');
+        var phone = form.querySelector('input[name="phone"]');
+        var email = form.querySelector('input[name="email"]');
+        var facilityLocation = form.querySelector('input[name="facilityLocation"]');
+        var serviceType = form.querySelector('select[name="serviceType"]');
+
+        var ok = true;
+
+        [contactName, phone, facilityLocation].forEach(function (f) {
+          var invalid = !f.value.trim();
           markInvalid(f, invalid);
           if (invalid) ok = false;
         });
-        const email = form.querySelector('input[name="email"]');
-        const emailInvalid = !validateEmail(email.value);
+
+        var emailInvalid = !validateEmail(email.value);
         markInvalid(email, emailInvalid);
         if (emailInvalid) ok = false;
+
+        var serviceInvalid = !serviceType.value;
+        markInvalid(serviceType, serviceInvalid);
+        if (serviceInvalid) ok = false;
+
         return ok;
       }
 
-      form.addEventListener('submit', async (e) => {
+      form.addEventListener('submit', async function (e) {
         e.preventDefault();
         successMsg.style.display = 'none';
+
         if (!validateForm()) return;
 
-        const fd = new FormData(form);
-        const services = Array.from(form.querySelectorAll('input[name="services"]:checked')).map(i => i.value);
-        const payload = {};
-        fd.forEach((v, k) => { payload[k] = v; });
-        if (services.length) payload.services = services.join(', ');
-        payload.startedAt = Date.now();
-        payload.formType = 'quote-request';
+        var fd = new FormData(form);
+        fd.append('startedAt', Date.now());
+        fd.append('formType', 'quote-request-basic');
 
-        // Google Apps Script cannot return CORS headers on browser POST responses.
-        // Use no-cors + URLSearchParams (urlencoded) — the only content-type allowed
-        // in a no-cors simple request. Backend parseFormUrlEncoded_() handles it.
-        const params = new URLSearchParams(payload);
-        fetch(API_BASE, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: params
-        }).catch(() => { });
+        try {
+          var res = await fetch(API_BASE, { method: 'POST', body: fd });
+          if (!res.ok) throw new Error('Submission failed');
 
-        if (typeof gtag === 'function') {
-          gtag('event', 'generate_lead', {
-            form_name: 'quote_request',
-            page_location: window.location.href,
-            page_path: window.location.pathname,
-            method: 'web_form'
-          });
+          if (typeof gtag === 'function') {
+            gtag('event', 'generate_lead', {
+              form_name: 'quote_request_basic',
+              page_location: window.location.href,
+              page_path: window.location.pathname,
+              method: 'web_form'
+            });
+          }
+
+          successMsg.textContent = '✅ Thanks! Your quote request has been submitted. We\'ll be in touch soon.';
+          successMsg.style.display = 'block';
+          submitBtn.disabled = true;
+          form.reset();
+        } catch (err) {
+          if (typeof gtag === 'function') {
+            gtag('event', 'submit_error', {
+              form_name: 'quote_request_basic',
+              page_location: window.location.href,
+              page_path: window.location.pathname,
+              error_message: err && err.message ? err.message : 'Submission failed'
+            });
+          }
+
+          successMsg.textContent = '⚠️ Unable to submit right now. Please try again.';
+          successMsg.style.display = 'block';
+          submitBtn.disabled = false;
         }
-
-        successMsg.style.display = 'block';
-        submitBtn.disabled = true;
-        form.reset();
       });
     })();
   </script>

@@ -2,10 +2,11 @@
 <html lang="en">
 
 <head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3032955456184358" crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3032955456184358"
+    crossorigin="anonymous"></script>
   <!-- Cache Version Control - Update this timestamp when deploying -->
   <script>
-    const CACHE_VERSION = '20251222-1230'; // Format: YYYYMMDD-HHMM
+    const CACHE_VERSION = '20260423-2015'; // Format: YYYYMMDD-HHMM
   </script>
 
   <!-- Google Analytics -->
@@ -28,20 +29,272 @@
   <link rel="manifest" href="manifest-employee.json">
   <meta name="theme-color" content="#ffcc00">
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Oswald:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
   <!-- iOS PWA Support -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CLS Employee">
   <link rel="apple-touch-icon" href="assets/CLS-icon-192.png">
 
-  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-  <script>
-    // Apply cache version to stylesheets dynamically
-    document.write('<link rel="stylesheet" href="css/style.css?v=' + CACHE_VERSION + '">');
-    document.write('<link rel="stylesheet" href="css/forms.css?v=' + CACHE_VERSION + '">');
-  </script>
+  <link rel="stylesheet" href="css/index-fresh-variant.css?v=20260423-a2">
+  <link rel="stylesheet" href="css/variant-a-priority1-modules.css?v=20260423-p1mods-a47">
 
   <style>
+    body.variant-a[data-page="login"] {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.variant-a[data-page="login"]>main {
+      width: min(1180px, calc(100% - 2rem));
+      margin-inline: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding-bottom: 2rem;
+    }
+
+    body.variant-a[data-page="login"] .login-hero {
+      align-items: center;
+      min-height: clamp(420px, 54vh, 560px);
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+
+    body.variant-a[data-page="login"] .login-hero .hero-content {
+      align-content: center;
+      gap: 0.85rem;
+    }
+
+    body.variant-a[data-page="login"] .login-hero .hero-content h1 {
+      margin: 0;
+      max-width: 14ch;
+      color: #ffffff;
+      font-size: clamp(2rem, 4.2vw, 3.2rem);
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+    }
+
+    body.variant-a[data-page="login"] .login-hero .hero-content .hero-subtitle {
+      max-width: 56ch;
+      color: #ececec;
+    }
+
+    body.variant-a[data-page="login"] .hero-form {
+      align-self: center;
+      margin: 0;
+      border: 1px solid #ffffff22;
+      background: #ffffff;
+      color: #171717;
+      box-shadow: var(--p1-shadow);
+      padding: clamp(1.2rem, 2vw, 1.9rem);
+      border-radius: var(--p1-radius);
+      width: min(560px, 100%);
+    }
+
+    body.variant-a[data-page="login"] .login-container {
+      width: 100%;
+    }
+
+    body.variant-a[data-page="login"] .login-container h2 {
+      margin: 0 0 0.35rem;
+      color: #171717;
+      font-family: "Oswald", "Arial Narrow", Arial, sans-serif;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+    }
+
+    body.variant-a[data-page="login"] .login-subtext {
+      margin: 0 0 0.9rem;
+      color: #4b4b4b;
+    }
+
+    body.variant-a[data-page="login"] #loginForm {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      padding: 0;
+      margin: 0;
+      max-width: none;
+    }
+
+    body.variant-a[data-page="login"] #loginForm input {
+      width: 100%;
+      min-height: 3rem;
+      padding: 0.8rem 0.95rem;
+      border: 1px solid #c9c9c3;
+      background: #ffffff;
+      color: #1b1b1b;
+    }
+
+    body.variant-a[data-page="login"] #loginForm button {
+      border-radius: 12px;
+    }
+
+    body.variant-a[data-page="login"] #loginForm input:focus {
+      outline: 2px solid rgba(216, 171, 36, 0.35);
+      border-color: #b68813;
+    }
+
+    body.variant-a[data-page="login"] #loginBtn {
+      width: 100%;
+      min-height: 3rem;
+      border: 0;
+      border-radius: 12px;
+      background: #d8ab24;
+      color: #141414;
+      font-family: "Oswald", "Arial Narrow", Arial, sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+    }
+
+    body.variant-a[data-page="login"] #loginBtn:hover {
+      background: #c3961b;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(182, 136, 19, 0.28);
+    }
+
+    body.variant-a[data-page="login"] #status {
+      margin: 0.3rem 0 0;
+      min-height: 1.2rem;
+      font-size: 0.93rem;
+    }
+
+    body.variant-a[data-page="login"] .link {
+      margin-top: 1rem;
+      text-align: left;
+    }
+
+    body.variant-a[data-page="login"] .link a {
+      font-weight: 600;
+      color: #1f1f1f;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    body.variant-a[data-page="login"] .pwa-banner {
+      border: 1px solid #d8d7d1;
+      border-radius: 14px;
+      background: #fffaf0;
+      padding: 0.8rem 0.95rem;
+      margin: 0 0 0.8rem;
+      width: 100%;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    body.variant-a[data-page="login"] #pwaInstallBanner {
+      display: none;
+    }
+
+    body.variant-a[data-page="login"] .pwa-buttons {
+      margin-top: 0.7rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    body.variant-a[data-page="login"] .pwa-install-btn,
+    body.variant-a[data-page="login"] .pwa-dismiss-btn {
+      width: auto;
+      min-height: 2.2rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid #c9c9c3;
+      background: #ffffff;
+      color: #1b1b1b;
+      cursor: pointer;
+      font-family: "Barlow", "Segoe UI", Arial, sans-serif;
+      font-weight: 600;
+    }
+
+    body.variant-a[data-page="login"] .pwa-install-btn {
+      background: #d8ab24;
+      border-color: #d8ab24;
+      color: #141414;
+    }
+
+    body.variant-a[data-page="login"] #offlineIndicator {
+      display: none;
+      margin: 0 0 0.8rem;
+      width: 100%;
+      border-radius: 10px;
+      background: #ff9800;
+      color: #000;
+      padding: 8px;
+      text-align: center;
+      font-size: 0.9em;
+    }
+
+    @media (max-width: 900px) {
+      body.variant-a[data-page="login"] .login-hero {
+        min-height: auto;
+      }
+
+      body.variant-a[data-page="login"] .hero-form {
+        border-radius: var(--p1-radius);
+      }
+    }
+
+    body.variant-a[data-page="login"] .login-feature-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      margin: 0.6rem 0 0;
+    }
+
+    body.variant-a[data-page="login"] .login-hero+.login-feature-strip {
+      margin-top: 1rem !important;
+      padding-top: 0;
+    }
+
+    body.variant-a[data-page="login"] .login-feature-strip article {
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+      padding: clamp(1.05rem, 2vw, 1.5rem);
+    }
+
+    body.variant-a[data-page="login"] .login-feature-strip article h2 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(1.2rem, 2vw, 1.5rem);
+      font-weight: 700;
+      color: var(--charcoal-strong);
+      text-transform: none;
+      letter-spacing: 0;
+      margin: 0;
+    }
+
+    body.variant-a[data-page="login"] .login-feature-strip article p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin: 0.62rem 0 0;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      body.variant-a[data-page="login"] .login-feature-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* Full-Screen Loading Overlay */
     .loading-overlay {
       display: none;
@@ -92,7 +345,7 @@
 
 </head>
 
-<body data-page="login">
+<body data-page="login" class="variant-a">
   <!-- Full-Screen Loading Overlay -->
   <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-content">
@@ -101,60 +354,103 @@
     </div>
   </div>
 
-  <!-- NAVBAR -->
   <div id="navbar-container"></div>
 
-  <!-- LOGIN FORM (centered vertically) -->
+  <!-- LOGIN SECTION -->
   <main>
-    <!-- PWA Install Prompt -->
-    <div id="pwaInstallBanner" class="pwa-banner" style="display:none;">
-      <span data-en="📲 Install CLS Employee App for faster access and offline features!"
-        data-es="📲 ¡Instala la App de Empleado CLS para un acceso más rápido y funciones sin conexión!"
-        data-pt="📲 Instale o App de Funcionário CLS para acesso mais rápido e recursos offline!">
-        📲 Install CLS Employee App for faster access and offline features!
-      </span>
-      <div class="pwa-buttons">
-        <button id="installPwaBtn" class="pwa-install-btn">Install</button>
-        <button id="dismissPwaBtn" class="pwa-dismiss-btn">Later</button>
+    <section class="hero login-hero" aria-label="Employee Login">
+      <div class="hero-content">
+        <p class="meta" data-en="Secure employee access" data-es="Acceso seguro para empleados"
+          data-pt="Acesso seguro para funcionários">Secure employee access</p>
+        <h1 data-en="Employee Login" data-es="Inicio de Sesión de Empleado" data-pt="Login de Funcionário">Employee
+          Login</h1>
+        <p class="hero-subtitle" data-en="Sign in to access your schedule, updates, and employee tools from one place."
+          data-es="Inicia sesión para acceder a tu horario, actualizaciones y herramientas de empleado en un solo lugar."
+          data-pt="Entre para acessar seu horário, atualizações e ferramentas do funcionário em um só lugar.">
+          Sign in to access your schedule, updates, and employee tools from one place.
+        </p>
       </div>
-    </div>
 
-    <!-- Offline Status Indicator -->
-    <div id="offlineIndicator"
-      style="display: none; background: #ff9800; color: #000; padding: 8px; text-align: center; font-size: 0.9em;">
-      📱 You're offline - Some features may be limited
-    </div>
+      <article class="login-container hero-form" id="login-panel">
+        <!-- PWA Install Prompt (deprecated) -->
 
-    <div class="login-container">
-      <h1 data-en="Employee Login" data-es="Inicio de Sesión de Empleado" data-pt="Login de Funcionário">Employee Login
-      </h1>
+        <!-- Offline Status Indicator -->
+        <div id="offlineIndicator">
+          📱 You're offline - Some features may be limited
+        </div>
 
-      <form id="loginForm" class="amber-glow">
-        <input type="email" id="email" name="email" autocomplete="email" placeholder="Work Email" data-en="Work Email"
-          data-es="Correo de Trabajo" data-pt="Email de Trabalho" required>
-        <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Password"
-          data-en="Password" data-es="Contraseña" data-pt="Senha" required>
+        <h2 data-en="Sign In" data-es="Iniciar Sesión" data-pt="Entrar">Sign In</h2>
+        <p class="login-subtext" data-en="Use your work email and password."
+          data-es="Usa tu correo de trabajo y contraseña." data-pt="Use seu email de trabalho e senha.">
+          Use your work email and password.
+        </p>
 
-        <button type="submit" id="loginBtn" data-en="Login" data-es="Iniciar Sesión" data-pt="Entrar">Login</button>
+        <form id="loginForm">
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="Work Email" data-en="Work Email"
+            data-es="Correo de Trabajo" data-pt="Email de Trabalho" required>
+          <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Password"
+            data-en="Password" data-es="Contraseña" data-pt="Senha" required>
 
-        <p id="status" class="message" role="status" aria-live="polite"></p>
-      </form>
+          <button type="submit" id="loginBtn" data-en="Login" data-es="Iniciar Sesión" data-pt="Entrar">Login</button>
 
-      <div class="link">
-        <span data-en="Don’t have an account?" data-es="¿No tienes una cuenta?" data-pt="Não tem uma conta?">Don’t have
-          an account?</span>
-        <a href="employeeSignup.html" data-en="Sign Up" data-es="Regístrate" data-pt="Cadastre-se">Sign Up</a>
-      </div>
-    </div>
+          <p id="status" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="link">
+          <span data-en="Don’t have an account?" data-es="¿No tienes una cuenta?" data-pt="Não tem uma conta?">Don’t
+            have
+            an account?</span>
+          <a href="employeeSignup.html" data-en="Sign Up" data-es="Regístrate" data-pt="Cadastre-se">Sign Up</a>
+        </div>
+      </article>
+    </section>
+
+    <!-- Employee portal feature strip -->
+    <section class="login-feature-strip" aria-label="Portal features">
+      <article>
+        <h2 data-en="📍 GPS Clock-In" data-es="📍 Registro de Entrada GPS" data-pt="📍 Registro GPS">📍 GPS Clock-In
+        </h2>
+        <p data-en="Clock in from any job site with location verification."
+          data-es="Regístrate desde cualquier sitio de trabajo con verificación de ubicación."
+          data-pt="Registre entrada em qualquer canteiro com verificação de localização.">Clock in from any job site
+          with location verification.</p>
+      </article>
+      <article>
+        <h2 data-en="🗓 Your Schedule" data-es="🗓 Tu Horario" data-pt="🗓 Seu Horário">🗓 Your Schedule</h2>
+        <p data-en="View your upcoming shifts, hours, and assignments."
+          data-es="Consulta tus turnos, horas y asignaciones." data-pt="Veja seus turnos, horas e atribuições.">View
+          your upcoming shifts, hours, and assignments.</p>
+      </article>
+      <article>
+        <h2 data-en="💰 Payroll Access" data-es="💰 Acceso a Nómina" data-pt="💰 Acesso à Folha">💰 Payroll Access</h2>
+        <p data-en="Track your earnings and download pay summaries."
+          data-es="Consulta tus ganancias y descarga resúmenes de pago."
+          data-pt="Acompanhe seus ganhos e baixe resumos de pagamento.">Track your earnings and download pay summaries.
+        </p>
+      </article>
+    </section>
   </main>
 
-  <!-- FOOTER -->
   <div id="footer-container"></div>
 
   <!-- PWA Service Worker Registration -->
   <script>
     // Service Worker Registration with cache version
-    if ('serviceWorker' in navigator) {
+    // For localhost QA, disable SW caching so style/layout edits are always current.
+    const isLocalhost =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
+    if ('serviceWorker' in navigator && isLocalhost) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => registration.unregister());
+      });
+      if (window.caches && caches.keys) {
+        caches.keys().then((keys) => {
+          keys.forEach((key) => caches.delete(key));
+        });
+      }
+    } else if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker-employee.js?v=' + CACHE_VERSION, { scope: './' })
         .then(registration => {
           console.log('✅ SW ready on login page:', registration.scope);
@@ -201,20 +497,16 @@
 
           if (isSessionValid) {
             const displayName = localStorage.getItem('CLS_WorkerName') || workerId;
-            console.log(`✅ Valid session found for ${displayName}, auto-redirecting to dashboard`);
+            console.log(`✅ Valid session found for ${displayName}`);
 
             // Show friendly message
             const statusEl = document.getElementById('status');
             if (statusEl) {
-              statusEl.textContent = `✅ Welcome back, ${displayName}! Redirecting...`;
+              statusEl.textContent = `✅ Welcome back, ${displayName}!`;
               statusEl.style.color = '#4CAF50';
             }
 
-            // Redirect to dashboard
-            setTimeout(() => {
-              window.location.href = 'employeeDashboard.html';
-            }, 800);
-            return true; // Session valid, redirecting
+            return true; // Session valid
           } else {
             // Session expired, clear it
             console.log('⚠️ Session expired, clearing localStorage');

@@ -3,7 +3,7 @@
  * Allows admins to view dashboard as another worker
  */
 
-import { Dialog } from '../utils/dialog.js';
+import { Dialog } from "../utils/dialog.js";
 
 export class ViewAs {
   constructor(apiUrl) {
@@ -16,20 +16,20 @@ export class ViewAs {
    * Initialize the View As module
    */
   async init() {
-    const dropdown = document.getElementById('viewAsWorkerSelect');
-    const btnViewAs = document.getElementById('btnViewAsWorker');
-    const btnReset = document.getElementById('btnResetView');
+    const dropdown = document.getElementById("viewAsWorkerSelect");
+    const btnViewAs = document.getElementById("btnViewAsWorker");
+    const btnReset = document.getElementById("btnResetView");
 
     if (dropdown) {
       await this.populateWorkerDropdown();
     }
 
     if (btnViewAs) {
-      btnViewAs.addEventListener('click', () => this.activateViewAs());
+      btnViewAs.addEventListener("click", () => this.activateViewAs());
     }
 
     if (btnReset) {
-      btnReset.addEventListener('click', () => this.resetView());
+      btnReset.addEventListener("click", () => this.resetView());
     }
   }
 
@@ -37,53 +37,56 @@ export class ViewAs {
    * Activate View As mode
    */
   activateViewAs() {
-    const dropdown = document.getElementById('viewAsWorkerSelect');
+    const dropdown = document.getElementById("viewAsWorkerSelect");
     if (!dropdown || !dropdown.value) {
-      alert('Please select a worker first');
+      alert("Please select a worker first");
       return;
     }
 
     const selectedOption = dropdown.options[dropdown.selectedIndex];
     const workerId = dropdown.value;
-    const workerName = selectedOption.text.split(' (')[0];
+    const workerName = selectedOption.text.split(" (")[0];
 
     // Store current admin info
-    if (!localStorage.getItem('CLS_AdminID')) {
-      localStorage.setItem('CLS_AdminID', localStorage.getItem('CLS_WorkerID'));
-      localStorage.setItem('CLS_AdminName', localStorage.getItem('CLS_WorkerName'));
-      localStorage.setItem('CLS_AdminRole', localStorage.getItem('CLS_Role'));
+    if (!localStorage.getItem("CLS_AdminID")) {
+      localStorage.setItem("CLS_AdminID", localStorage.getItem("CLS_WorkerID"));
+      localStorage.setItem(
+        "CLS_AdminName",
+        localStorage.getItem("CLS_WorkerName"),
+      );
+      localStorage.setItem("CLS_AdminRole", localStorage.getItem("CLS_Role"));
     }
 
     // Switch to worker view
-    localStorage.setItem('CLS_WorkerID', workerId);
-    localStorage.setItem('CLS_WorkerName', workerName);
-    localStorage.setItem('CLS_Role', 'Worker');
-    localStorage.setItem('CLS_ViewAsActive', 'true');
+    localStorage.setItem("CLS_WorkerID", workerId);
+    localStorage.setItem("CLS_WorkerName", workerName);
+    localStorage.setItem("CLS_Role", "Worker");
+    localStorage.setItem("CLS_ViewAsActive", "true");
 
     console.log(`👤 Viewing as: ${workerName} (${workerId})`);
-    
+
     // Redirect to employee dashboard
-    window.location.href = 'employeeDashboard.html?view=employee';
+    window.location.href = "employeelogin.html";
   }
 
   /**
    * Reset to admin view
    */
   resetView() {
-    const adminId = localStorage.getItem('CLS_AdminID');
-    const adminName = localStorage.getItem('CLS_AdminName');
-    const adminRole = localStorage.getItem('CLS_AdminRole');
+    const adminId = localStorage.getItem("CLS_AdminID");
+    const adminName = localStorage.getItem("CLS_AdminName");
+    const adminRole = localStorage.getItem("CLS_AdminRole");
 
     if (adminId) {
-      localStorage.setItem('CLS_WorkerID', adminId);
-      localStorage.setItem('CLS_WorkerName', adminName);
-      localStorage.setItem('CLS_Role', adminRole);
-      localStorage.removeItem('CLS_AdminID');
-      localStorage.removeItem('CLS_AdminName');
-      localStorage.removeItem('CLS_AdminRole');
-      localStorage.removeItem('CLS_ViewAsActive');
-      
-      console.log('🔄 Reset to admin view');
+      localStorage.setItem("CLS_WorkerID", adminId);
+      localStorage.setItem("CLS_WorkerName", adminName);
+      localStorage.setItem("CLS_Role", adminRole);
+      localStorage.removeItem("CLS_AdminID");
+      localStorage.removeItem("CLS_AdminName");
+      localStorage.removeItem("CLS_AdminRole");
+      localStorage.removeItem("CLS_ViewAsActive");
+
+      console.log("🔄 Reset to admin view");
       window.location.reload();
     }
   }
@@ -92,12 +95,12 @@ export class ViewAs {
    * Populate worker dropdown for View As feature
    */
   async populateWorkerDropdown() {
-    const dropdown = document.getElementById('viewAsWorkerSelect');
+    const dropdown = document.getElementById("viewAsWorkerSelect");
     if (!dropdown) return;
 
     try {
       // Get current admin's worker ID
-      const adminWorkerId = localStorage.getItem('CLS_WorkerID');
+      const adminWorkerId = localStorage.getItem("CLS_WorkerID");
       const url = `${this.apiUrl}?action=reportAll&workerId=${encodeURIComponent(adminWorkerId)}`;
       const response = await fetch(url);
       const data = await response.json();
@@ -109,11 +112,11 @@ export class ViewAs {
       } else if (data.report && Array.isArray(data.report)) {
         // Extract unique workers from report records
         const workerMap = new Map();
-        data.report.forEach(record => {
+        data.report.forEach((record) => {
           if (record.WorkerID && !workerMap.has(record.WorkerID)) {
             workerMap.set(record.WorkerID, {
               workerId: record.WorkerID,
-              displayName: record.DisplayName || record.WorkerID
+              displayName: record.DisplayName || record.WorkerID,
             });
           }
         });
@@ -132,14 +135,18 @@ export class ViewAs {
         return nameA.localeCompare(nameB);
       });
 
-      dropdown.innerHTML = '<option value="">-- Select a Worker --</option>' +
-        workers.map(w => `<option value="${w.workerId}">${this.escapeHtml(w.displayName || w.name || w.workerId)} (${w.workerId})</option>`).join('');
-
-
-
+      dropdown.innerHTML =
+        '<option value="">-- Select a Worker --</option>' +
+        workers
+          .map(
+            (w) =>
+              `<option value="${w.workerId}">${this.escapeHtml(w.displayName || w.name || w.workerId)} (${w.workerId})</option>`,
+          )
+          .join("");
     } catch (err) {
-      console.error('Failed to populate View As dropdown:', err);
-      dropdown.innerHTML = '<option value="">-- Error loading workers --</option>';
+      console.error("Failed to populate View As dropdown:", err);
+      dropdown.innerHTML =
+        '<option value="">-- Error loading workers --</option>';
     }
   }
 
@@ -147,32 +154,33 @@ export class ViewAs {
    * Toggle View As mode
    */
   async toggle() {
-    const dropdown = document.getElementById('viewAsWorkerSelect');
-    const btnToggle = document.getElementById('btnToggleViewAs');
-    const indicator = document.getElementById('viewAsIndicator');
+    const dropdown = document.getElementById("viewAsWorkerSelect");
+    const btnToggle = document.getElementById("btnToggleViewAs");
+    const indicator = document.getElementById("viewAsIndicator");
 
     if (!this.isActive) {
       // Activate View As mode
       const selectedWorkerId = dropdown?.value;
       if (!selectedWorkerId) {
-        await Dialog.alert('Worker Required', 'Please select a worker first');
+        await Dialog.alert("Worker Required", "Please select a worker first");
         return;
       }
-      
+
       this.isActive = true;
       this.selectedWorkerId = selectedWorkerId;
 
       // Update UI
       if (btnToggle) {
-        btnToggle.textContent = 'Disable View As';
-        btnToggle.classList.add('btn-danger');
-        btnToggle.classList.remove('btn-primary');
+        btnToggle.textContent = "Disable View As";
+        btnToggle.classList.add("btn-danger");
+        btnToggle.classList.remove("btn-primary");
       }
 
       if (indicator) {
-        const selectedText = dropdown.options[dropdown.selectedIndex]?.text || selectedWorkerId;
+        const selectedText =
+          dropdown.options[dropdown.selectedIndex]?.text || selectedWorkerId;
         indicator.textContent = `👁️ Viewing as: ${selectedText}`;
-        indicator.style.display = 'block';
+        indicator.style.display = "block";
       }
 
       if (dropdown) {
@@ -181,7 +189,6 @@ export class ViewAs {
 
       // Notify parent dashboard to reload data as selected worker
       this.notifyViewAsChange(selectedWorkerId);
-
     } else {
       // Deactivate View As mode
       this.isActive = false;
@@ -189,18 +196,18 @@ export class ViewAs {
 
       // Update UI
       if (btnToggle) {
-        btnToggle.textContent = 'Enable View As';
-        btnToggle.classList.add('btn-primary');
-        btnToggle.classList.remove('btn-danger');
+        btnToggle.textContent = "Enable View As";
+        btnToggle.classList.add("btn-primary");
+        btnToggle.classList.remove("btn-danger");
       }
 
       if (indicator) {
-        indicator.style.display = 'none';
+        indicator.style.display = "none";
       }
 
       if (dropdown) {
         dropdown.disabled = false;
-        dropdown.value = '';
+        dropdown.value = "";
       }
 
       // Notify parent dashboard to reload data as original user
@@ -214,15 +221,18 @@ export class ViewAs {
    */
   notifyViewAsChange(workerId) {
     // Dispatch custom event that parent dashboard can listen to
-    const event = new CustomEvent('viewAsChanged', {
+    const event = new CustomEvent("viewAsChanged", {
       detail: {
         active: this.isActive,
-        workerId: workerId
-      }
+        workerId: workerId,
+      },
     });
     window.dispatchEvent(event);
 
-    console.log('View As changed:', this.isActive ? `Viewing as ${workerId}` : 'Disabled');
+    console.log(
+      "View As changed:",
+      this.isActive ? `Viewing as ${workerId}` : "Disabled",
+    );
   }
 
   /**
@@ -231,7 +241,7 @@ export class ViewAs {
   getState() {
     return {
       active: this.isActive,
-      workerId: this.selectedWorkerId
+      workerId: this.selectedWorkerId,
     };
   }
 
@@ -240,12 +250,12 @@ export class ViewAs {
    */
   escapeHtml(text) {
     const map = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;'
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
     };
-    return String(text).replace(/[&<>"']/g, m => map[m]);
+    return String(text).replace(/[&<>"']/g, (m) => map[m]);
   }
 }
