@@ -16,6 +16,7 @@ This directory contains implementation guides, completion reports, and technical
 
 - **PWA_OFFLINE_ICONS_AND_CLOCKIN_FIX.md** - PWA offline functionality reference
 - **BIOMETRIC_REMOVAL_COMPLETE.md** - Biometric removal technical summary (historical reference)
+- **QUOTE_SUBMISSION_TRANSPORT_FIX_2026-04-24.md** - Quote submission CORS/request-transport issue and fix pattern
 
 ### Build & Deploy
 

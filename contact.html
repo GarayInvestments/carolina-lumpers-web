@@ -253,13 +253,17 @@
 
         if (!validateForm()) return;
 
-        var fd = new FormData(form);
-        fd.append('startedAt', Date.now());
-        fd.append('formType', 'quote-request-basic');
+        // no-cors accepts simple requests; URL-encoded payload avoids preflight/CORS blocking.
+        var payload = new URLSearchParams(new FormData(form));
+        payload.set('startedAt', String(Date.now()));
+        payload.set('formType', 'quote-request-basic');
 
         try {
-          var res = await fetch(API_BASE, { method: 'POST', body: fd });
-          if (!res.ok) throw new Error('Submission failed');
+          await fetch(API_BASE, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: payload
+          });
 
           if (typeof gtag === 'function') {
             gtag('event', 'generate_lead', {
