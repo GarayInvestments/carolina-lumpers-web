@@ -253,6 +253,10 @@
 
         if (!validateForm()) return;
 
+        // Disable button and show loading state immediately
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
+
         // no-cors accepts simple requests; URL-encoded payload avoids preflight/CORS blocking.
         var payload = new URLSearchParams(new FormData(form));
         payload.set('startedAt', String(Date.now()));
@@ -280,7 +284,8 @@
 
           successMsg.textContent = '✅ Thanks! Your quote request has been submitted. We\'ll be in touch soon.';
           successMsg.style.display = 'block';
-          submitBtn.disabled = true;
+          submitBtn.textContent = 'Submitted';
+          // Keep disabled — one submission per page load
           form.reset();
         } catch (err) {
           if (typeof gtag === 'function') {
@@ -294,7 +299,9 @@
 
           successMsg.textContent = '⚠️ Unable to submit right now. Please try again.';
           successMsg.style.display = 'block';
+          // Re-enable on error so user can retry
           submitBtn.disabled = false;
+          submitBtn.textContent = 'Request Quote';
         }
       });
     })();
