@@ -1316,7 +1316,7 @@ function initLoginForm() {
 
         // Redirect after short delay
         setTimeout(() => {
-          window.location.href = "employeelogin.html";
+          window.location.href = "employeeDashboard.html";
         }, 1500);
       } else {
         // Hide loading overlay on error
