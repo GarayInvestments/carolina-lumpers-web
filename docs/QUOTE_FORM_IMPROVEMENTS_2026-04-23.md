@@ -1,4 +1,5 @@
 # Quote Form — Improvement Plan
+
 **File:** `contact.html`  
 **Date:** April 23, 2026  
 **Status:** Planned — not started
@@ -10,18 +11,22 @@
 ### 1. 🔴 API Endpoint — Workspace-Scoped URL (Verify First)
 
 **Current:**
+
 ```javascript
-var API_BASE = 'https://script.google.com/a/macros/carolinalumpers.com/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec';
+var API_BASE =
+  "https://script.google.com/a/macros/carolinalumpers.com/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec";
 ```
 
 The `/a/macros/carolinalumpers.com/` path is a **Google Workspace-scoped URL**. External visitors (not signed into a carolinalumpers.com Google account) may be redirected to a Google login wall instead of reaching the script.
 
 **Compare with apply form (correct public URL):**
+
 ```javascript
-action="https://script.google.com/macros/s/AKfycbxdD80YrBa6wa271_.../exec"
+action = "https://script.google.com/macros/s/AKfycbxdD80YrBa6wa271_.../exec";
 ```
 
 **Action:**
+
 1. Open the Quote Request Apps Script project in Google Apps Script
 2. Go to Deploy → Manage Deployments
 3. Confirm "Who has access" is set to **Anyone** (not "Anyone in carolinalumpers.com")
@@ -40,21 +45,33 @@ Apply form has both; quote form has neither. Bots can spam the form with no fric
 
 ```html
 <!-- Timing: set on page load -->
-<input type="hidden" name="startedAt" id="startedAt" value="">
+<input type="hidden" name="startedAt" id="startedAt" value="" />
 
 <!-- Honeypot: hidden from real users, filled by bots -->
-<div class="honeypot" aria-hidden="true" style="display:none !important; position:absolute; left:-9999px;">
+<div
+  class="honeypot"
+  aria-hidden="true"
+  style="display:none !important; position:absolute; left:-9999px;"
+>
   <label for="hp_website">Leave this blank</label>
-  <input type="text" id="hp_website" name="website" tabindex="-1" autocomplete="off">
+  <input
+    type="text"
+    id="hp_website"
+    name="website"
+    tabindex="-1"
+    autocomplete="off"
+  />
 </div>
 ```
 
 **Set `startedAt` on page load (inline script):**
+
 ```javascript
-document.getElementById('startedAt').value = String(Date.now());
+document.getElementById("startedAt").value = String(Date.now());
 ```
 
 **Backend can then check:**
+
 - `website` field is non-empty → reject as bot
 - `Date.now() - startedAt < 3000` → reject as bot (submitted too fast)
 
@@ -63,17 +80,23 @@ document.getElementById('startedAt').value = String(Date.now());
 ### 3. 🟡 Fix Success/Error Message Copy
 
 **Current (developer-style, not user-facing):**
+
 ```javascript
-successMsg.textContent = 'SUCCESS: Your quote request has been submitted. We will contact you soon.';
+successMsg.textContent =
+  "SUCCESS: Your quote request has been submitted. We will contact you soon.";
 // ...
-successMsg.textContent = 'ERROR: Unable to submit request right now. Please try again.';
+successMsg.textContent =
+  "ERROR: Unable to submit request right now. Please try again.";
 ```
 
 **Replace with:**
+
 ```javascript
-successMsg.textContent = 'Your quote request has been submitted. Our team will follow up with you shortly.';
+successMsg.textContent =
+  "Your quote request has been submitted. Our team will follow up with you shortly.";
 // ...
-successMsg.textContent = 'Unable to submit right now. Please try again or call us at (828) 781-0002.';
+successMsg.textContent =
+  "Unable to submit right now. Please try again or call us at (828) 781-0002.";
 ```
 
 ---
@@ -83,8 +106,9 @@ successMsg.textContent = 'Unable to submit right now. Please try again or call u
 **Current bug:** `submitBtn.disabled = true` is set on submit but only re-enabled in the `catch` block's error path. If submission succeeds, the button stays permanently disabled and the user can't re-submit (e.g., if they want to send a second inquiry).
 
 **Current flow:**
+
 ```javascript
-submitBtn.disabled = true;       // set on submit
+submitBtn.disabled = true; // set on submit
 // success path: never re-enabled ← BUG
 // catch path: submitBtn.disabled = false; ← only on error
 ```
@@ -100,7 +124,7 @@ After a successful submission the form fields stay populated. Apply form calls `
 ```javascript
 // After successMsg is shown:
 form.reset();
-document.getElementById('startedAt').value = String(Date.now()); // reset timing too
+document.getElementById("startedAt").value = String(Date.now()); // reset timing too
 ```
 
 ---
@@ -126,7 +150,7 @@ The `details` textarea currently hints at these but they're optional freeform. M
 
 <div class="field">
   <label for="preferredStartDate">Preferred Start Date</label>
-  <input id="preferredStartDate" name="preferredStartDate" type="date">
+  <input id="preferredStartDate" name="preferredStartDate" type="date" />
 </div>
 ```
 
@@ -138,10 +162,17 @@ The phone input has no placeholder. All other text inputs on the form have one. 
 
 ```html
 <!-- Before -->
-<input id="phone" name="phone" type="tel" autocomplete="tel" required>
+<input id="phone" name="phone" type="tel" autocomplete="tel" required />
 
 <!-- After -->
-<input id="phone" name="phone" type="tel" autocomplete="tel" required placeholder="(xxx) xxx-xxxx">
+<input
+  id="phone"
+  name="phone"
+  type="tel"
+  autocomplete="tel"
+  required
+  placeholder="(xxx) xxx-xxxx"
+/>
 ```
 
 ---
@@ -149,6 +180,7 @@ The phone input has no placeholder. All other text inputs on the form have one. 
 ### 8. 🟢 Improve "Additional Support" Service Option Label
 
 **Current options:**
+
 ```
 Inbound Services
 Outbound Services
@@ -157,6 +189,7 @@ Additional Support       ← vague
 ```
 
 **Suggested:**
+
 ```
 Inbound Services
 Outbound Services
@@ -172,12 +205,16 @@ Other
 The apply form appends `formType: 'careers-application'` and `submissionMeta` JSON to help the backend route and tag records. The quote form appends `formType: 'quote-request-basic'` already — but it does not include `submissionMeta`.
 
 **Add to the `FormData` build block:**
+
 ```javascript
-fd.append('submissionMeta', JSON.stringify({
-  clientTime: new Date().toISOString(),
-  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  device: navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop'
-}));
+fd.append(
+  "submissionMeta",
+  JSON.stringify({
+    clientTime: new Date().toISOString(),
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    device: navigator.userAgent.includes("Mobile") ? "mobile" : "desktop",
+  }),
+);
 ```
 
 ---
@@ -198,7 +235,7 @@ fd.append('submissionMeta', JSON.stringify({
 
 ## Files to Edit
 
-| File | Changes |
-|------|---------|
-| `contact.html` | All 9 items above (HTML + inline script) |
+| File                               | Changes                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------- |
+| `contact.html`                     | All 9 items above (HTML + inline script)                                        |
 | Google Apps Script (Quote project) | Verify deploy access setting (item 1) — done in GAS dashboard, not in this repo |
