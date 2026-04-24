@@ -257,6 +257,10 @@
         var payload = new URLSearchParams(new FormData(form));
         payload.set('startedAt', String(Date.now()));
         payload.set('formType', 'quote-request-basic');
+        // Backend requires 'facility' and 'address' — map from the frontend 'facilityLocation' field
+        var facilityVal = form.querySelector('[name="facilityLocation"]').value.trim();
+        payload.set('facility', facilityVal);
+        payload.set('address', facilityVal);
 
         try {
           await fetch(API_BASE, {
