@@ -11,11 +11,160 @@
   color: var(--text-primary);
 }
 
-/* [DASHBOARD: Navigation Overrides] */
-/* Show hamburger menu ONLY on mobile/tablet */
-@media (max-width: 940px) {
-  .dashboard-page .hamburger {
+/* [DASHBOARD: Navbar Styles] */
+/* The shared navbar (components/navbar.html) has no standalone stylesheet.
+   On non-variant-a pages it relies on layout.css for styling; dashboard-page
+   does not load layout.css section rules, so we replicate the needed rules here. */
+
+.dashboard-page .site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: var(--space-md);
+  width: 100%;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--space-sm) var(--space-lg);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  box-sizing: border-box;
+}
+
+.dashboard-page .site-header .wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  text-decoration: none;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.dashboard-page .site-header .wordmark img {
+  width: 40px;
+  height: auto;
+}
+
+.dashboard-page .site-header .wordmark span {
+  display: inline-block;
+}
+
+.dashboard-page .site-header #primary-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: nowrap;
+}
+
+.dashboard-page .site-header #primary-nav a {
+  color: var(--text-primary);
+  text-decoration: none;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: var(--transition-base);
+  font-size: var(--font-size-sm);
+}
+
+.dashboard-page .site-header #primary-nav a:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.dashboard-page .nav-toggle {
+  display: none;
+  width: 2rem;
+  height: 2rem;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.dashboard-page .nav-toggle span {
+  width: 1rem;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.dashboard-page .site-header.menu-open .nav-toggle span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.dashboard-page .site-header.menu-open .nav-toggle span:nth-child(2) {
+  opacity: 0;
+}
+.dashboard-page .site-header.menu-open .nav-toggle span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Nav language dropdown */
+.dashboard-page .nav-language-container {
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-page .nav-language-container select {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 6px 28px 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: var(--transition-base);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 11px;
+}
+
+[data-theme="light"] .dashboard-page .nav-language-container select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231a1a1a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.dashboard-page .nav-language-container select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+}
+
+@media (max-width: 640px) {
+  .dashboard-page .nav-toggle {
     display: flex;
+  }
+
+  .dashboard-page .site-header #primary-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--space-sm) var(--space-lg);
+    gap: var(--space-xs);
+    z-index: var(--z-dropdown);
+  }
+
+  .dashboard-page .site-header.menu-open #primary-nav {
+    display: flex;
+  }
+
+  .dashboard-page .nav-language-container {
+    display: none;
   }
 }
 
@@ -55,7 +204,7 @@
   background: var(--bg-secondary);
   color: var(--color-primary);
   border: none;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-md);
   padding: 12px 22px;
   font-size: 1.05em;
   cursor: pointer;
@@ -96,7 +245,7 @@
   background: var(--color-primary);
   color: var(--bg-secondary);
   border: none;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-md);
   padding: 14px 36px;
   font-size: 1.1em;
   cursor: pointer;
@@ -134,7 +283,7 @@
 }
 
 .dashboard th {
-  background: #222;
+  background: var(--thead);
 }
 
 .dashboard tr:nth-child(even) {
@@ -161,7 +310,7 @@
 
 .dashboard .btn {
   border: 2px solid transparent;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--radius-sm);
   padding: var(--space-sm) var(--space-md);
   font-size: 0.95em;
   cursor: pointer;
@@ -595,10 +744,7 @@
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin is defined once above in the Modal section */
 
 /* ================================
    Light Theme Overrides
@@ -678,4 +824,107 @@
 [data-theme="light"] .tab-btn.active {
   background: #d4a017;
   color: #ffffff;
+}
+
+/* ================================
+   Inline-Style Replacements
+   ================================ */
+
+/* W-9 bypass banner */
+.w9-bypass-banner {
+  display: none;
+  margin: var(--space-lg) 0;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  text-align: center;
+  background: #3b2f00;
+  color: #f1c40f;
+  border: 1px solid #f1c40f;
+}
+
+.w9-bypass-banner a {
+  margin-left: var(--space-md);
+  text-decoration: underline;
+  color: #ffd54f;
+  font-weight: 700;
+}
+
+/* Sync status indicator */
+.sync-status {
+  display: none;
+  font-size: 0.9em;
+  color: #FFC107;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Dashboard select inputs */
+.dashboard-select {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  min-width: 200px;
+  font-size: inherit;
+}
+
+.dashboard-select-wide {
+  width: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  margin-top: 6px;
+  font-size: inherit;
+}
+
+/* View As admin panel */
+.view-as-wrap {
+  margin: var(--space-lg) auto;
+  max-width: 860px;
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.view-as-wrap h4 {
+  color: var(--color-primary);
+  margin: 0 0 var(--space-md) 0;
+  text-align: center;
+}
+
+.view-as-label {
+  display: block;
+  margin: 12px 0;
+}
+
+.view-as-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.view-as-alert {
+  margin: 12px 0;
+  padding: 12px;
+  background: #FFC107;
+  color: #000;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-weight: 600;
+}
+
+[data-theme="light"] .w9-bypass-banner {
+  background: #fff3cd;
+  color: #7d5800;
+  border-color: #f1c40f;
+}
+
+[data-theme="light"] .w9-bypass-banner a {
+  color: #7d5800;
 }
