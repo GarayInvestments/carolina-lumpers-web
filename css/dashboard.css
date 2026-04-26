@@ -91,9 +91,10 @@
 }
 
 .dashboard-page .nav-toggle span {
+  display: block;
   width: 1rem;
   height: 2px;
-  background: currentColor;
+  background: var(--color-primary);
   border-radius: 1px;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
@@ -140,7 +141,7 @@
   box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 940px) {
   .dashboard-page .nav-toggle {
     display: flex;
   }
