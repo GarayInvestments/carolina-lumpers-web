@@ -88,10 +88,11 @@
   flex-direction: column;
   gap: 4px;
   cursor: pointer;
+  position: relative;
 }
 
 .dashboard-page .nav-toggle span {
-  display: block;
+  display: none;
   width: 1rem;
   height: 2px;
   background: var(--color-primary);
@@ -99,14 +100,16 @@
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.dashboard-page .site-header.menu-open .nav-toggle span:nth-child(1) {
-  transform: translateY(6px) rotate(45deg);
+.dashboard-page .nav-toggle::before {
+  content: "\2630";
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  line-height: 1;
 }
-.dashboard-page .site-header.menu-open .nav-toggle span:nth-child(2) {
-  opacity: 0;
-}
-.dashboard-page .site-header.menu-open .nav-toggle span:nth-child(3) {
-  transform: translateY(-6px) rotate(-45deg);
+
+.dashboard-page .site-header.menu-open .nav-toggle::before {
+  content: "\2715";
+  font-size: 1rem;
 }
 
 /* Nav language dropdown */
