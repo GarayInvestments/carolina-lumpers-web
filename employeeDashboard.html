@@ -595,6 +595,11 @@
     const w9Status = localStorage.getItem("CLS_W9Status"); // W-9 compliance status
     let w9BypassUsed = false;
 
+    // Centralize role checks so Lead/Supervisor/Admin are treated consistently.
+    function isPrivilegedRole(role) {
+      return role === 'Admin' || role === 'Supervisor' || role === 'Lead';
+    }
+
     if (!workerId) {
       const currentLang = localStorage.getItem("CLS_Lang") || "en";
       alert(getText('dashboard.sessionExpired', currentLang));
@@ -610,7 +615,7 @@
       // W-9 COMPLIANCE CHECK: Redirect non-admins if W-9 not submitted
       // Check if user is admin first (admins exempt from W-9 requirement)
       const storedRole = localStorage.getItem("CLS_Role");
-      if (storedRole !== 'Admin' && storedRole !== 'Supervisor') {
+      if (!isPrivilegedRole(storedRole)) {
         const w9Bypass = sessionStorage.getItem('CLS_W9BypassOnce') === 'true';
         if (w9Bypass) {
           w9BypassUsed = true;
@@ -816,7 +821,7 @@
       const bypassUsed = window.w9BypassUsed === true;
 
       // Only show for non-admin workers with pending/rejected status
-      if (storedRole === 'Admin' || storedRole === 'Supervisor') {
+      if (isPrivilegedRole(storedRole)) {
         banner.style.display = 'none';
         if (bypassBanner) bypassBanner.style.display = 'none';
         return;
@@ -889,7 +894,7 @@
         const currentStatus = localStorage.getItem('CLS_W9Status');
 
         // Only check for non-admin workers
-        if (!workerId || storedRole === 'Admin' || storedRole === 'Supervisor') {
+        if (!workerId || isPrivilegedRole(storedRole)) {
           return;
         }
 
@@ -914,7 +919,7 @@
         const response = await fetch(url);
         const data = await response.json();
 
-        if (data.success) {
+        if (data.ok || data.success) {
           const newStatus = data.status || 'none';
 
           // If status changed, update localStorage and refresh banner
@@ -1020,7 +1025,7 @@
       const storedRole = localStorage.getItem('CLS_Role');
 
       // Don't start polling for admins/supervisors
-      if (storedRole === 'Admin' || storedRole === 'Supervisor') {
+      if (isPrivilegedRole(storedRole)) {
         return;
       }
 
