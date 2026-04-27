@@ -289,6 +289,35 @@ h3 {
   outline: none;
 }
 
+/* ── CTA buttons — match index.html CTA weight & sizing ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.68rem 1.5rem;
+  font-weight: 700;
+  border-radius: 12px;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease,
+    background 0.2s ease;
+}
+
+.btn.btn-primary {
+  background: linear-gradient(180deg, #f0c03b 0%, #d8ab24 100%);
+  color: #111;
+  border: none;
+  box-shadow: 0 10px 22px rgba(216, 171, 36, 0.25);
+}
+
+.btn.btn-primary:hover,
+.btn.btn-primary:focus-visible {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  outline: none;
+}
+
 /* ── Responsive ── */
 
 @media (max-width: 900px) {
