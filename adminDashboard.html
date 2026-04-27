@@ -3,7 +3,13 @@
 
 <head>
   <script>
-    window.location.replace('employeelogin.html');
+    (function () {
+      var role = localStorage.getItem('CLS_Role');
+      var workerId = localStorage.getItem('CLS_WorkerID');
+      if (!workerId || role !== 'Admin') {
+        window.location.replace('employeelogin.html');
+      }
+    })();
   </script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3032955456184358"
     crossorigin="anonymous"></script>
