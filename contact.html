@@ -150,6 +150,12 @@
             </div>
           </div>
 
+          <!-- Anti-spam: honeypot (visually hidden, must stay empty) -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="hp_website">Leave this blank</label>
+            <input id="hp_website" name="website" type="text" autocomplete="off" tabindex="-1">
+          </div>
+
           <div class="form-actions">
             <button type="submit" id="basicSubmitBtn" class="btn btn-primary">Request Quote</button>
           </div>
@@ -176,9 +182,23 @@
 
   <script src="js/script.js?v=20260422-modular-a2" defer></script>
 
+  <style>
+    .hp-field {
+      position: absolute;
+      left: -9999px;
+      top: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+
   <script>
     (function () {
       var API_BASE = 'https://script.google.com/macros/s/AKfycbwWsIE5HwHzfZX2V6kh8SvUXZMhthPeEY3I1p0oGbdU3tp3-T6Q7tgEEgLJ-p9VZu1o/exec';
+      var _formLoadedAt = Date.now();
       var header = document.querySelector('.site-header');
       var toggle = document.querySelector('.nav-toggle');
       var nav = document.getElementById('primary-nav');
@@ -247,9 +267,31 @@
         return ok;
       }
 
+      var RATE_LIMIT_KEY = 'cls_quote_last_submit';
+      var RATE_LIMIT_MS = 10 * 60 * 1000; // 10 minutes
+
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
         successMsg.style.display = 'none';
+
+        // Honeypot check
+        var hp = form.querySelector('input[name="website"]');
+        if (hp && hp.value) return;
+
+        // Timing check — must be at least 4 s since page load
+        if (Date.now() - _formLoadedAt < 4000) {
+          successMsg.textContent = '⚠️ Please take a moment to review your request before submitting.';
+          successMsg.style.display = 'block';
+          return;
+        }
+
+        // Rate-limit check
+        var lastSubmit = parseInt(localStorage.getItem(RATE_LIMIT_KEY) || '0', 10);
+        if (Date.now() - lastSubmit < RATE_LIMIT_MS) {
+          successMsg.textContent = '⚠️ You already submitted a request recently. Please wait a few minutes before trying again.';
+          successMsg.style.display = 'block';
+          return;
+        }
 
         if (!validateForm()) return;
 
@@ -259,7 +301,9 @@
 
         // no-cors accepts simple requests; URL-encoded payload avoids preflight/CORS blocking.
         var payload = new URLSearchParams(new FormData(form));
-        payload.set('startedAt', String(Date.now()));
+        payload.delete('website'); // never send honeypot value
+        payload.set('startedAt', String(_formLoadedAt));
+        payload.set('elapsed', String(Date.now() - _formLoadedAt));
         payload.set('formType', 'quote-request-basic');
         // Backend requires 'facility' and 'address' — map from the frontend 'facilityLocation' field
         var facilityVal = form.querySelector('[name="facilityLocation"]').value.trim();
@@ -282,6 +326,7 @@
             });
           }
 
+          localStorage.setItem(RATE_LIMIT_KEY, String(Date.now()));
           successMsg.textContent = '✅ Thanks! Your quote request has been submitted. We\'ll be in touch soon.';
           successMsg.style.display = 'block';
           submitBtn.textContent = 'Submitted';

@@ -144,6 +144,21 @@ function doPost(e) {
       );
     }
 
+    // Timing check — reject if form was filled in under 4 seconds (bot indicator)
+    const elapsed = parseInt(String(payload.elapsed || "99999"), 10);
+    if (!isNaN(elapsed) && elapsed < 4000) {
+      return withCors_(
+        JSON.stringify({ ok: false, error: "Submission rejected." }),
+      );
+    }
+
+    // Honeypot check — 'website' field must be empty
+    if (String(payload.website || "").trim() !== "") {
+      return withCors_(
+        JSON.stringify({ ok: false, error: "Submission rejected." }),
+      );
+    }
+
     // Throttle by email to reduce duplicate spam
     const cache = CacheService.getScriptCache();
     const cKey = "qr-throttle-" + email.toLowerCase();

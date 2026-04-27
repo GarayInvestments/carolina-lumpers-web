@@ -12,10 +12,6 @@
       "name": "🔧 Google Apps Scripts",
       "path": "GoogleAppsScripts",
     },
-    {
-      "name": "carolina-lumpers-web-variant-a",
-      "path": "../carolina-lumpers-web-variant-a",
-    },
   ],
   "settings": {
     // File exclusions (keep explorer clean)
