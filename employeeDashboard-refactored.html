@@ -13,6 +13,7 @@
           theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
         document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute('data-bs-theme', theme);
       } catch (e) { }
     })();
   </script>
@@ -45,26 +46,28 @@
   </title>
 
   <link rel="icon" type="image/png" href="assets/CLS-favicon.png" />
-  <link rel="manifest" href="manifest-employee.json">
-  <meta name="theme-color" content="#ffcc00">
-
-  <!-- iOS support -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="CLS Employee">
-  <link rel="apple-touch-icon" href="assets/CLS-favicon.png">
+  <meta name="theme-color" content="#2563eb">
 
   <!-- Feather Icons (Local - works offline!) -->
   <script src="js/feather.min.js"></script>
+
+  <!-- Tabler (neutral app UI baseline for refactored copy) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
+
+  <!-- CLS brand fonts: Oswald (headings) + Barlow (body) + Inter (UI details) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Oswald:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
 
   <!-- Global CSS System -->
   <script>
     // Apply cache version to stylesheets dynamically
     document.write('<link rel="stylesheet" href="css/style.css?v=' + CACHE_VERSION + '">');
     document.write('<link rel="stylesheet" href="css/dashboard.css?v=' + CACHE_VERSION + '">');
+    document.write('<link rel="stylesheet" href="css/employee-dashboard.css?v=' + CACHE_VERSION + '">');
   </script>
   <!-- Note: Modal, status badge, and loading overlay styles moved to dashboard.css -->
-  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
 </head>
 
 <body data-page="employeeDashboard" class="dashboard-page">
@@ -81,17 +84,27 @@
 
 
   <!-- DASHBOARD -->
-  <div class="dashboard">
+  <div class="dashboard container-xl py-4">
 
-    <h1 id="welcomeMessage" data-en="Employee Dashboard" data-es="Panel del Empleado" data-pt="Painel do Funcionário">
-      Employee Dashboard</h1>
-    <h2 id="welcomeName"></h2>
-    <div class="info" id="userInfo"></div>
+    <!-- PAGE HEADER -->
+    <div class="page-header d-print-none mb-3">
+      <div class="row g-2 align-items-center">
+        <div class="col">
+          <h2 id="welcomeMessage" class="page-title" data-en="Employee Dashboard" data-es="Panel del Empleado"
+            data-pt="Painel do Funcionário">
+            Employee Dashboard</h2>
+          <div id="welcomeName" class="page-subtitle mt-1"></div>
+        </div>
+        <div class="col-auto">
+          <div class="text-muted small" id="userInfo"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- W-9 BYPASS WARNING (shown only when user bypassed form) -->
-    <div id="w9BypassBanner" class="w9-bypass-banner">
-      <span style="font-weight: 700; margin-right: var(--space-sm);" data-en="Action needed:"
-        data-es="Acción requerida:" data-pt="Ação necessária:">Action needed:</span>
+    <div id="w9BypassBanner" class="w9-bypass-banner alert alert-warning" role="alert">
+      <span class="w9-bypass-label" data-en="Action needed:" data-es="Acción requerida:"
+        data-pt="Ação necessária:">Action needed:</span>
       <span id="w9BypassText" data-en="Please complete your W-9 to continue working."
         data-es="Por favor complete su W-9 para continuar trabajando."
         data-pt="Conclua seu W-9 para continuar trabalhando.">Please complete your W-9 to continue working.</span>
@@ -99,151 +112,161 @@
     </div>
 
     <!-- W-9 STATUS BANNER (shown for pending/rejected only) -->
-    <div id="w9StatusBanner"
-      style="display: none; margin: var(--space-lg) 0; padding: var(--space-md); border-radius: var(--radius-md); text-align: center;">
-      <span id="w9BannerIcon" style="font-size: 24px; margin-right: var(--space-sm);"></span>
-      <span id="w9BannerText" style="font-weight: 600;"></span>
-      <a href="w9Status.html" id="w9BannerLink" style="margin-left: var(--space-md); text-decoration: underline;">
+    <div id="w9StatusBanner" class="w9-status-banner alert d-none" role="alert">
+      <span id="w9BannerIcon"></span>
+      <span id="w9BannerText"></span>
+      <a href="w9Status.html" id="w9BannerLink" class="w9-banner-link">
         <span data-en="View Details" data-es="Ver Detalles" data-pt="Ver Detalhes">View Details</span>
       </a>
     </div>
 
     <!-- TABS -->
-    <div class="tab-buttons">
-      <button id="tabClock" class="tab-btn active" data-en="Clock-Ins" data-es="Entradas"
-        data-pt="Registros">Clock-Ins</button>
-      <button id="tabPayroll" class="tab-btn" data-en="Payroll" data-es="Nómina"
-        data-pt="Folha de Pagamento">Payroll</button>
-    </div>
+    <ul class="nav nav-tabs mb-3" id="dashboardTabs">
+      <li class="nav-item">
+        <button id="tabClock" class="nav-link active" data-en="Clock-Ins" data-es="Entradas"
+          data-pt="Registros">Clock-Ins</button>
+      </li>
+      <li class="nav-item">
+        <button id="tabPayroll" class="nav-link" data-en="Payroll" data-es="Nómina"
+          data-pt="Folha de Pagamento">Payroll</button>
+      </li>
+    </ul>
 
     <!-- CLOCK-IN SECTION -->
-    <div id="clockin-section" class="card">
-      <button id="clockInBtn" data-en="Clock In / Out" data-es="Registrar Entrada / Salida"
-        data-pt="Registrar Entrada / Saída">
-        Clock In / Out
-      </button>
-      <div id="clockInStatus"></div>
-      <div id="syncStatus" class="sync-status"></div>
+    <div id="clockin-section" class="card mb-3">
+      <div class="card-body">
+        <button id="clockInBtn" class="btn btn-primary btn-lg w-100 mb-3" data-en="Clock In / Out"
+          data-es="Registrar Entrada / Salida" data-pt="Registrar Entrada / Saída">
+          <i data-feather="clock" class="icon me-2"></i>
+          <span data-en="Clock In / Out" data-es="Registrar Entrada / Salida" data-pt="Registrar Entrada / Saída">Clock
+            In / Out</span>
+        </button>
+        <div id="clockInStatus" class="text-muted small mb-3"></div>
 
-      <h3 class="section-title" data-en="Today's Time Entries" data-es="Entradas de Tiempo de Hoy"
-        data-pt="Registros de Tempo de Hoje">
-        Today's Time Entries
-      </h3>
-      <table id="reportTable">
-        <thead>
-          <tr>
-            <th data-en="Date" data-es="Fecha" data-pt="Data">Date</th>
-            <th data-en="Time" data-es="Hora" data-pt="Hora">Time</th>
-            <th style="width: 60px; text-align: center;"></th>
-          </tr>
-        </thead>
-        <tbody id="reportBody">
-          <tr>
-            <td colspan="3" class="muted">Loading...</td>
-          </tr>
-        </tbody>
-      </table>
+        <div class="subheader mb-2" data-en="Today's Time Entries" data-es="Entradas de Tiempo de Hoy"
+          data-pt="Registros de Tempo de Hoje">Today's Time Entries</div>
+        <table id="reportTable" class="table table-vcenter table-striped">
+          <thead>
+            <tr>
+              <th data-en="Date" data-es="Fecha" data-pt="Data">Date</th>
+              <th data-en="Time" data-es="Hora" data-pt="Hora">Time</th>
+              <th class="col-action"></th>
+            </tr>
+          </thead>
+          <tbody id="reportBody">
+            <tr>
+              <td colspan="3" class="text-muted">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- PAYROLL SECTION -->
-    <div id="payroll-section" class="card hidden">
-      <h3 class="section-title" data-en="Payroll Summary" data-es="Resumen de Nómina" data-pt="Resumo da Folha">
-        Payroll Summary
-      </h3>
-
-      <div class="controls" style="justify-content: center; flex-direction: column; align-items: center;">
-        <label for="weekPeriodSelect" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-          <span data-en="Week Period:" data-es="Período de Semana:" data-pt="Período da Semana:">Week Period:</span>
-          <select id="weekPeriodSelect" class="dashboard-select">
-            <option value="" data-en="Loading..." data-es="Cargando..." data-pt="Carregando...">Loading...</option>
-          </select>
-        </label>
-        <button id="btnPayrollPdf" class="btn btn-secondary" data-en="Send Payroll Report"
-          data-es="Enviar Informe de Nómina" data-pt="Enviar Relatório de Pagamento">
-          Send Payroll Report
-        </button>
-
+    <div id="payroll-section" class="card d-none mb-3">
+      <div class="card-header">
+        <h3 class="card-title" data-en="Payroll Summary" data-es="Resumen de Nómina" data-pt="Resumo da Folha">
+          Payroll Summary
+        </h3>
+        <div class="card-options">
+          <button id="btnPayrollPdf" class="btn btn-outline-secondary btn-sm" data-en="Email Report"
+            data-es="Enviar Informe" data-pt="Enviar Relatório">
+            <i data-feather="mail" class="icon me-1"></i>
+            <span data-en="Email Report" data-es="Enviar Informe" data-pt="Enviar Relatório">Email Report</span>
+          </button>
+        </div>
       </div>
-
-      <table id="payrollTable">
-        <thead>
-          <tr>
-            <th data-en="Date" data-es="Fecha" data-pt="Data">Date</th>
-            <th data-en="Hours / Break" data-es="Horas / Descanso" data-pt="Horas / Pausa">Hours / Break</th>
-            <th class="t-right" data-en="Check Amount" data-es="Monto del Cheque" data-pt="Valor do Cheque">Check Amount
-            </th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-
-
-      <p id="payrollTotals" class="t-right" data-label-total-en="Total" data-label-total-es="Total"
-        data-label-total-pt="Total"></p>
-      <p id="payrollNone" class="muted hidden" data-en="No records found" data-es="No se encontraron registros"
-        data-pt="Nenhum registro encontrado">
-        No records found
-      </p>
+      <div class="card-body">
+        <div class="controls payroll-controls">
+          <label for="weekPeriodSelect" class="payroll-period-label">
+            <span class="subheader mb-1" data-en="Week Period:" data-es="Período de Semana:"
+              data-pt="Período da Semana:">Week Period:</span>
+            <select id="weekPeriodSelect" class="dashboard-select form-select">
+              <option value="" data-en="Loading..." data-es="Cargando..." data-pt="Carregando...">Loading...</option>
+            </select>
+          </label>
+        </div>
+        <table id="payrollTable" class="table table-vcenter table-striped">
+          <thead>
+            <tr>
+              <th data-en="Date" data-es="Fecha" data-pt="Data">Date</th>
+              <th data-en="Hours / Break" data-es="Horas / Descanso" data-pt="Horas / Pausa">Hours / Break</th>
+              <th class="text-end" data-en="Check Amount" data-es="Monto del Cheque" data-pt="Valor do Cheque">Check
+                Amount</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card-footer d-flex justify-content-between align-items-center">
+        <p id="payrollNone" class="text-muted mb-0 d-none" data-en="No records found"
+          data-es="No se encontraron registros" data-pt="Nenhum registro encontrado">No records found</p>
+        <p id="payrollTotals" class="ms-auto mb-0 fw-semibold" data-label-total-en="Total" data-label-total-es="Total"
+          data-label-total-pt="Total"></p>
+      </div>
     </div>
 
     <!-- ADMIN TOOLS REMOVED - All admin features now in adminDashboard.html -->
     <!-- Admins are automatically redirected to adminDashboard.html on login -->
 
     <!-- VIEW AS Section (Admin-only feature - shown dynamically by ensureRoleAndRevealAdmin() function) -->
-    <div id="viewAsWrap" class="view-as-wrap hidden">
-      <h4 data-en="View As (Admin)" data-es="Ver Como (Admin)" data-pt="Ver Como (Admin)">
-        View As (Admin)
-      </h4>
-      <label for="viewAsSelect" class="view-as-label">
-        <span data-en="Choose a worker:" data-es="Elija un empleado:" data-pt="Escolha um funcionário:">Choose a
-          worker:</span>
-        <select id="viewAsSelect" class="dashboard-select-wide"></select>
-      </label>
-      <div class="view-as-actions">
-        <button id="btnActivateViewAs" class="btn btn-primary" data-en="Activate View As" data-es="Activar Ver Como"
-          data-pt="Ativar Ver Como">Activate View As</button>
-        <button id="btnExitViewAs" class="btn btn-ghost hidden" data-en="Exit View As" data-es="Salir de Ver Como"
-          data-pt="Sair do Ver Como">Exit View As</button>
+    <div id="viewAsWrap" class="view-as-wrap d-none card">
+      <div class="card-header">
+        <h3 class="card-title" data-en="View As (Admin)" data-es="Ver Como (Admin)" data-pt="Ver Como (Admin)">
+          View As (Admin)
+        </h3>
       </div>
-      <div id="viewAsAlert" class="view-as-alert hidden">
-        ⚠️ <span data-en="Viewing as:" data-es="Viendo como:" data-pt="Visualizando como:">Viewing as:</span> <span
-          id="viewAsWorkerName"></span>
+      <div class="card-body">
+        <label for="viewAsSelect" class="view-as-label">
+          <span data-en="Choose a worker:" data-es="Elija un empleado:" data-pt="Escolha um funcionário:">Choose a
+            worker:</span>
+          <select id="viewAsSelect" class="dashboard-select-wide form-select"></select>
+        </label>
+        <div class="view-as-actions">
+          <button id="btnActivateViewAs" class="btn btn-primary" data-en="Activate View As" data-es="Activar Ver Como"
+            data-pt="Ativar Ver Como">Activate View As</button>
+          <button id="btnExitViewAs" class="btn btn-outline-secondary d-none" data-en="Exit View As"
+            data-es="Salir de Ver Como" data-pt="Sair do Ver Como">Exit View As</button>
+        </div>
+        <div id="viewAsAlert" class="view-as-alert d-none alert alert-primary mt-2 mb-0" role="alert">
+          ⚠️ <span data-en="Viewing as:" data-es="Viendo como:" data-pt="Visualizando como:">Viewing as:</span> <span
+            id="viewAsWorkerName"></span>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Time Entry Edit Modal -->
-  <div id="timeEditModal" class="modal" style="display: none;">
+  <div id="timeEditModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 data-en="Request Time Adjustment" data-es="Solicitar Ajuste de Tiempo" data-pt="Solicitar Ajuste de Tempo">
           Request Time Adjustment
         </h3>
-        <span class="close" onclick="closeTimeEditModal()">&times;</span>
+        <button type="button" class="btn-close" onclick="closeTimeEditModal()" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <span style="font-weight:600;display:block;margin-bottom:8px;" data-en="Original Time:"
-            data-es="Tiempo Original:" data-pt="Tempo Original:">Original Time:</span>
+        <div class="mb-3">
+          <span class="form-label-inline" data-en="Original Time:" data-es="Tiempo Original:"
+            data-pt="Tempo Original:">Original Time:</span>
           <span id="originalTime" class="readonly-field"></span>
         </div>
-        <div class="form-group">
+        <div class="mb-3">
           <label for="requestedTime" data-en="Requested Time:" data-es="Tiempo Solicitado:"
             data-pt="Tempo Solicitado:">Requested Time:</label>
-          <input type="datetime-local" id="requestedTime" class="form-input" required>
+          <input type="datetime-local" id="requestedTime" class="form-control" required>
         </div>
-        <div class="form-group">
+        <div class="mb-3">
           <label for="editReason" data-en="Reason for Change:" data-es="Razón del Cambio:"
             data-pt="Motivo da Mudança:">Reason for Change:</label>
-          <textarea id="editReason" class="form-input" rows="3"
+          <textarea id="editReason" class="form-control" rows="3"
             data-en="Please explain why this time adjustment is needed..."
             data-es="Por favor explique por qué se necesita este ajuste de tiempo..."
             data-pt="Por favor explique por que esse ajuste de tempo é necessário..."
             placeholder="Please explain why this time adjustment is needed..." required></textarea>
         </div>
-        <div class="form-group">
-          <span style="font-weight:600;display:block;margin-bottom:8px;" data-en="Note:" data-es="Nota:"
-            data-pt="Nota:">Note:</span>
+        <div class="mb-3">
+          <span class="form-label-inline" data-en="Note:" data-es="Nota:" data-pt="Nota:">Note:</span>
           <p class="info-text"
             data-en="This request will be sent to your supervisor for approval. You will be notified once it's reviewed."
             data-es="Esta solicitud será enviada a su supervisor para aprobación. Se le notificará una vez que sea revisada."
@@ -253,8 +276,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" onclick="closeTimeEditModal()" data-en="Cancel" data-es="Cancelar"
-          data-pt="Cancelar">Cancel</button>
+        <button type="button" class="btn btn-ghost-secondary" onclick="closeTimeEditModal()" data-en="Cancel"
+          data-es="Cancelar" data-pt="Cancelar">Cancel</button>
         <button type="button" class="btn btn-primary" onclick="submitTimeEditRequest()" data-en="Submit Request"
           data-es="Enviar Solicitud" data-pt="Enviar Solicitação">Submit Request</button>
       </div>
@@ -274,6 +297,7 @@
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
       html.setAttribute('data-theme', newTheme);
+      html.setAttribute('data-bs-theme', newTheme);
       localStorage.setItem('CLS_Theme', newTheme);
 
       // Re-render feather icons after theme change
@@ -304,6 +328,7 @@
         if (!localStorage.getItem('CLS_Theme')) {
           const newTheme = e.matches ? 'dark' : 'light';
           document.documentElement.setAttribute('data-theme', newTheme);
+          document.documentElement.setAttribute('data-bs-theme', newTheme);
           if (typeof feather !== 'undefined') {
             feather.replace();
           }
@@ -329,21 +354,6 @@
           en: "Worker ID",
           es: "ID de Empleado",
           pt: "ID do Funcionário"
-        },
-        'pwaStatus.offlineMode': {
-          en: 'Offline Mode Active',
-          es: 'Modo Sin Conexión Activo',
-          pt: 'Modo Offline Ativo'
-        },
-        'pwaStatus.installedPwa': {
-          en: 'App Mode: Installed PWA',
-          es: 'Modo App: PWA Instalada',
-          pt: 'Modo App: PWA Instalado'
-        },
-        'pwaStatus.serviceWorkerActive': {
-          en: 'App Mode: Online',
-          es: 'Modo App: En Línea',
-          pt: 'Modo App: Online'
         }
       };
 
@@ -364,11 +374,6 @@
       loadingReport: { en: "Loading...", es: "Cargando...", pt: "Carregando..." },
       noClockIns: { en: "No clock-ins this week.", es: "No hay registros esta semana.", pt: "Sem registros esta semana." },
       reportError: { en: "Error loading report:", es: "Error al cargar el informe:", pt: "Erro ao carregar o relatório:" },
-      // Offline sync messages
-      offlineSaved: { en: "Clock-in saved offline — will sync when online", es: "Registro guardado sin conexión — se sincronizará cuando esté en línea", pt: "Registro salvo offline — será sincronizado quando online" },
-      syncInProgress: { en: "Connection restored — syncing clock data...", es: "Conexión restaurada — sincronizando datos...", pt: "Conexão restaurada — sincronizando dados..." },
-      syncComplete: { en: "All clock-ins synced successfully", es: "Todos los registros sincronizados", pt: "Todos os registros sincronizados" },
-      pendingSync: { en: "pending sync", es: "sincronización pendiente", pt: "sincronização pendente" },
       // Time edit messages
       timeEditRequest: { en: "Time adjustment request submitted", es: "Solicitud de ajuste de tiempo enviada", pt: "Solicitação de ajuste de tempo enviada" },
       timeEditError: { en: "Failed to submit time adjustment request", es: "Error al enviar solicitud de ajuste", pt: "Falha ao enviar solicitação de ajuste" },
@@ -392,9 +397,7 @@
         'fas fa-sync-alt fa-spin': 'refresh-cw',
         'fas fa-check-circle': 'check-circle',
         'fas fa-exclamation-triangle': 'alert-triangle',
-        'fas fa-mobile-alt': 'smartphone',
         'fas fa-edit': 'edit-2',
-        'fas fa-wifi-slash': 'wifi-off'
       };
 
       const featherName = iconMap[iconName] || iconName;
@@ -465,128 +468,6 @@
       });
     }
 
-    // =================== Offline Sync Utilities ===================
-    async function sendMessageToServiceWorker(type, data = {}) {
-      if (!('serviceWorker' in navigator)) return null;
-
-      const registration = await navigator.serviceWorker.ready;
-      if (!registration.active) return null;
-
-      return new Promise((resolve) => {
-        const channel = new MessageChannel();
-        channel.port1.onmessage = (event) => resolve(event.data);
-        registration.active.postMessage({ type, data }, [channel.port2]);
-      });
-    }
-
-    async function saveClockInOffline(clockData) {
-      try {
-        const result = await sendMessageToServiceWorker('QUEUE_CLOCK_IN', clockData);
-        return result && result.success;
-      } catch (err) {
-        console.error('Failed to save offline:', err);
-        return false;
-      }
-    }
-
-    async function triggerSync() {
-      try {
-        // Try background sync first
-        if ('serviceWorker' in navigator && 'SyncManager' in window) {
-          const registration = await navigator.serviceWorker.ready;
-          await registration.sync.register('sync-clock-data');
-        }
-
-        // Also trigger manual sync
-        await sendMessageToServiceWorker('TRIGGER_SYNC');
-      } catch (err) {
-        console.warn('Sync trigger failed:', err);
-      }
-    }
-
-    async function getPendingSyncCount() {
-      try {
-        const result = await sendMessageToServiceWorker('GET_PENDING_COUNT');
-        return result ? result.count : 0;
-      } catch (err) {
-        console.error('Failed to get pending count:', err);
-        return 0;
-      }
-    }
-
-    // Update sync status in UI
-    async function updateSyncStatus() {
-      const pendingCount = await getPendingSyncCount();
-      const syncStatus = document.getElementById('syncStatus');
-      if (syncStatus && pendingCount > 0) {
-        syncStatus.innerHTML = '';
-        const icon = createIcon('circle');
-        icon.style.color = '#ffc107';
-        icon.style.width = '12px';
-        icon.style.height = '12px';
-        syncStatus.appendChild(document.createTextNode(`${pendingCount} `));
-        syncStatus.appendChild(icon);
-        syncStatus.appendChild(document.createTextNode(' ' + getMSG('pendingSync')));
-        syncStatus.style.display = 'block';
-        if (typeof feather !== 'undefined') feather.replace();
-      } else if (syncStatus) {
-        syncStatus.style.display = 'none';
-      }
-    }
-
-    // Listen for sync messages from service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        const { type, data } = event.data;
-
-        switch (type) {
-          case 'CLOCK_SYNC_SUCCESS':
-            updateSyncStatus();
-            loadReport(); // Refresh the report
-            break;
-        }
-      });
-    }
-
-    // Handle online/offline events (at global scope for PWA icon updates)
-    window.addEventListener('online', async () => {
-      updatePWAStatus();
-
-      const status = document.getElementById('clockInStatus');
-      const pendingCount = await getPendingSyncCount();
-
-      if (pendingCount > 0 && status) {
-        setStatusWithIcon(status, 'fas fa-sync-alt fa-spin', getMSG('syncInProgress'));
-
-        try {
-          await triggerSync();
-
-          // Wait a moment for sync to complete
-          setTimeout(async () => {
-            const remainingCount = await getPendingSyncCount();
-            if (remainingCount === 0) {
-              setStatusWithIcon(status, 'check-circle', 'All clock-ins synced successfully!');
-              loadReport(); // Refresh the report
-
-              // Clear message after 3 seconds
-              setTimeout(() => {
-                if (status) status.innerHTML = '';
-              }, 3000);
-            } else {
-              setStatusWithIcon(status, 'alert-triangle', `${remainingCount} clock-ins still pending`);
-            }
-          }, 2000);
-        } catch (err) {
-          console.error('Sync error:', err);
-          setStatusWithIcon(status, 'alert-triangle', 'Sync failed: ' + err.message);
-        }
-      }
-    });
-
-    window.addEventListener('offline', () => {
-      updatePWAStatus();
-    });
-
     // =================== Session ===================
     const workerId = localStorage.getItem("CLS_WorkerID");
     const displayName = localStorage.getItem("CLS_WorkerName");
@@ -639,60 +520,6 @@
 
     // =================== INIT (All Event Bindings + Defaults) ===================
 
-    // PWA Status Detection and Display (Updates navbar icon)
-    let pwaStatusUpdateTimer = null;
-    window.updatePWAStatus = function () {
-      // Debounce to prevent redundant updates
-      if (pwaStatusUpdateTimer) return;
-      pwaStatusUpdateTimer = setTimeout(() => { pwaStatusUpdateTimer = null; }, 100);
-
-      const pwaIcon = document.getElementById('pwaStatusIcon');
-      if (!pwaIcon) {
-        return; // Icon not loaded yet
-      }
-
-      const currentLang = localStorage.getItem("CLS_Lang") || "en";
-
-      // Detect PWA/offline state and update icon (using Feather Icons - works offline!)
-      if (!navigator.onLine) {
-        // Offline mode - wifi-off icon
-        pwaIcon.innerHTML = '';
-        const icon = createIcon('wifi-off');
-        icon.style.color = '#f44336'; // Red
-        icon.style.width = '20px';
-        icon.style.height = '20px';
-        pwaIcon.appendChild(icon);
-        pwaIcon.style.display = 'flex';
-        pwaIcon.title = getText('pwaStatus.offlineMode', currentLang);
-        if (typeof feather !== 'undefined') feather.replace();
-      } else if (window.matchMedia('(display-mode: standalone)').matches) {
-        // Running as installed PWA - check-circle icon
-        pwaIcon.innerHTML = '';
-        const icon = createIcon('check-circle');
-        icon.style.color = '#4CAF50'; // Green
-        icon.style.width = '20px';
-        icon.style.height = '20px';
-        pwaIcon.appendChild(icon);
-        pwaIcon.style.display = 'flex';
-        pwaIcon.title = getText('pwaStatus.installedPwa', currentLang);
-        if (typeof feather !== 'undefined') feather.replace();
-      } else if ('serviceWorker' in navigator) {
-        // Service worker available - sync icon
-        pwaIcon.innerHTML = '';
-        const icon = createIcon('refresh-cw');
-        icon.style.color = '#4CAF50'; // Green
-        icon.style.width = '20px';
-        icon.style.height = '20px';
-        pwaIcon.appendChild(icon);
-        pwaIcon.style.display = 'flex';
-        pwaIcon.title = getText('pwaStatus.serviceWorkerActive', currentLang);
-        if (typeof feather !== 'undefined') feather.replace();
-      } else {
-        // Regular web browser without service worker support - hide icon
-        pwaIcon.style.display = 'none';
-      }
-    };
-
     // API call with retry logic (reduced to 1 retry to prevent excessive 60-90s timeouts)
     window.apiCallWithRetry = async function (url, maxRetries = 1) {
       for (let i = 0; i < maxRetries; i++) {
@@ -727,42 +554,17 @@
       document.getElementById("welcomeName").textContent = `${greeting}, ${displayName || "Employee"}!`;
       document.getElementById("userInfo").textContent = `${getText('dashboard.workerIdLabel', currentLang)}: ${workerId} | ${email}`;
 
-      // Listen for navbar loaded event from script.js
-      window.addEventListener('navbarLoaded', () => {
-        updatePWAStatus();
-      });
-
-      // Also check if navbar is already loaded (in case event fired before listener added)
-      setTimeout(() => {
-        const pwaIcon = document.getElementById('pwaStatusIcon');
-        if (pwaIcon) {
-          updatePWAStatus();
-        }
-      }, 200);
-
-      // Expose function for manual testing
-      window.testPWAStatus = updatePWAStatus;
-
       // Listen for language changes to update dashboard content
       window.addEventListener('languageChanged', (event) => {
         const newLang = event.detail.language;
         const greeting = getText('dashboard.greeting', newLang);
         document.getElementById("welcomeName").textContent = `${greeting}, ${displayName || "Employee"}!`;
         document.getElementById("userInfo").textContent = `${getText('dashboard.workerIdLabel', newLang)}: ${workerId} | ${email}`;
-        updatePWAStatus(); // This will now work since it's in global scope
       });
 
       // Clock-in
       document.getElementById("clockInBtn").addEventListener("click", handleClockIn);
       loadReport();
-
-      // Initialize sync status
-      updateSyncStatus();
-
-      // Trigger sync if back online
-      if (navigator.onLine) {
-        triggerSync();
-      }
 
       // Tabs
       document.getElementById("tabClock").addEventListener("click", () => switchTab("clock"));
@@ -821,7 +623,8 @@
 
       // Only show for non-admin workers with pending/rejected status
       if (isPrivilegedRole(storedRole)) {
-        banner.style.display = 'none';
+        banner.classList.add('d-none');
+        banner.classList.remove('w9-pending', 'w9-rejected');
         if (bypassBanner) bypassBanner.style.display = 'none';
         return;
       }
@@ -837,10 +640,8 @@
 
       if (w9Status === 'pending_admin_review') {
         // Yellow banner for pending
-        banner.style.display = 'block';
-        banner.style.backgroundColor = 'rgba(255, 193, 7, 0.15)';
-        banner.style.border = '2px solid #FFC107';
-        banner.style.color = '#FFC107';
+        banner.classList.remove('d-none', 'w9-rejected');
+        banner.classList.add('w9-pending');
         icon.textContent = '⏳';
         text.textContent = 'W-9 Pending Review - Your form is being reviewed by an admin.';
         text.setAttribute('data-en', 'W-9 Pending Review - Your form is being reviewed by an admin.');
@@ -848,10 +649,8 @@
         text.setAttribute('data-pt', 'Revisão de W-9 Pendente - Seu formulário está sendo revisado por um administrador.');
       } else if (w9Status === 'rejected') {
         // Red banner for rejected
-        banner.style.display = 'block';
-        banner.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
-        banner.style.border = '2px solid #ef4444';
-        banner.style.color = '#ef4444';
+        banner.classList.remove('d-none', 'w9-pending');
+        banner.classList.add('w9-rejected');
         icon.textContent = '❌';
         text.textContent = 'W-9 Rejected - Please review the reason and resubmit.';
         text.setAttribute('data-en', 'W-9 Rejected - Please review the reason and resubmit.');
@@ -861,7 +660,7 @@
         // Add resubmit button for rejected status
         const resubmitBtn = document.createElement('a');
         resubmitBtn.href = 'w9Form.html';
-        resubmitBtn.style.cssText = 'margin-left: var(--space-md); padding: 8px 16px; background-color: #ef4444; color: white; text-decoration: none; border-radius: var(--radius-sm); font-weight: 600; display: inline-block;';
+        resubmitBtn.className = 'w9-resubmit-btn';
         resubmitBtn.innerHTML = '<span data-en="Resubmit W-9" data-es="Reenviar W-9" data-pt="Reenviar W-9">Resubmit W-9</span>';
 
         // Clear any existing buttons and add new one
@@ -872,7 +671,8 @@
         banner.appendChild(resubmitBtn);
       } else {
         // Hide banner for 'none' or 'approved'
-        banner.style.display = 'none';
+        banner.classList.add('d-none');
+        banner.classList.remove('w9-pending', 'w9-rejected');
       }
 
       // Reapply translations if available
@@ -944,76 +744,48 @@
       const statusMessages = {
         'approved': {
           icon: '✅',
-          title: 'W-9 Approved',
-          message: 'Your W-9 form has been approved!',
+          title: { en: 'W-9 Approved', es: 'W-9 Aprobado', pt: 'W-9 Aprovado' },
+          message: { en: 'Your W-9 form has been approved!', es: '¡Tu formulario W-9 ha sido aprobado!', pt: 'Seu formulário W-9 foi aprovado!' },
           color: '#10b981'
         },
         'rejected': {
           icon: '❌',
-          title: 'W-9 Rejected',
-          message: 'Your W-9 form was rejected. Please review and resubmit.',
+          title: { en: 'W-9 Rejected', es: 'W-9 Rechazado', pt: 'W-9 Rejeitado' },
+          message: { en: 'Your W-9 form was rejected. Please review and resubmit.', es: 'Tu formulario W-9 fue rechazado. Por favor revisa y reenvía.', pt: 'Seu formulário W-9 foi rejeitado. Por favor revise e reenvie.' },
           color: '#ef4444'
         },
         'pending_admin_review': {
           icon: '⏳',
-          title: 'W-9 Under Review',
-          message: 'Your W-9 form is being reviewed.',
+          title: { en: 'W-9 Under Review', es: 'W-9 en Revisión', pt: 'W-9 em Revisão' },
+          message: { en: 'Your W-9 form is being reviewed.', es: 'Tu formulario W-9 está siendo revisado.', pt: 'Seu formulário W-9 está sendo revisado.' },
           color: '#FFC107'
         }
       };
 
       const config = statusMessages[newStatus];
       if (!config) return;
+      const lang = localStorage.getItem('CLS_Lang') || 'en';
 
       // Create toast element
       const toast = document.createElement('div');
-      toast.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        background: var(--bg-secondary);
-        border-left: 4px solid ${config.color};
-        color: var(--text-primary);
-        padding: var(--space-md) var(--space-lg);
-        border-radius: var(--radius-md);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        z-index: 10000;
-        max-width: 350px;
-        animation: slideInRight 0.3s ease-out;
-      `;
+      toast.className = 'cls-toast';
+      toast.style.setProperty('--cls-toast-border', config.color);
 
       toast.innerHTML = `
-        <div style="display: flex; align-items: start; gap: var(--space-sm);">
-          <span style="font-size: 24px;">${config.icon}</span>
+        <div class="cls-toast__inner">
+          <span class="cls-toast__icon">${config.icon}</span>
           <div>
-            <div style="font-weight: 600; margin-bottom: 4px;">${config.title}</div>
-            <div style="font-size: 14px; opacity: 0.9;">${config.message}</div>
+            <div class="cls-toast__title">${config.title[lang] || config.title.en}</div>
+            <div class="cls-toast__body">${config.message[lang] || config.message.en}</div>
           </div>
         </div>
       `;
-
-      // Add animation keyframe if not exists
-      if (!document.getElementById('toastAnimationStyle')) {
-        const style = document.createElement('style');
-        style.id = 'toastAnimationStyle';
-        style.textContent = `
-          @keyframes slideInRight {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-          }
-          @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(400px); opacity: 0; }
-          }
-        `;
-        document.head.appendChild(style);
-      }
 
       document.body.appendChild(toast);
 
       // Auto-remove after 5 seconds
       setTimeout(() => {
-        toast.style.animation = 'slideOutRight 0.3s ease-in';
+        toast.classList.add('cls-toast--leaving');
         setTimeout(() => toast.remove(), 300);
       }, 5000);
     }
@@ -1131,20 +903,20 @@
       if (adminBtn) adminBtn.classList.remove("active");
 
       // Hide all sections
-      clockSec.classList.add("hidden");
-      paySec.classList.add("hidden");
-      if (adminSec) adminSec.classList.add("hidden");
+      clockSec.classList.add("d-none");
+      paySec.classList.add("d-none");
+      if (adminSec) adminSec.classList.add("d-none");
 
       // Show selected tab
       if (tab === "clock") {
         clockBtn.classList.add("active");
-        clockSec.classList.remove("hidden");
+        clockSec.classList.remove("d-none");
       } else if (tab === "payroll") {
         payBtn.classList.add("active");
-        paySec.classList.remove("hidden");
+        paySec.classList.remove("d-none");
       } else if (tab === "admin" && adminBtn && adminSec) {
         adminBtn.classList.add("active");
-        adminSec.classList.remove("hidden");
+        adminSec.classList.remove("d-none");
       }
     }
 
@@ -1166,7 +938,7 @@
 
       // Hide button and show spinner in status
       btn.style.display = 'none';
-      status.innerHTML = '<span class="btn-spinner"></span> ' + getMSG('gettingLocation');
+      status.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> ' + getMSG('gettingLocation');
 
       try {
         const pos = await new Promise((resolve, reject) =>
@@ -1182,54 +954,29 @@
         const deviceInfo = window.getDeviceInfo ? window.getDeviceInfo() : { displayString: 'Unknown Device' };
 
         // Try sending immediately (works both online and with cached service worker)
-        status.innerHTML = '<span class="btn-spinner"></span> ' + getMSG('recordingClockIn');
+        status.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> ' + getMSG('recordingClockIn');
 
         const clockInUrl = `${API_URL}?action=clockin&workerId=${encodeURIComponent(workerId)}&lat=${latitude}&lng=${longitude}&lang=${lang}&email=${encodeURIComponent(email)}&device=${encodeURIComponent(deviceInfo.displayString)}`;
         console.log('🔵 Clock-in URL:', clockInUrl);
 
-        try {
-          console.log('⏱️ Sending clock-in request...');
-          const res = await jsonp(clockInUrl);
-          console.log('✅ Clock-in response:', res);
+        console.log('⏱️ Sending clock-in request...');
+        const res = await jsonp(clockInUrl);
+        console.log('✅ Clock-in response:', res);
 
-          if (res && res.success) {
-            // If backend provided a localized message (e.g. late message), show it directly
-            if (res.message) {
-              status.textContent = res.message;
-            } else {
-              const site = res.site || "Job Site";
-              const dist = res.distance ? ` (${res.distance} mi)` : "";
-              setStatusWithIcon(status, 'check-circle', `${getMSG('clockInSuccess')} ${site}${dist}`);
-            }
-            await loadReport();
-          } else if (res && res.message) {
-            const site = res.site ? ` (${res.site} - ${res.distance} mi)` : "";
-            setStatusWithIcon(status, 'alert-triangle', `${getMSG('clockInFailed')} ${site}. ${res.message}`);
+        if (res && res.success) {
+          if (res.message) {
+            status.textContent = res.message;
           } else {
-            setStatusWithIcon(status, 'alert-triangle', getMSG('clockInFailed'));
+            const site = res.site || "Job Site";
+            const dist = res.distance ? ` (${res.distance} mi)` : "";
+            setStatusWithIcon(status, 'check-circle', `${getMSG('clockInSuccess')} ${site}${dist}`);
           }
-          btn.style.display = 'inline-block';
-        } catch (networkErr) {
-          // Network request failed - save offline
-          console.error('❌ Clock-in request failed:', networkErr);
-          const clockData = {
-            workerId: workerId,
-            lat: latitude,
-            lng: longitude,
-            lang: lang,
-            email: email || '',
-            device: deviceInfo.displayString,
-            timestamp: new Date().toISOString()
-          };
-
-          const saved = await saveClockInOffline(clockData);
-          if (saved) {
-            setStatusWithIcon(status, 'smartphone', getMSG('offlineSaved'));
-            updateSyncStatus();
-          } else {
-            setStatusWithIcon(status, 'alert-triangle', getMSG('clockInFailed') + " (Offline save failed)");
-          }
-          btn.style.display = 'inline-block';
+          await loadReport();
+        } else if (res && res.message) {
+          const site = res.site ? ` (${res.site} - ${res.distance} mi)` : "";
+          setStatusWithIcon(status, 'alert-triangle', `${getMSG('clockInFailed')} ${site}. ${res.message}`);
+        } else {
+          setStatusWithIcon(status, 'alert-triangle', getMSG('clockInFailed'));
         }
       } catch (err) {
         // Handle geolocation errors
@@ -1239,41 +986,8 @@
           setStatusWithIcon(status, 'alert-triangle', getMSG('locationUnavailable'));
         else if (err && err.code === 3)
           setStatusWithIcon(status, 'alert-triangle', getMSG('locationTimeout'));
-        else {
-          // Network error - try to save offline
-          if (err.message && err.message.includes("Network")) {
-            try {
-              const pos = await new Promise((resolve, reject) =>
-                navigator.geolocation.getCurrentPosition(resolve, reject, {
-                  enableHighAccuracy: true,
-                  timeout: 5000,
-                })
-              );
-
-              const clockData = {
-                workerId: workerId,
-                lat: pos.coords.latitude,
-                lng: pos.coords.longitude,
-                lang: localStorage.getItem("CLS_Lang") || "en",
-                email: email || '',
-                timestamp: new Date().toISOString()
-              };
-
-              const saved = await saveClockInOffline(clockData);
-              if (saved) {
-                setStatusWithIcon(status, 'smartphone', getMSG('offlineSaved'));
-                updateSyncStatus();
-              } else {
-                setStatusWithIcon(status, 'alert-triangle', `${getMSG('errorPrefix')} ${err.message || err}`);
-              }
-            } catch (geoErr) {
-              setStatusWithIcon(status, 'alert-triangle', `${getMSG('errorPrefix')} ${err.message || err}`);
-            }
-          } else {
-            setStatusWithIcon(status, 'alert-triangle', `${getMSG('errorPrefix')} ${err.message || err}`);
-          }
-        }
-        btn.style.display = 'inline-block';
+        else
+          setStatusWithIcon(status, 'alert-triangle', `${getMSG('errorPrefix')} ${err.message || err}`);
       } finally {
         // Restore button visibility
         btn.style.display = '';
@@ -1392,7 +1106,7 @@
     // =================== Clock-In Report (Today Only, Latest First) ===================
     async function loadReport() {
       const body = document.getElementById("reportBody");
-      body.innerHTML = `<tr><td colspan='3' class="muted">${getMSG('loadingReport')}</td></tr>`;
+      body.innerHTML = `<tr><td colspan='3' class="text-muted">${getMSG('loadingReport')}</td></tr>`;
 
       try {
         let records = [];
@@ -1480,9 +1194,20 @@
 
         if (todayRecords.length > 0) {
           todayRecords.sort((a, b) => {
-            const t1 = a.time ? new Date(`1970-01-01T${a.time}`) : 0;
-            const t2 = b.time ? new Date(`1970-01-01T${b.time}`) : 0;
-            return t2 - t1;
+            // Parse 12-hour time strings like "09:34:12 AM" properly
+            const parseTime12 = t => {
+              if (!t) return 0;
+              const m = t.match(/(\d+):(\d+):(\d+)\s*(AM|PM)/i);
+              if (!m) return 0;
+              let h = parseInt(m[1], 10);
+              const min = parseInt(m[2], 10);
+              const sec = parseInt(m[3], 10);
+              const pm = m[4].toUpperCase() === 'PM';
+              if (pm && h !== 12) h += 12;
+              if (!pm && h === 12) h = 0;
+              return h * 3600 + min * 60 + sec;
+            };
+            return parseTime12(b.time) - parseTime12(a.time);
           });
 
           todayRecords.forEach((r, index) => {
@@ -1497,14 +1222,14 @@
               ? `<button class=\"action-btn edit-btn\" onclick=\"openTimeEditModal('${entryId}', '${r.time}', true)\" title=\"${getMSG('editButton')}\"><i data-feather=\"edit-2\"></i></button>`
               : `<button class=\"action-btn edit-btn\" disabled title=\"${status === 'editing' ? 'Edit request pending' : 'Cannot edit this entry'}\"><i data-feather=\"edit-2\"></i></button>`;
 
-            tr.innerHTML = `<td>${r.date}</td><td>${r.time}</td><td style="text-align: center;">${editIcon}</td>`;
+            tr.innerHTML = `<td>${r.date}</td><td>${r.time}</td><td class="text-center">${editIcon}</td>`;
             body.appendChild(tr);
           });
           // Replace Feather icon placeholders with actual SVG
           if (typeof feather !== 'undefined') feather.replace();
         } else {
           const lang = localStorage.getItem("CLS_Lang") || "en";
-          body.innerHTML = `<tr><td colspan="3" class="muted">${lang === 'es' ? 'Sin registros de hoy.' :
+          body.innerHTML = `<tr><td colspan="3" class="text-muted">${lang === 'es' ? 'Sin registros de hoy.' :
             lang === 'pt' ? 'Sem registros de hoje.' :
               'No clock-ins today.'
             }</td></tr>`;
@@ -1542,8 +1267,8 @@
       const none = document.getElementById("payrollNone");
       const tbody = document.querySelector("#payrollTable tbody");
       const totalsEl = document.getElementById("payrollTotals");
-      tbody.innerHTML = `<tr><td colspan="3" class="muted">${getMSG('loadingReport')}</td></tr>`;
-      none.classList.add("hidden");
+      tbody.innerHTML = `<tr><td colspan="3" class="text-muted">${getMSG('loadingReport')}</td></tr>`;
+      none.classList.add("d-none");
       totalsEl.textContent = "";
 
       try {
@@ -1555,14 +1280,14 @@
         }
         if (!res || !res.success || !res.rows) {
           tbody.innerHTML = "";
-          none.classList.remove("hidden");
+          none.classList.remove("d-none");
           return;
         }
 
         currentWeekPeriod = res.period?.weekEnd || null;
         if (!res.rows.length) {
           tbody.innerHTML = "";
-          none.classList.remove("hidden");
+          none.classList.remove("d-none");
           totalsEl.textContent = "";
           return;
         }
@@ -1572,14 +1297,14 @@
         <tr>
           <td>${r.date || ''}</td>
           <td>${r.hoursBreak || r.lineItemDetail || ''}</td>
-          <td class="t-right">$${Number(r.checkAmount || 0).toFixed(2)}</td>
+          <td class="text-end">$${Number(r.checkAmount || 0).toFixed(2)}</td>
         </tr>`).join('');
 
         tbody.innerHTML = rowsHtml;
         const totalLabel = getTotalLabelByLang();
         totalsEl.textContent = `${totalLabel}: $${Number(res.totals?.checkAmountSum || 0).toFixed(2)} (${res.totals?.entries || 0} entries)`;
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="3" class="muted">Error: ${err.message || err}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="text-muted">Error: ${err.message || err}</td></tr>`;
         totalsEl.textContent = "";
       }
     }
@@ -1717,7 +1442,7 @@
         if (USER_ROLE === 'Admin') {
           // Show View As section for admins
           const viewAsWrap = document.getElementById('viewAsWrap');
-          if (viewAsWrap) viewAsWrap.classList.remove('hidden');
+          if (viewAsWrap) viewAsWrap.classList.remove('d-none');
 
           // Populate View As list and worker filter using workers from Workers sheet
           try {
@@ -1765,18 +1490,14 @@
       }
     }
 
-    // ===== View As Helper Functions (kept for non-admin usage) =====
+    // ===== View As Helper Functions =====
     function setViewAsBanner(targetId, name) {
-      const b = document.getElementById('viewAsBanner');
+      const b = document.getElementById('viewAsAlert');
       const lang = localStorage.getItem("CLS_Lang") || "en";
 
-      b.classList.remove('hidden');
-      b.textContent =
-        (lang === 'es')
-          ? `Viendo como: ${name || targetId}`
-          : (lang === 'pt')
-            ? `Visualizando como: ${name || targetId}`
-            : `Viewing as: ${name || targetId}`;
+      b.classList.remove('d-none');
+      const nameSpan = document.getElementById('viewAsWorkerName');
+      if (nameSpan) nameSpan.textContent = name || targetId;
 
       // Disable clock-in while viewing to avoid accidental actions
       const btn = document.getElementById('clockInBtn');
@@ -1787,9 +1508,10 @@
     }
 
     function clearViewAsBanner() {
-      const b = document.getElementById('viewAsBanner');
-      b.classList.add('hidden');
-      b.textContent = '';
+      const b = document.getElementById('viewAsAlert');
+      b.classList.add('d-none');
+      const nameSpan = document.getElementById('viewAsWorkerName');
+      if (nameSpan) nameSpan.textContent = '';
       const btn = document.getElementById('clockInBtn');
       btn.disabled = false;
       btn.title = '';
@@ -1807,8 +1529,8 @@
       const who = await jsonp(`${API_URL}?action=whois&workerId=${encodeURIComponent(targetId)}`);
       setViewAsBanner(targetId, who?.displayName || '');
 
-      document.getElementById('btnActivateViewAs').classList.add('hidden');
-      document.getElementById('btnExitViewAs').classList.remove('hidden');
+      document.getElementById('btnActivateViewAs').classList.add('d-none');
+      document.getElementById('btnExitViewAs').classList.remove('d-none');
 
       // Refresh sections in View As mode
       await loadReport();
@@ -1820,8 +1542,8 @@
       VIEW_AS_WORKER = null;
       VIEW_AS_ACTIVE = false;
       clearViewAsBanner();
-      document.getElementById('btnExitViewAs').classList.add('hidden');
-      document.getElementById('btnActivateViewAs').classList.remove('hidden');
+      document.getElementById('btnExitViewAs').classList.add('d-none');
+      document.getElementById('btnActivateViewAs').classList.remove('d-none');
       loadReport();
       loadPayrollWeekPeriods(); // Reload admin's own week periods
     }
@@ -1871,9 +1593,6 @@
       initAdminTools();
     }
   </script>
-
-  <!-- Service Worker Management -->
-  <script src="js/service-worker-manager.js" defer></script>
 
   <!-- Cache Busting Utility -->
   <script>

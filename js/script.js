@@ -406,7 +406,10 @@ async function loadNavbar() {
       // Check if we're on the dashboard page and customize navigation
       const currentPage =
         window.location.pathname.split("/").pop() || "index.html";
-      if (currentPage === "employeeDashboard.html") {
+      if (
+        currentPage === "employeeDashboard.html" ||
+        currentPage === "employeeDashboard-refactored.html"
+      ) {
         const navLinks =
           document.querySelector(".nav-links") ||
           document.getElementById("primary-nav");
