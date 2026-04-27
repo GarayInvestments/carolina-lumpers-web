@@ -411,11 +411,21 @@ async function loadNavbar() {
           document.querySelector(".nav-links") ||
           document.getElementById("primary-nav");
 
-        // Replace nav links with logout-only menu + theme toggle
+        // Replace nav links with dashboard/admin/logout menu + theme toggle
         if (navLinks) {
+          const storedRole = localStorage.getItem("CLS_Role") || "";
+          const isAdmin = storedRole.toLowerCase() === "admin";
+          const adminLinkHtml = isAdmin
+            ? '<li><a href="adminDashboard.html" id="navAdminDashboard" data-en="Admin Dashboard" data-es="Panel Admin" data-pt="Painel Admin">Admin Dashboard</a></li>'
+            : "";
+          const adminLinkHtmlPlain = isAdmin
+            ? '<a href="adminDashboard.html" id="navAdminDashboard" data-en="Admin Dashboard" data-es="Panel Admin" data-pt="Painel Admin">Admin Dashboard</a>'
+            : "";
+
           const dashboardNavHtml =
             navLinks.tagName === "UL"
               ? `
+            ${adminLinkHtml}
             <li><a href="#" id="navLogout" data-en="Logout" data-es="Cerrar Sesión" data-pt="Sair">Logout</a></li>
             <li class="nav-theme-toggle">
               <button id="themeToggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle theme">
@@ -425,6 +435,7 @@ async function loadNavbar() {
             </li>
           `
               : `
+            ${adminLinkHtmlPlain}
             <a href="#" id="navLogout" data-en="Logout" data-es="Cerrar Sesión" data-pt="Sair">Logout</a>
           `;
 
