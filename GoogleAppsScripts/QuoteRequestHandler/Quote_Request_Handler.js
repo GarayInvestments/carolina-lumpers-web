@@ -63,11 +63,6 @@ function getQuoteSheet_() {
     "Send Rate Sheet",
     "Request Site Visit",
     "Notes",
-    // Confirmation
-    "Signature",
-    "Signature Date",
-    // Meta
-    "Client StartedAt (ms)",
   ];
 
   if (sh.getLastRow() === 0) {
@@ -221,13 +216,6 @@ function doPost(e) {
       truthy(payload.sendRateSheet) ? "Yes" : "No",
       truthy(payload.siteVisit) ? "Yes" : "No",
       safe(payload.notes),
-
-      // Confirmation
-      safe(payload.signature),
-      safe(payload.signatureDate),
-
-      // Meta
-      String(payload.startedAt || ""),
     ];
 
     sh.appendRow(row);
@@ -375,8 +363,6 @@ function sendConfirmationEmail_(p) {
   const facility = safe(p.facility) || "—";
   const address = safe(p.address) || "—";
   const preferredContact = safe(p.preferredContact);
-  const shiftsPerWeek = safe(p.shiftsPerWeek);
-  const startedAt = safe(p.startedAt);
   const notes = (safe(p.notes) || "").replace(/\n/g, "<br>");
 
   const row = (label, value) =>
@@ -454,12 +440,16 @@ function sendConfirmationEmail_(p) {
             ${row("Email", to)}
             ${row("Service(s)", svc)}
             ${row("Facility", facility)}
-            ${row("Address", address)}
+            ${safe(p.frequency) ? row("Frequency", safe(p.frequency)) : ""}
             ${safe(p.startDate) ? row("Start Date", safe(p.startDate)) : ""}
+            ${safe(p.shift) ? row("Shift Window", safe(p.shift)) : ""}
             ${safe(p.workersNeeded) ? row("Workers Needed", safe(p.workersNeeded)) : ""}
+            ${safe(p.avgLoads) ? row("Avg Loads / Day", safe(p.avgLoads)) : ""}
             ${preferredContact ? row("Preferred Contact", preferredContact) : ""}
-            ${shiftsPerWeek ? row("Shifts Per Week", shiftsPerWeek) : ""}
-            ${startedAt ? row("Client Started At", startedAt) : ""}
+            ${safe(p.billingContact) ? row("Billing Contact", safe(p.billingContact)) : ""}
+            ${truthy(p.sendRateSheet) ? row("Rate Sheet Requested", "Yes") : ""}
+            ${truthy(p.siteVisit) ? row("Site Visit Requested", "Yes") : ""}
+            ${truthy(p.requireDocs) ? row("W9 / Insurance Docs Required", "Yes") : ""}
             ${notes ? row("Notes", notes) : ""}
           </table>
 

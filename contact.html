@@ -131,16 +131,17 @@
               <div class="error">Please enter facility location.</div>
             </div>
 
-            <div class="field">
-              <label for="serviceType" class="required">Service Type</label>
-              <select id="serviceType" name="serviceType" required>
-                <option value="">Select service type...</option>
-                <option value="Inbound Services">Inbound Services</option>
-                <option value="Outbound Services">Outbound Services</option>
-                <option value="Floor-Loaded Freight">Floor-Loaded Freight</option>
-                <option value="Additional Support">Additional Support</option>
-              </select>
-              <div class="error">Please select a service type.</div>
+            <div class="field full" id="serviceTypeField">
+              <fieldset class="svc-group" aria-required="true">
+                <legend class="required">Service Type <span class="svc-group__note">(select all that apply)</span></legend>
+                <div class="svc-options">
+                  <label class="svc-option"><input type="checkbox" name="serviceType" value="Inbound Services"> Inbound Services</label>
+                  <label class="svc-option"><input type="checkbox" name="serviceType" value="Outbound Services"> Outbound Services</label>
+                  <label class="svc-option"><input type="checkbox" name="serviceType" value="Floor-Loaded Freight"> Floor-Loaded Freight</label>
+                  <label class="svc-option"><input type="checkbox" name="serviceType" value="Additional Support"> Additional Support</label>
+                </div>
+                <div class="error" id="serviceTypeError" style="display:none;">Please select at least one service type.</div>
+              </fieldset>
             </div>
 
             <div class="field full">
@@ -149,6 +150,127 @@
                 placeholder="Volume, shift timing, start date, and any special requirements."></textarea>
             </div>
           </div>
+
+          <!-- Extend toggle -->
+          <div class="extend-bar">
+            <button type="button" id="extendToggle" class="extend-toggle-btn" aria-expanded="false" aria-controls="extendedFields">
+              <span id="extendIcon" aria-hidden="true">＋</span>
+              <span class="extend-label">Add full operation details</span>
+              <span class="extend-hint">(optional)</span>
+            </button>
+          </div>
+
+          <!-- Extended fields (hidden by default) -->
+          <div id="extendedFields" hidden>
+
+            <div class="ext-section-head">Schedule</div>
+            <div class="grid grid-2">
+              <div class="field">
+                <label for="frequency">Frequency</label>
+                <select id="frequency" name="frequency">
+                  <option value="">Select…</option>
+                  <option>Daily</option>
+                  <option>Weekly</option>
+                  <option>One-time</option>
+                  <option>As needed</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="startDate">Estimated Start Date</label>
+                <input id="startDate" name="startDate" type="date">
+              </div>
+              <div class="field">
+                <label for="shift">Shift Window</label>
+                <input id="shift" name="shift" type="text" placeholder="e.g. 6am–2pm">
+              </div>
+              <div class="field">
+                <label for="duration">Shift Duration</label>
+                <input id="duration" name="duration" type="text" placeholder="e.g. 4 hrs, full shift">
+              </div>
+              <div class="field">
+                <label for="ongoingOrTrial">Engagement Type</label>
+                <select id="ongoingOrTrial" name="ongoingOrTrial">
+                  <option value="">Select…</option>
+                  <option>Ongoing</option>
+                  <option>Trial period</option>
+                  <option>One-time</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="ext-section-head">Facility Details</div>
+            <div class="grid grid-2">
+              <div class="field">
+                <label for="dock">Dock / Bay Access</label>
+                <input id="dock" name="dock" type="text" placeholder="e.g. Dock 3, Bay A">
+              </div>
+              <div class="field">
+                <label for="onsiteContact">On-site Contact</label>
+                <input id="onsiteContact" name="onsiteContact" type="text" placeholder="Name and phone">
+              </div>
+              <div class="field full">
+                <label for="entryRequirements">Entry / Safety Requirements</label>
+                <input id="entryRequirements" name="entryRequirements" type="text" placeholder="e.g. safety vest, sign-in required">
+              </div>
+            </div>
+
+            <div class="ext-section-head">Volume &amp; Workforce</div>
+            <div class="grid grid-2">
+              <div class="field">
+                <label for="avgLoads">Avg Loads per Day</label>
+                <input id="avgLoads" name="avgLoads" type="number" min="1" placeholder="e.g. 5">
+              </div>
+              <div class="field">
+                <label for="workersNeeded">Workers Needed</label>
+                <input id="workersNeeded" name="workersNeeded" type="number" min="1" placeholder="e.g. 8">
+              </div>
+              <div class="field">
+                <label for="avgWeight">Avg Weight / Load Size</label>
+                <input id="avgWeight" name="avgWeight" type="text" placeholder="e.g. 50 lbs, mixed pallets">
+              </div>
+              <div class="field">
+                <label for="equipment">Equipment Available</label>
+                <input id="equipment" name="equipment" type="text" placeholder="e.g. pallet jacks, forklifts">
+              </div>
+            </div>
+
+            <div class="ext-section-head">Billing &amp; Preferences</div>
+            <div class="grid grid-2">
+              <div class="field">
+                <label for="preferredContact">Preferred Contact Method</label>
+                <select id="preferredContact" name="preferredContact">
+                  <option value="">Select…</option>
+                  <option>Phone</option>
+                  <option>Email</option>
+                  <option>Either</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="referral">How did you hear about us?</label>
+                <input id="referral" name="referral" type="text" placeholder="e.g. Google, referral">
+              </div>
+              <div class="field">
+                <label for="billingContact">Billing Contact</label>
+                <input id="billingContact" name="billingContact" type="text" placeholder="Name and email">
+              </div>
+              <div class="field">
+                <label for="billingMethod">Billing Method</label>
+                <select id="billingMethod" name="billingMethod">
+                  <option value="">Select…</option>
+                  <option>Net 30</option>
+                  <option>Net 15</option>
+                  <option>COD</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="field full ext-check-row">
+                <label class="ext-check-label"><input type="checkbox" name="sendRateSheet" value="yes"> Send me a rate sheet</label>
+                <label class="ext-check-label"><input type="checkbox" name="siteVisit" value="yes"> Request a site visit</label>
+                <label class="ext-check-label"><input type="checkbox" name="requireDocs" value="yes"> Require W9 / insurance docs</label>
+              </div>
+            </div>
+
+          </div><!-- /#extendedFields -->
 
           <!-- Anti-spam: honeypot (visually hidden, must stay empty) -->
           <div class="hp-field" aria-hidden="true">
@@ -193,6 +315,111 @@
       opacity: 0;
       pointer-events: none;
     }
+
+    /* Service type checkboxes */
+    .svc-group {
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+    .svc-group legend {
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      padding: 0;
+      font-size: inherit;
+    }
+    .svc-group__note {
+      font-weight: 400;
+      font-size: 0.85em;
+      opacity: 0.7;
+    }
+    .svc-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.25rem;
+    }
+    .svc-option {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .svc-option input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: currentColor;
+      flex-shrink: 0;
+    }
+    #serviceTypeField.invalid .error {
+      display: block !important;
+    }
+
+    /* Extend toggle */
+    .extend-bar {
+      margin: 1rem 0 0;
+    }
+    .extend-toggle-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      opacity: 0.75;
+      transition: opacity 0.15s;
+    }
+    .extend-toggle-btn:hover {
+      opacity: 1;
+    }
+    .extend-hint {
+      font-weight: 400;
+      opacity: 0.7;
+    }
+
+    /* Extended fields */
+    #extendedFields {
+      margin-top: 1.25rem;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      padding-top: 0.75rem;
+    }
+    .ext-section-head {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.5;
+      margin: 1rem 0 0.5rem;
+    }
+    .ext-section-head:first-child {
+      margin-top: 0;
+    }
+    .ext-check-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+      align-items: center;
+    }
+    .ext-check-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .ext-check-label input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+      accent-color: currentColor;
+      flex-shrink: 0;
+    }
   </style>
 
   <script>
@@ -203,30 +430,41 @@
       var toggle = document.querySelector('.nav-toggle');
       var nav = document.getElementById('primary-nav');
 
+      // --- Nav toggle ---
       function setOpen(isOpen) {
         header.classList.toggle('menu-open', isOpen);
         toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         toggle.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
       }
-
       if (toggle && nav) {
         toggle.addEventListener('click', function () {
           setOpen(!header.classList.contains('menu-open'));
         });
-
         nav.querySelectorAll('a').forEach(function (link) {
-          link.addEventListener('click', function () {
-            setOpen(false);
-          });
+          link.addEventListener('click', function () { setOpen(false); });
         });
-
         window.addEventListener('resize', function () {
-          if (window.innerWidth > 900) {
-            setOpen(false);
-          }
+          if (window.innerWidth > 900) setOpen(false);
         });
       }
 
+      // --- Extended fields toggle ---
+      var extendedOpen = false;
+      var extendToggle = document.getElementById('extendToggle');
+      var extendedFields = document.getElementById('extendedFields');
+      var extendIcon = document.getElementById('extendIcon');
+
+      extendToggle.addEventListener('click', function () {
+        extendedOpen = !extendedOpen;
+        extendedFields.hidden = !extendedOpen;
+        extendToggle.setAttribute('aria-expanded', extendedOpen ? 'true' : 'false');
+        extendIcon.textContent = extendedOpen ? '−' : '＋';
+        extendToggle.querySelector('.extend-label').textContent = extendedOpen
+          ? 'Hide extended details'
+          : 'Add full operation details';
+      });
+
+      // --- Form logic ---
       var form = document.getElementById('basicQuoteForm');
       var successMsg = document.getElementById('basicSuccessMsg');
       var submitBtn = document.getElementById('basicSubmitBtn');
@@ -246,7 +484,6 @@
         var phone = form.querySelector('input[name="phone"]');
         var email = form.querySelector('input[name="email"]');
         var facilityLocation = form.querySelector('input[name="facilityLocation"]');
-        var serviceType = form.querySelector('select[name="serviceType"]');
 
         var ok = true;
 
@@ -260,32 +497,34 @@
         markInvalid(email, emailInvalid);
         if (emailInvalid) ok = false;
 
-        var serviceInvalid = !serviceType.value;
-        markInvalid(serviceType, serviceInvalid);
-        if (serviceInvalid) ok = false;
+        // Service type: at least one checkbox must be checked
+        var serviceBoxes = Array.from(form.querySelectorAll('input[name="serviceType"]'));
+        var anyService = serviceBoxes.some(function (cb) { return cb.checked; });
+        var serviceField = document.getElementById('serviceTypeField');
+        var serviceError = document.getElementById('serviceTypeError');
+        serviceField.classList.toggle('invalid', !anyService);
+        serviceError.style.display = anyService ? 'none' : 'block';
+        if (!anyService) ok = false;
 
         return ok;
       }
 
       var RATE_LIMIT_KEY = 'cls_quote_last_submit';
-      var RATE_LIMIT_MS = 10 * 60 * 1000; // 10 minutes
+      var RATE_LIMIT_MS = 10 * 60 * 1000;
 
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
         successMsg.style.display = 'none';
 
-        // Honeypot check
         var hp = form.querySelector('input[name="website"]');
         if (hp && hp.value) return;
 
-        // Timing check — must be at least 4 s since page load
         if (Date.now() - _formLoadedAt < 4000) {
           successMsg.textContent = '⚠️ Please take a moment to review your request before submitting.';
           successMsg.style.display = 'block';
           return;
         }
 
-        // Rate-limit check
         var lastSubmit = parseInt(localStorage.getItem(RATE_LIMIT_KEY) || '0', 10);
         if (Date.now() - lastSubmit < RATE_LIMIT_MS) {
           successMsg.textContent = '⚠️ You already submitted a request recently. Please wait a few minutes before trying again.';
@@ -295,20 +534,39 @@
 
         if (!validateForm()) return;
 
-        // Disable button and show loading state immediately
         submitBtn.disabled = true;
         submitBtn.textContent = 'Sending…';
 
-        // no-cors accepts simple requests; URL-encoded payload avoids preflight/CORS blocking.
+        // Build payload — FormData captures all named fields automatically
         var payload = new URLSearchParams(new FormData(form));
-        payload.delete('website'); // never send honeypot value
-        payload.set('startedAt', String(_formLoadedAt));
+        payload.delete('website');
+        payload.delete('serviceType'); // replaced below with joined string
+
         payload.set('elapsed', String(Date.now() - _formLoadedAt));
-        payload.set('formType', 'quote-request-basic');
-        // Backend requires 'facility' and 'address' — map from the frontend 'facilityLocation' field
+        payload.set('formType', extendedOpen ? 'quote-request-extended' : 'quote-request-basic');
+
+        // facility + address from facilityLocation
         var facilityVal = form.querySelector('[name="facilityLocation"]').value.trim();
         payload.set('facility', facilityVal);
         payload.set('address', facilityVal);
+
+        // services: join all checked service type checkboxes
+        var checkedServices = Array.from(form.querySelectorAll('input[name="serviceType"]:checked'))
+          .map(function (cb) { return cb.value; });
+        payload.set('services', checkedServices.join(', '));
+
+        // notes from details textarea
+        payload.set('notes', form.querySelector('[name="details"]').value.trim());
+
+        // Explicit boolean fields (checkboxes that may be unchecked = not in FormData)
+        var srEl = form.querySelector('[name="sendRateSheet"]');
+        var svEl = form.querySelector('[name="siteVisit"]');
+        var rdEl = form.querySelector('[name="requireDocs"]');
+        payload.set('sendRateSheet', srEl && srEl.checked ? 'yes' : 'no');
+        payload.set('siteVisit', svEl && svEl.checked ? 'yes' : 'no');
+        payload.set('requireDocs', rdEl && rdEl.checked ? 'yes' : 'no');
+
+        var formName = extendedOpen ? 'quote_request_extended' : 'quote_request_basic';
 
         try {
           await fetch(API_BASE, {
@@ -319,7 +577,7 @@
 
           if (typeof gtag === 'function') {
             gtag('event', 'generate_lead', {
-              form_name: 'quote_request_basic',
+              form_name: formName,
               page_location: window.location.href,
               page_path: window.location.pathname,
               method: 'web_form'
@@ -327,15 +585,22 @@
           }
 
           localStorage.setItem(RATE_LIMIT_KEY, String(Date.now()));
+          form.reset();
+          // Collapse extended panel
+          extendedOpen = false;
+          extendedFields.hidden = true;
+          extendToggle.setAttribute('aria-expanded', 'false');
+          extendIcon.textContent = '＋';
+          extendToggle.querySelector('.extend-label').textContent = 'Add full operation details';
+          // Hide form, show success
+          form.style.display = 'none';
+          extendToggle.closest('.extend-bar').style.display = 'none';
           successMsg.textContent = '✅ Thanks! Your quote request has been submitted. We\'ll be in touch soon.';
           successMsg.style.display = 'block';
-          submitBtn.textContent = 'Submitted';
-          // Keep disabled — one submission per page load
-          form.reset();
         } catch (err) {
           if (typeof gtag === 'function') {
             gtag('event', 'submit_error', {
-              form_name: 'quote_request_basic',
+              form_name: formName,
               page_location: window.location.href,
               page_path: window.location.pathname,
               error_message: err && err.message ? err.message : 'Submission failed'
@@ -344,7 +609,6 @@
 
           successMsg.textContent = '⚠️ Unable to submit right now. Please try again.';
           successMsg.style.display = 'block';
-          // Re-enable on error so user can retry
           submitBtn.disabled = false;
           submitBtn.textContent = 'Request Quote';
         }
