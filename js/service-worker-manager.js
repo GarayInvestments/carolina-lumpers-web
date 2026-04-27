@@ -11,7 +11,7 @@
     return;
   }
 
-  const CACHE_VERSION = window.CACHE_VERSION || '20260417-1501';
+  const CACHE_VERSION = window.CACHE_VERSION || '20260427-1315';
   const REQUIRED_VERSION = 'cls-employee-v19';
   const SESSION_FLAG = 'cache_cleared_v19';
 
